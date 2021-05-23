@@ -58,6 +58,8 @@ public class QuickJS {
 
     static native long _initNewJSObject(long contextPtr);
 
+    static native void _release(long contextPtr, long objectHandle);
+
 
     static {
         System.loadLibrary("quickjs");

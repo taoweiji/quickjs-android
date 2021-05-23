@@ -182,4 +182,11 @@ Java_com_quickjs_android_QuickJS__1addObject(JNIEnv *env, jclass clazz, jlong co
     JSValue this_obj = object_handle;
     JSValue jsValue = value_ptr;
     JS_SetPropertyStr(ctx, this_obj, key, jsValue);
+}extern "C"
+JNIEXPORT void JNICALL
+Java_com_quickjs_android_QuickJS__1release(JNIEnv *env, jclass clazz, jlong context_ptr,
+                                           jlong object_handle) {
+    JSContext *ctx = reinterpret_cast<JSContext *>(context_ptr);
+    JSValue this_obj = object_handle;
+    JS_FreeValue(ctx, this_obj);
 }

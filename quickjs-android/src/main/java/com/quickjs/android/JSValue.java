@@ -13,10 +13,14 @@ public class JSValue {
 
     private void addObjectReference(long objectHandle) {
         this.objectHandle = objectHandle;
-        // TODO 考虑释放
+        // TODO 考虑自动管理
     }
 
     long getContextPtr() {
         return context.getContextPtr();
+    }
+
+    public void close() {
+        QuickJS._release(getContextPtr(), this.objectHandle);
     }
 }
