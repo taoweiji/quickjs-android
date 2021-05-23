@@ -56,6 +56,14 @@ public class QuickJS {
 
     static native void _addObject(long contextPtr, long objectHandle, String key, long value);
 
+    static native int _getInteger(long contextPtr, long objectHandle, String key);
+
+    static native boolean _getBoolean(long contextPtr, long objectHandle, String key);
+
+    static native double _getDouble(long contextPtr, long objectHandle, String key);
+
+    static native String _getString(long contextPtr, long objectHandle, String key);
+
     static native long _initNewJSObject(long contextPtr);
 
     static native void _release(long contextPtr, long objectHandle);

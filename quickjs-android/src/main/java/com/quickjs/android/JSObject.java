@@ -35,6 +35,30 @@ public class JSObject extends JSValue {
         QuickJS._addObject(getContextPtr(), this.objectHandle, key, value.objectHandle);
     }
 
+    public int getInteger(String key) {
+        return QuickJS._getInteger(this.getContextPtr(), this.objectHandle, key);
+    }
+
+    public boolean getBoolean(String key) {
+        return QuickJS._getBoolean(this.getContextPtr(), this.objectHandle, key);
+    }
+
+    public double getDouble(String key) {
+        return QuickJS._getDouble(this.getContextPtr(), this.objectHandle, key);
+    }
+
+    public String getString(String key) {
+        return QuickJS._getString(this.getContextPtr(), this.objectHandle, key);
+    }
+
+//    public JSArray getArray(String key) {
+//        return QuickJS._getInteger(this.getContextPtr(), this.objectHandle, key);
+//    }
+//
+//    public JSObject getObject(String key) {
+//        return QuickJS._getInteger(this.getContextPtr(), this.objectHandle, key);
+//    }
+
 
     public JSObject registerJavaMethod(JavaCallback callback, String jsFunctionName) {
         // TODO
