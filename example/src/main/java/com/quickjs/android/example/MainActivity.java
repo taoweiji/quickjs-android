@@ -46,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
         String result = jsContext.executeStringScript("console.a;", "file.js");
 //        String result = jsContext.executeStringScript("var a = 'Hello World';\nb;", "file.js");
         Log.e("quickjs", String.valueOf(result));
+        Log.e("quickjs", console.getString("a"));
 //        jsContext.close();
 //        quickJS.close();
     }
@@ -58,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
 //        v8.add()
 //        v8.add()
 //        jsObject.add()
+//        v8.getInteger()
         v8.close();
 
     }
