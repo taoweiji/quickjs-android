@@ -15,4 +15,8 @@ public class JSValue {
         this.objectHandle = objectHandle;
         // TODO 考虑释放
     }
+
+    long getContextPtr() {
+        return context.getContextPtr();
+    }
 }

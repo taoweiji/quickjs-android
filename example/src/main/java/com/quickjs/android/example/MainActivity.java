@@ -53,6 +53,8 @@ public class MainActivity extends AppCompatActivity {
     void testV8() {
         V8 v8 = V8.createV8Runtime();
         V8Object jsObject = new V8Object(v8);
+//        jsObject.executeBooleanFunction();
+//        v8.executeVoidFunction();
 //        v8.add()
 //        v8.add()
 //        jsObject.add()
