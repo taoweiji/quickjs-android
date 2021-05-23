@@ -16,8 +16,6 @@ android {
         externalNativeBuild {
             cmake {
                 cppFlags ''
-                targets 'quickjs-android'
-                arguments '-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON'
             }
         }
     }
