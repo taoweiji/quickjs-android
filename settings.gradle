@@ -1,0 +1,3 @@
+rootProject.name = "quickjs-android"
+include ':app'
+include ':quickjs-android'
