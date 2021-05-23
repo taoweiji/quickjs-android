@@ -12,7 +12,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        int result = QuickJS.executeIntegerScript("var a = 2+2;\n a;","file.js");
+        int result = QuickJS.executeIntegerScript("var a = 2+2;\n a;", "file.js");
         Log.e("quickjs", String.valueOf(result));
     }
 
