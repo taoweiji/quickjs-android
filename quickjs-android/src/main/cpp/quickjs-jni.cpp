@@ -101,9 +101,85 @@ Java_com_quickjs_android_QuickJS__1executeScript(JNIEnv *env, jclass clazz, jlon
 
     }
     return NULL;
-}extern "C"
+}
+
+extern "C"
 JNIEXPORT void JNICALL
 Java_com_quickjs_android_QuickJS__1executeVoidScript(JNIEnv *env, jclass clazz, jlong context_ptr,
                                                      jstring source, jstring file_name) {
     executeScript(env, clazz, context_ptr, source, file_name);
+}
+extern "C"
+JNIEXPORT jlong JNICALL
+Java_com_quickjs_android_QuickJS__1getGlobalObject(JNIEnv *env, jclass clazz, jlong context_ptr) {
+    JSContext *ctx = reinterpret_cast<JSContext *>(context_ptr);
+    JSValue global_obj = JS_GetGlobalObject(ctx);
+    return global_obj;
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_quickjs_android_QuickJS__1add__JJLjava_lang_String_2I(JNIEnv *env, jclass clazz,
+                                                               jlong context_ptr,
+                                                               jlong object_handle, jstring key_,
+                                                               jint value_) {
+    const char *key = env->GetStringUTFChars(key_, NULL);
+    JSContext *ctx = reinterpret_cast<JSContext *>(context_ptr);
+    JSValue this_obj = object_handle;
+    JSValue jsValue = JS_NewInt32(ctx, value_);
+    JS_SetPropertyStr(ctx, this_obj, key, jsValue);
+}
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_quickjs_android_QuickJS__1add__JJLjava_lang_String_2Ljava_lang_String_2(JNIEnv *env,
+                                                                                 jclass clazz,
+                                                                                 jlong context_ptr,
+                                                                                 jlong object_handle,
+                                                                                 jstring key_,
+                                                                                 jstring value_) {
+    const char *key = env->GetStringUTFChars(key_, NULL);
+    const char *value = env->GetStringUTFChars(value_, NULL);
+    JSContext *ctx = reinterpret_cast<JSContext *>(context_ptr);
+    JSValue this_obj = object_handle;
+    JSValue jsValue = JS_NewString(ctx, value);
+    JS_SetPropertyStr(ctx, this_obj, key, jsValue);
+}extern "C"
+JNIEXPORT void JNICALL
+Java_com_quickjs_android_QuickJS__1add__JJLjava_lang_String_2D(JNIEnv *env, jclass clazz,
+                                                               jlong context_ptr,
+                                                               jlong object_handle, jstring key_,
+                                                               jdouble value_) {
+    const char *key = env->GetStringUTFChars(key_, NULL);
+    JSContext *ctx = reinterpret_cast<JSContext *>(context_ptr);
+    JSValue this_obj = object_handle;
+    JSValue jsValue = JS_NewFloat64(ctx, value_);
+    JS_SetPropertyStr(ctx, this_obj, key, jsValue);
+}extern "C"
+JNIEXPORT void JNICALL
+Java_com_quickjs_android_QuickJS__1add__JJLjava_lang_String_2Z(JNIEnv *env, jclass clazz,
+                                                               jlong context_ptr,
+                                                               jlong object_handle, jstring key_,
+                                                               jboolean value_) {
+    const char *key = env->GetStringUTFChars(key_, NULL);
+    JSContext *ctx = reinterpret_cast<JSContext *>(context_ptr);
+    JSValue this_obj = object_handle;
+    JSValue jsValue = JS_NewBool(ctx, value_);
+    JS_SetPropertyStr(ctx, this_obj, key, jsValue);
+}
+
+extern "C"
+JNIEXPORT jlong JNICALL
+Java_com_quickjs_android_QuickJS__1initNewJSObject(JNIEnv *env, jclass clazz, jlong context_ptr) {
+    JSContext *ctx = reinterpret_cast<JSContext *>(context_ptr);
+    JSValue jsValue = JS_NewObject(ctx);
+    return jsValue;
+}extern "C"
+JNIEXPORT void JNICALL
+Java_com_quickjs_android_QuickJS__1addObject(JNIEnv *env, jclass clazz, jlong context_ptr,
+                                             jlong object_handle, jstring key_, jlong value_ptr) {
+    const char *key = env->GetStringUTFChars(key_, NULL);
+    JSContext *ctx = reinterpret_cast<JSContext *>(context_ptr);
+    JSValue this_obj = object_handle;
+    JSValue jsValue = value_ptr;
+    JS_SetPropertyStr(ctx, this_obj, key, jsValue);
 }

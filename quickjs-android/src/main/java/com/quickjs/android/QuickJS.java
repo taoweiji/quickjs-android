@@ -11,12 +11,17 @@ public class QuickJS {
         return new QuickJS(_createRuntime());
     }
 
+
     public JSContext createContext() {
         return new JSContext(_createContext(runtimePtr));
     }
 
     public void close() {
         _releaseRuntime(runtimePtr);
+    }
+
+    long getRuntimePtr() {
+        return this.runtimePtr;
     }
 
     static native long _createRuntime();
@@ -39,5 +44,23 @@ public class QuickJS {
 
     static native void _executeVoidScript(long contextPtr, String source, String fileName);
 
+    static native long _getGlobalObject(long contextPtr);
 
+    static native void _add(long contextPtr, long objectHandle, String key, int value);
+
+    static native void _add(long contextPtr, long objectHandle, String key, double value);
+
+    static native void _add(long contextPtr, long objectHandle, String key, boolean value);
+
+    static native void _add(long contextPtr, long objectHandle, String key, String value);
+
+    static native void _addObject(long contextPtr, long objectHandle, String key, long value);
+
+    static native long _initNewJSObject(long contextPtr);
+
+
+    static {
+        System.loadLibrary("quickjs");
+        System.loadLibrary("quickjs-android");
+    }
 }
