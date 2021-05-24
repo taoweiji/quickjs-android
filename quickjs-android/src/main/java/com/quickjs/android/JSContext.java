@@ -1,7 +1,12 @@
 package com.quickjs.android;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class JSContext extends JSObject {
     private final long contextPtr;
+
+    Map<Long, MethodDescriptor> functionRegistry = new HashMap<>();
 
     JSContext(long contextPtr) {
         super();
@@ -70,6 +75,22 @@ public class JSContext extends JSObject {
         }
         return null;
     }
+
+    void registerCallback(JavaCallback callback, long objectHandle, String jsFunctionName) {
+        long methodID = QuickJS._registerJavaMethod(this.getContextPtr(), objectHandle, jsFunctionName, false);
+        MethodDescriptor methodDescriptor = new MethodDescriptor();
+        methodDescriptor.callback = callback;
+        this.functionRegistry.put(methodID, methodDescriptor);
+    }
+
+
+    void registerCallback(JavaVoidCallback callback, long objectHandle, String jsFunctionName) {
+        long methodID = QuickJS._registerJavaMethod(this.getContextPtr(), objectHandle, jsFunctionName, true);
+        MethodDescriptor methodDescriptor = new MethodDescriptor();
+        methodDescriptor.voidCallback = callback;
+        this.functionRegistry.put(methodID, methodDescriptor);
+    }
+
 
     long initNewJSObject(long contextPtr) {
         return QuickJS._initNewJSObject(contextPtr);
