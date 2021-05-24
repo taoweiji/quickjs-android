@@ -86,8 +86,7 @@ public class JSObject extends JSValue {
     }
 
     public String executeStringFunction(String name, JSArray parameters) {
-        // TODO
-        return null;
+        return (String) QuickJS._executeFunction(getContextPtr(), 0, objectHandle, name, 0);
     }
 
     public boolean executeBooleanFunction(String name, JSArray parameters) {

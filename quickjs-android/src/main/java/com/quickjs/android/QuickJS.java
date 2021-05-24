@@ -64,6 +64,16 @@ public class QuickJS {
 
     static native String _getString(long contextPtr, long objectHandle, String key);
 
+    static native String _arrayGetString(long contextPtr, long objectHandle, int index);
+
+    static native double _arrayGetDouble(long contextPtr, long objectHandle, int index);
+
+    static native boolean _arrayGetBoolean(long contextPtr, long objectHandle, int index);
+
+    static native int _arrayGetInteger(long contextPtr, long objectHandle, int index);
+
+    static native Object _executeFunction(long contextPtr, int expectedType, long objectHandle, String name, long parametersHandle);
+
     static native long _initNewJSObject(long contextPtr);
 
     static native void _release(long contextPtr, long objectHandle);

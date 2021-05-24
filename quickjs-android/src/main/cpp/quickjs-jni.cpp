@@ -228,4 +228,24 @@ Java_com_quickjs_android_QuickJS__1getString(JNIEnv *env, jclass clazz, jlong co
     const char *str = JS_ToCString(ctx, jsValue);
     jstring j_str = env->NewStringUTF(str);
     return j_str;
+}extern "C"
+JNIEXPORT jstring JNICALL
+Java_com_quickjs_android_QuickJS__1arrayGetString(JNIEnv *env, jclass clazz, jlong context_ptr,
+                                                  jlong object_handle, jint index) {
+    JSContext *ctx = reinterpret_cast<JSContext *>(context_ptr);
+    JSValue this_obj = object_handle;
+
+}extern "C"
+JNIEXPORT jobject JNICALL
+Java_com_quickjs_android_QuickJS__1executeFunction(JNIEnv *env, jclass clazz, jlong context_ptr,
+                                                   jint expected_type, jlong object_handle,
+                                                   jstring name, jlong parameters_handle) {
+    const char *name_ = env->GetStringUTFChars(name, NULL);
+    JSContext *ctx = reinterpret_cast<JSContext *>(context_ptr);
+    JSValue this_obj = object_handle;
+    JSValue jsValue = JS_GetPropertyStr(ctx, this_obj, name_);
+    JSValue result = JS_EvalFunction(ctx, jsValue);
+    const char *str = JS_ToCString(ctx, result);
+    jstring j_str = env->NewStringUTF(str);
+    return j_str;
 }
