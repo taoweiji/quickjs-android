@@ -15,24 +15,29 @@ public class JSObject extends JSValue {
         this.initialize(this.context.getContextPtr(), data);
     }
 
-    public void add(String key, int value) {
-        QuickJS._add(getContextPtr(), this.objectHandle, key, value);
+    public JSObject set(String key, int value) {
+        QuickJS._set(getContextPtr(), this.objectHandle, key, value);
+        return this;
     }
 
-    public void add(String key, double value) {
-        QuickJS._add(getContextPtr(), this.objectHandle, key, value);
+    public JSObject set(String key, double value) {
+        QuickJS._set(getContextPtr(), this.objectHandle, key, value);
+        return this;
     }
 
-    public void add(String key, String value) {
-        QuickJS._add(getContextPtr(), this.objectHandle, key, value);
+    public JSObject set(String key, String value) {
+        QuickJS._set(getContextPtr(), this.objectHandle, key, value);
+        return this;
     }
 
-    public void add(String key, boolean value) {
-        QuickJS._add(getContextPtr(), this.objectHandle, key, value);
+    public JSObject set(String key, boolean value) {
+        QuickJS._set(getContextPtr(), this.objectHandle, key, value);
+        return this;
     }
 
-    public void add(String key, JSValue value) {
-        QuickJS._addObject(getContextPtr(), this.objectHandle, key, value.objectHandle);
+    public JSObject set(String key, JSValue value) {
+        QuickJS._setObject(getContextPtr(), this.objectHandle, key, value.objectHandle);
+        return this;
     }
 
     public int getInteger(String key) {
@@ -51,23 +56,31 @@ public class JSObject extends JSValue {
         return QuickJS._getString(this.getContextPtr(), this.objectHandle, key);
     }
 
-//    public JSArray getArray(String key) {
-//        return QuickJS._getInteger(this.getContextPtr(), this.objectHandle, key);
-//    }
-//
-//    public JSObject getObject(String key) {
-//        return QuickJS._getInteger(this.getContextPtr(), this.objectHandle, key);
-//    }
+    public JSArray getArray(String key) {
+        long ptr = QuickJS._getObject(this.getContextPtr(), this.objectHandle, key);
+        JSArray jsArray = new JSArray();
+        jsArray.context = context;
+        jsArray.objectHandle = ptr;
+        return jsArray;
+    }
+
+    public JSObject getObject(String key) {
+        long ptr = QuickJS._getObject(this.getContextPtr(), this.objectHandle, key);
+        JSObject jsObject = new JSObject();
+        jsObject.context = context;
+        jsObject.objectHandle = ptr;
+        return jsObject;
+    }
 
 
     public JSObject registerJavaMethod(JavaCallback callback, String jsFunctionName) {
         // TODO
-        return null;
+        return this;
     }
 
     public JSObject registerJavaMethod(JavaVoidCallback callback, String jsFunctionName) {
         // TODO
-        return null;
+        return this;
     }
 
     public Object executeFunction(String name, JSArray parameters) {
@@ -86,7 +99,8 @@ public class JSObject extends JSValue {
     }
 
     public String executeStringFunction(String name, JSArray parameters) {
-        return (String) QuickJS._executeFunction(getContextPtr(), 0, objectHandle, name, 0);
+        long parametersHandle = parameters == null ? 0L : parameters.getHandle();
+        return (String) QuickJS._executeFunction(getContextPtr(), 0, objectHandle, name, parametersHandle);
     }
 
     public boolean executeBooleanFunction(String name, JSArray parameters) {
@@ -118,4 +132,16 @@ public class JSObject extends JSValue {
         // TODO
         return null;
     }
+
+    public boolean contains(String key) {
+        // TODO
+        return false;
+    }
+
+    public String[] getKeys() {
+        // TODO
+        return null;
+    }
+
+
 }

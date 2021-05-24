@@ -7,7 +7,7 @@ public class QuickJS {
         this.runtimePtr = runtimePtr;
     }
 
-    public static QuickJS createV8Runtime() {
+    public static QuickJS createRuntime() {
         return new QuickJS(_createRuntime());
     }
 
@@ -44,17 +44,21 @@ public class QuickJS {
 
     static native void _executeVoidScript(long contextPtr, String source, String fileName);
 
+    static native long _executeArrayScript(long contextPtr, String source, String fileName);
+
+    static native long _executeObjectScript(long contextPtr, String source, String fileName);
+
     static native long _getGlobalObject(long contextPtr);
 
-    static native void _add(long contextPtr, long objectHandle, String key, int value);
+    static native void _set(long contextPtr, long objectHandle, String key, int value);
 
-    static native void _add(long contextPtr, long objectHandle, String key, double value);
+    static native void _set(long contextPtr, long objectHandle, String key, double value);
 
-    static native void _add(long contextPtr, long objectHandle, String key, boolean value);
+    static native void _set(long contextPtr, long objectHandle, String key, boolean value);
 
-    static native void _add(long contextPtr, long objectHandle, String key, String value);
+    static native void _set(long contextPtr, long objectHandle, String key, String value);
 
-    static native void _addObject(long contextPtr, long objectHandle, String key, long value);
+    static native void _setObject(long contextPtr, long objectHandle, String key, long value);
 
     static native int _getInteger(long contextPtr, long objectHandle, String key);
 
@@ -64,6 +68,8 @@ public class QuickJS {
 
     static native String _getString(long contextPtr, long objectHandle, String key);
 
+    static native long _getObject(long contextPtr, long objectHandle, String key);
+
     static native String _arrayGetString(long contextPtr, long objectHandle, int index);
 
     static native double _arrayGetDouble(long contextPtr, long objectHandle, int index);
@@ -72,9 +78,21 @@ public class QuickJS {
 
     static native int _arrayGetInteger(long contextPtr, long objectHandle, int index);
 
+    static native void _arrayAdd(long contextPtr, long objectHandle, int value);
+
+    static native void _arrayAdd(long contextPtr, long objectHandle, double value);
+
+    static native void _arrayAdd(long contextPtr, long objectHandle, boolean value);
+
+    static native void _arrayAdd(long contextPtr, long objectHandle, String value);
+
+    static native void _arrayAddObject(long contextPtr, long objectHandle, long value);
+
     static native Object _executeFunction(long contextPtr, int expectedType, long objectHandle, String name, long parametersHandle);
 
     static native long _initNewJSObject(long contextPtr);
+
+    static native long _initNewJSArray(long contextPtr);
 
     static native void _release(long contextPtr, long objectHandle);
 
