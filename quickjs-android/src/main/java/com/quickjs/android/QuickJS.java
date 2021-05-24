@@ -100,6 +100,7 @@ public class QuickJS {
 
     static native void _release(long contextPtr, long objectHandle);
 
+    static native long _registerJavaMethod(long contextPtr, long objectHandle, String jsFunctionName, boolean voidMethod);
 
     static {
         System.loadLibrary("quickjs");

@@ -74,18 +74,18 @@ public class JSObject extends JSValue {
 
 
     public JSObject registerJavaMethod(JavaCallback callback, String jsFunctionName) {
-        // TODO
+        context.registerCallback(callback, objectHandle, jsFunctionName);
         return this;
     }
 
     public JSObject registerJavaMethod(JavaVoidCallback callback, String jsFunctionName) {
-        // TODO
+        context.registerCallback(callback, objectHandle, jsFunctionName);
         return this;
     }
 
     public Object executeFunction(String name, JSArray parameters) {
-        // TODO
-        return null;
+        long parametersHandle = parameters == null ? 0L : parameters.getHandle();
+        return QuickJS._executeFunction(getContextPtr(), 0, objectHandle, name, parametersHandle);
     }
 
     public int executeIntegerFunction(String name, JSArray parameters) {
