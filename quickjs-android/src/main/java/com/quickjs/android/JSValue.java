@@ -11,13 +11,17 @@ public class JSValue {
         this.addObjectReference(objectHandle);
     }
 
-    private void addObjectReference(long objectHandle) {
+    protected void addObjectReference(long objectHandle) {
         this.objectHandle = objectHandle;
         // TODO 考虑自动管理
     }
 
     long getContextPtr() {
         return context.getContextPtr();
+    }
+
+    long getHandle() {
+        return this.objectHandle;
     }
 
     public void close() {

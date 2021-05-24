@@ -11,7 +11,6 @@ import com.eclipsesource.v8.V8Object;
 import com.quickjs.android.JSArray;
 import com.quickjs.android.JSContext;
 import com.quickjs.android.JSObject;
-import com.quickjs.android.JavaVoidCallback;
 import com.quickjs.android.QuickJS;
 
 public class MainActivity extends AppCompatActivity {
@@ -36,29 +35,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void test() {
-        QuickJS quickJS = QuickJS.createV8Runtime();
+        QuickJS quickJS = QuickJS.createRuntime();
         JSContext jsContext = quickJS.createContext();
-//        jsContext.add("b", "Hello World");
-        JSObject console = new JSObject(jsContext);
-        jsContext.add("console", console);
-        console.add("a", "Hello");
-        console.add("b", 3.14159);
-        console.registerJavaMethod(new JavaVoidCallback() {
-            @Override
-            public void invoke(JSObject jsObject, JSArray jsArray) {
-                Log.e("console", jsArray.getString(0));
-            }
-        }, "log");
-        jsContext.executeScript("function name() {return 'Hello World'};", "file.js");
-//        String result = jsContext.executeStringFunction("name", null);
-        String result = jsContext.executeStringScript("name()", "file.js");
-        Log.e("QuickJS", String.valueOf(result));
-//        jsContext.close();
-//        quickJS.close();
+        jsContext.executeScript("function sayHello(param) {return param[0];}", "file.js");
+        JSArray jsArray = new JSArray(jsContext);
+        jsArray.push("Hello");
+        String result = jsContext.executeStringFunction("sayHello", jsArray);
+        Log.e("QuickJS", result);
     }
 
     void testV8() {
         V8 v8 = V8.createV8Runtime();
+//        v8.executeStringFunction()
+//        v8.contains();
         V8Object jsObject = new V8Object(v8);
         jsObject.registerJavaMethod(new com.eclipsesource.v8.JavaVoidCallback() {
 
