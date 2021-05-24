@@ -11,6 +11,10 @@ public class QuickJS {
         return new QuickJS(_createRuntime());
     }
 
+    native static boolean _contains(long contextPtr, long objectHandle, String key);
+
+    native static String[] _getKeys(long contextPtr, long objectHandle);
+
 
     public JSContext createContext() {
         return new JSContext(_createContext(runtimePtr));
