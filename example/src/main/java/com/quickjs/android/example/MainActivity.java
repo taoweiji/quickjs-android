@@ -13,6 +13,8 @@ import com.quickjs.android.JSContext;
 import com.quickjs.android.JSObject;
 import com.quickjs.android.QuickJS;
 
+import java.util.Arrays;
+
 public class MainActivity extends AppCompatActivity {
 
     @Override
@@ -37,11 +39,14 @@ public class MainActivity extends AppCompatActivity {
     void test() {
         QuickJS quickJS = QuickJS.createRuntime();
         JSContext jsContext = quickJS.createContext();
-        jsContext.executeScript("function sayHello(param) {return param[0];}", "file.js");
-        JSArray jsArray = new JSArray(jsContext);
-        jsArray.push("Hello");
-        String result = jsContext.executeStringFunction("sayHello", jsArray);
-        Log.e("QuickJS", result);
+        jsContext.set("name", "Wiki");
+        jsContext.set("age", 18);
+        jsContext.set("gender", 1);
+//        jsContext.executeScript("function sayHello(param) {return param[0];}", "file.js");
+//        JSArray jsArray = new JSArray(jsContext);
+//        jsArray.push("Hello");
+//        String result = jsContext.executeStringFunction("sayHello", jsArray);
+        Log.e("QuickJS", Arrays.toString(jsContext.getKeys()));
     }
 
     void testV8() {

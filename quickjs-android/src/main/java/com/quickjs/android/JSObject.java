@@ -134,14 +134,10 @@ public class JSObject extends JSValue {
     }
 
     public boolean contains(String key) {
-        // TODO
-        return false;
+        return QuickJS._contains(getContextPtr(), this.objectHandle, key);
     }
 
     public String[] getKeys() {
-        // TODO
-        return null;
+        return QuickJS._getKeys(getContextPtr(), this.objectHandle);
     }
-
-
 }

@@ -364,4 +364,29 @@ Java_com_quickjs_android_QuickJS__1arrayAdd__JJLjava_lang_String_2(JNIEnv *env, 
     const char *value_str = env->GetStringUTFChars(value, NULL);
     JSValue value_ = JS_NewString(ctx, value_str);
     JS_SetPropertyUint32(ctx, this_obj, getArrayLength(ctx, this_obj), value_);
+}extern "C"
+JNIEXPORT jboolean JNICALL
+Java_com_quickjs_android_QuickJS__1contains(JNIEnv *env, jclass clazz, jlong context_ptr,
+                                            jlong object_handle, jstring key) {
+    JSContext *ctx = reinterpret_cast<JSContext *>(context_ptr);
+    JSValue this_obj = object_handle;
+    const char *key_ = env->GetStringUTFChars(key, NULL);
+    JSValue jsValue = JS_GetPropertyStr(ctx, this_obj, key_);
+    return JS_IsNull(jsValue);
+}extern "C"
+JNIEXPORT jobjectArray JNICALL
+Java_com_quickjs_android_QuickJS__1getKeys(JNIEnv *env, jclass clazz, jlong context_ptr,
+                                           jlong object_handle) {
+    JSContext *ctx = reinterpret_cast<JSContext *>(context_ptr);
+    JSValue this_obj = object_handle;
+    JSPropertyEnum *tab;
+    uint32_t len;
+    JS_GetOwnPropertyNames(ctx, &tab, &len, this_obj, JS_GPN_STRING_MASK | JS_GPN_ENUM_ONLY);
+    jclass strClass = env->FindClass("java/lang/String");
+    jobjectArray stringArray = env->NewObjectArray(len, strClass, NULL);
+    for (int i = 0; i < len; ++i) {
+        jstring key = env->NewStringUTF(JS_AtomToCString(ctx, tab[i].atom));
+        env->SetObjectArrayElement(stringArray, i, key);
+    }
+    return stringArray;
 }
