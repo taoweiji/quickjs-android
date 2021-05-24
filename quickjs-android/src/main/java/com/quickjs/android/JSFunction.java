@@ -1,4 +1,4 @@
 package com.quickjs.android;
 
-public class JSFunction {
+public class JSFunction extends JSObject{
 }

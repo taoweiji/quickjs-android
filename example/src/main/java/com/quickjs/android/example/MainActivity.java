@@ -6,9 +6,12 @@ import android.util.Log;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.eclipsesource.v8.V8;
+import com.eclipsesource.v8.V8Array;
 import com.eclipsesource.v8.V8Object;
+import com.quickjs.android.JSArray;
 import com.quickjs.android.JSContext;
 import com.quickjs.android.JSObject;
+import com.quickjs.android.JavaVoidCallback;
 import com.quickjs.android.QuickJS;
 
 public class MainActivity extends AppCompatActivity {
@@ -39,14 +42,17 @@ public class MainActivity extends AppCompatActivity {
         JSObject console = new JSObject(jsContext);
         jsContext.add("console", console);
         console.add("a", "Hello");
-
-//        jsContext.add("a", 1.1);
-//        jsContext.add("b", 2.2);
-//        jsContext.add("d", false);
-        String result = jsContext.executeStringScript("console.a;", "file.js");
-//        String result = jsContext.executeStringScript("var a = 'Hello World';\nb;", "file.js");
-        Log.e("quickjs", String.valueOf(result));
-        Log.e("quickjs", console.getString("a"));
+        console.add("b", 3.14159);
+        console.registerJavaMethod(new JavaVoidCallback() {
+            @Override
+            public void invoke(JSObject jsObject, JSArray jsArray) {
+                Log.e("console", jsArray.getString(0));
+            }
+        }, "log");
+        jsContext.executeScript("function name() {return 'Hello World'};", "file.js");
+//        String result = jsContext.executeStringFunction("name", null);
+        String result = jsContext.executeStringScript("name()", "file.js");
+        Log.e("QuickJS", String.valueOf(result));
 //        jsContext.close();
 //        quickJS.close();
     }
@@ -54,6 +60,13 @@ public class MainActivity extends AppCompatActivity {
     void testV8() {
         V8 v8 = V8.createV8Runtime();
         V8Object jsObject = new V8Object(v8);
+        jsObject.registerJavaMethod(new com.eclipsesource.v8.JavaVoidCallback() {
+
+            @Override
+            public void invoke(V8Object v8Object, V8Array v8Array) {
+//                v8Array.getInteger(v8Array.getString())
+            }
+        }, "");
 //        jsObject.executeBooleanFunction();
 //        v8.executeVoidFunction();
 //        v8.add()
