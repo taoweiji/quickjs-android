@@ -15,11 +15,10 @@ public class QuickJS {
 
     native static String[] _getKeys(long contextPtr, long objectHandle);
 
-    static Object executeScript(JSContext jsContext, int expectedType, String source, String fileName) {
-        Object object = _executeScript(jsContext.getContextPtr(), expectedType, source, fileName);
-        return toJavaObject(jsContext, object, expectedType);
+    static Object executeScript(JSContext context, int expectedType, String source, String fileName) {
+        Object object = _executeScript(context.getContextPtr(), expectedType, source, fileName);
+        return toJavaObject(context, object, expectedType);
     }
-
 
     public JSContext createContext() {
         return new JSContext(_createContext(runtimePtr));
@@ -37,6 +36,12 @@ public class QuickJS {
         Object object = _executeFunction(context.getContextPtr(), expectedType, objectHandle, name, parametersHandle);
         return toJavaObject(context, object, expectedType);
     }
+
+    static Object executeJSFunction(JSContext context, long objectHandle, String name, Object[] parameters) {
+        Object object = _executeJSFunction(context.getContextPtr(), objectHandle, name, parameters);
+        return toJavaObject(context, object, JSValue.UNKNOWN);
+    }
+
 
     static Object toJavaObject(JSContext context, Object object, int expectedType) {
         if (object == null) return null;
@@ -101,6 +106,8 @@ public class QuickJS {
     static native void _arrayAddObject(long contextPtr, long objectHandle, long value);
 
     private static native Object _executeFunction(long contextPtr, int expectedType, long objectHandle, String name, long parametersHandle);
+
+    native static Object _executeJSFunction(long contextPtr, long objectHandle, String name, Object[] parameters);
 
     static native long _initNewJSObject(long contextPtr);
 
