@@ -20,6 +20,10 @@ public class QuickJS {
         return toJavaObject(context, object, expectedType);
     }
 
+    native static long _arrayGetObject(long contextPtr, long objectHandle, int index);
+
+    native static long _arrayGetArray(long contextPtr, long objectHandle, int index);
+
     public JSContext createContext() {
         return new JSContext(_createContext(runtimePtr));
     }

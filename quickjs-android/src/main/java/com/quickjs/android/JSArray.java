@@ -40,6 +40,18 @@ public class JSArray extends JSObject {
         return QuickJS._arrayGetString(this.getContextPtr(), this.objectHandle, index);
     }
 
+    public JSObject getObject(int index) {
+        long ptr = QuickJS._arrayGetObject(this.getContextPtr(), this.objectHandle, index);
+        if (ptr == 0) return null;
+        return new JSObject(context, ptr);
+    }
+
+    public JSArray getArray(int index) {
+        long ptr = QuickJS._arrayGetArray(this.getContextPtr(), this.objectHandle, index);
+        if (ptr == 0) return null;
+        return new JSArray(context, ptr);
+    }
+
     public JSArray push(int value) {
         QuickJS._arrayAdd(getContextPtr(), this.objectHandle, value);
         return this;
