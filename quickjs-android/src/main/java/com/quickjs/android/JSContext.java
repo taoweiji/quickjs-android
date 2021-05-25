@@ -62,19 +62,25 @@ public class JSContext extends JSObject {
     }
 
     void registerCallback(JavaCallback callback, long objectHandle, String jsFunctionName) {
-        // TODO
-        long methodID = QuickJS._registerJavaMethod(this.getContextPtr(), objectHandle, jsFunctionName, false);
-        MethodDescriptor methodDescriptor = new MethodDescriptor();
-        methodDescriptor.callback = callback;
-        this.functionRegistry.put(methodID, methodDescriptor);
+        long functionHandle = QuickJS._registerJavaMethod(this.getContextPtr(), objectHandle, jsFunctionName, false);
+        registerCallback(callback, functionHandle);
     }
 
     void registerCallback(JavaVoidCallback callback, long objectHandle, String jsFunctionName) {
-        // TODO
-        long methodID = QuickJS._registerJavaMethod(this.getContextPtr(), objectHandle, jsFunctionName, true);
+        long functionHandle = QuickJS._registerJavaMethod(this.getContextPtr(), objectHandle, jsFunctionName, true);
+        registerCallback(callback, functionHandle);
+    }
+
+    void registerCallback(JavaCallback callback, long functionHandle) {
+        MethodDescriptor methodDescriptor = new MethodDescriptor();
+        methodDescriptor.callback = callback;
+        this.functionRegistry.put(functionHandle, methodDescriptor);
+    }
+
+    void registerCallback(JavaVoidCallback callback, long functionHandle) {
         MethodDescriptor methodDescriptor = new MethodDescriptor();
         methodDescriptor.voidCallback = callback;
-        this.functionRegistry.put(methodID, methodDescriptor);
+        this.functionRegistry.put(functionHandle, methodDescriptor);
     }
 
     long initNewJSObject(long contextPtr) {

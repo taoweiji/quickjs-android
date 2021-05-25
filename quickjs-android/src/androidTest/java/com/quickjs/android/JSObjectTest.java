@@ -81,11 +81,19 @@ public class JSObjectTest {
     }
 
     @Test
-    public void registerJavaMethod() {
+    public void registerJavaMethod1() {
+        String[] result = new String[1];
+        object.registerJavaMethod((jsObject, jsArray) -> {
+            result[0] = jsArray.getString(0);
+        }, "setMessage");
+        JSArray jsArray = new JSArray(context);
+        jsArray.push("Hello");
+        object.executeVoidFunction("setMessage", jsArray);
+        assertEquals("Hello", result[0]);
     }
 
     @Test
-    public void testRegisterJavaMethod() {
+    public void registerJavaMethod2() {
     }
 
     @Test
@@ -111,7 +119,6 @@ public class JSObjectTest {
         double result = context.executeDoubleFunction("test", array);
         array.close();
         assertEquals(3.14, result, 0);
-
     }
 
     @Test
@@ -122,7 +129,6 @@ public class JSObjectTest {
         boolean result = context.executeBooleanFunction("test", array);
         array.close();
         assertTrue(result);
-
     }
 
     @Test
@@ -133,7 +139,6 @@ public class JSObjectTest {
         String result = context.executeStringFunction("test", array);
         array.close();
         assertEquals("Hello", result);
-
     }
 
     @Test
@@ -144,7 +149,6 @@ public class JSObjectTest {
         JSArray result = context.executeArrayFunction("test", array);
         array.close();
         assertEquals("Hello", result.getString(0));
-
     }
 
     @Test
@@ -165,6 +169,7 @@ public class JSObjectTest {
 
     @Test
     public void executeJSFunction() {
+
     }
 
     @Test
