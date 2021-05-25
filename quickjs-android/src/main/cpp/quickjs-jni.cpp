@@ -2,6 +2,99 @@
 #include <string>
 #include <quickjs/quickjs.h>
 
+const int TYPE_NULL = 0;
+const int TYPE_UNKNOWN = 0;
+const int TYPE_INTEGER = 1;
+const int TYPE_INT_32_ARRAY = 1;
+const int TYPE_DOUBLE = 2;
+const int TYPE_FLOAT_64_ARRAY = 2;
+const int TYPE_BOOLEAN = 3;
+const int TYPE_STRING = 4;
+const int TYPE_JS_ARRAY = 5;
+const int TYPE_JS_OBJECT = 6;
+const int TYPE_V8_FUNCTION = 7;
+const int TYPE_V8_TYPED_ARRAY = 8;
+const int TYPE_BYTE = 9;
+const int TYPE_INT_8_ARRAY = 9;
+const int TYPE_V8_ARRAY_BUFFER = 10;
+const int TYPE_UNSIGNED_INT_8_ARRAY = 11;
+const int TYPE_UNSIGNED_INT_8_CLAMPED_ARRAY = 12;
+const int TYPE_INT_16_ARRAY = 13;
+const int TYPE_UNSIGNED_INT_16_ARRAY = 14;
+const int TYPE_UNSIGNED_INT_32_ARRAY = 15;
+const int TYPE_FLOAT_32_ARRAY = 16;
+const int TYPE_UNDEFINED = 99;
+
+jclass integerCls = nullptr;
+jclass longCls = nullptr;
+jclass doubleCls = nullptr;
+jclass booleanCls = nullptr;
+jmethodID integerInitMethodID = nullptr;
+jmethodID longInitMethodID = nullptr;
+jmethodID doubleInitMethodID = nullptr;
+jmethodID booleanInitMethodID = nullptr;
+
+jobject To_JObject(JNIEnv *env, jlong context_ptr, int expected_type, JSValue result) {
+    JSContext *ctx = reinterpret_cast<JSContext *>(context_ptr);
+    switch (expected_type) {
+        case TYPE_NULL:
+            return nullptr;
+        case TYPE_INTEGER:
+            return env->NewObject(integerCls, integerInitMethodID, JS_VALUE_GET_INT(result));
+        case TYPE_DOUBLE:
+            return env->NewObject(doubleCls, doubleInitMethodID, JS_VALUE_GET_FLOAT64(result));
+        case TYPE_BOOLEAN:
+            return env->NewObject(booleanCls, booleanInitMethodID, JS_VALUE_GET_BOOL(result));
+        case TYPE_STRING:
+            return env->NewStringUTF(JS_ToCString(ctx, result));
+        case TYPE_JS_ARRAY:
+            return env->NewObject(integerCls, integerInitMethodID, (long) result);
+        case TYPE_JS_OBJECT:
+            return env->NewObject(integerCls, integerInitMethodID, (long) result);
+    }
+    if (JS_IsArray(ctx, result)) {
+        // TODO
+        return env->NewObject(integerCls, integerInitMethodID, (long) result);
+    } else if (JS_IsObject(result)) {
+        // TODO
+        return env->NewObject(integerCls, integerInitMethodID, (long) result);
+    } else if (JS_IsString(result)) {
+        return env->NewStringUTF(JS_ToCString(ctx, result));
+    } else if (JS_IsBool(result)) {
+        return env->NewObject(booleanCls, booleanInitMethodID, JS_VALUE_GET_BOOL(result));
+    } else if (JS_IsBigFloat(result)) {
+        return env->NewObject(doubleCls, doubleInitMethodID, JS_VALUE_GET_FLOAT64(result));
+    } else if (JS_IsBigInt(ctx, result)) {
+        // long
+    } else if (JS_IsNull(result)) {
+        return nullptr;
+    } else if (JS_IsNumber(result)) {
+
+    }
+    return nullptr;
+}
+
+JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *) {
+    JNIEnv *env;
+    jint onLoad_err = -1;
+    if (vm->GetEnv((void **) &env, JNI_VERSION_1_6) != JNI_OK) {
+        return onLoad_err;
+    }
+    if (env == nullptr) {
+        return onLoad_err;
+    }
+
+    integerCls = (jclass) env->NewGlobalRef((env)->FindClass("java/lang/Integer"));
+    longCls = (jclass) env->NewGlobalRef((env)->FindClass("java/lang/Long"));
+    doubleCls = (jclass) env->NewGlobalRef((env)->FindClass("java/lang/Double"));
+    booleanCls = (jclass) env->NewGlobalRef((env)->FindClass("java/lang/Boolean"));
+
+    integerInitMethodID = env->GetMethodID(integerCls, "<init>", "(I)V");
+    longInitMethodID = env->GetMethodID(longCls, "<init>", "(J)V");
+    doubleInitMethodID = env->GetMethodID(doubleCls, "<init>", "(D)V");
+    booleanInitMethodID = env->GetMethodID(booleanCls, "<init>", "(Z)V");
+    return JNI_VERSION_1_6;
+}
 
 int getArrayLength(JSContext *ctx, JSValue this_obj) {
     JSValue lenValue = JS_GetPropertyStr(ctx, this_obj, "length");
@@ -44,89 +137,18 @@ Java_com_quickjs_android_QuickJS__1releaseContext(JNIEnv *env, jclass clazz, jlo
     JSContext *ctx = reinterpret_cast<JSContext *>(context_ptr);
     JS_FreeContext(ctx);
 }
-
-JSValue executeScript(JNIEnv *env, jclass clazz, jlong context_ptr, jstring source_,
-                      jstring file_name_) {
-    JSContext *ctx = reinterpret_cast<JSContext *>(context_ptr);
-    const char *source = env->GetStringUTFChars(source_, NULL);
-    const int source_length = env->GetStringUTFLength(source_);
-    const char *file_name = env->GetStringUTFChars(file_name_, NULL);
-    int flags = 0;
-    JSValue val = JS_Eval(ctx, source, (size_t) source_length, file_name, flags);
-    return val;
-}
-
 extern "C"
-JNIEXPORT jint JNICALL
-Java_com_quickjs_android_QuickJS__1executeIntegerScript(JNIEnv *env, jclass clazz,
-                                                        jlong context_ptr, jstring source,
-                                                        jstring file_name) {
-    JSValue val = executeScript(env, clazz, context_ptr, source, file_name);
-    return JS_VALUE_GET_INT(val);
-}extern "C"
-JNIEXPORT jdouble JNICALL
-Java_com_quickjs_android_QuickJS__1executeDoubleScript(JNIEnv *env, jclass clazz, jlong context_ptr,
-                                                       jstring source, jstring file_name) {
-    JSValue val = executeScript(env, clazz, context_ptr, source, file_name);
-    return JS_VALUE_GET_FLOAT64(val);
-}extern "C"
-JNIEXPORT jstring JNICALL
-Java_com_quickjs_android_QuickJS__1executeStringScript(JNIEnv *env, jclass clazz, jlong context_ptr,
-                                                       jstring source, jstring file_name) {
-    JSContext *ctx = reinterpret_cast<JSContext *>(context_ptr);
-    JSValue val = executeScript(env, clazz, context_ptr, source, file_name);
-    const char *str = JS_ToCString(ctx, val);
-    jstring j_str = env->NewStringUTF(str);
-    JS_FreeCString(ctx, str);
-    return j_str;
-}extern "C"
-JNIEXPORT jboolean JNICALL
-Java_com_quickjs_android_QuickJS__1executeBooleanScript(JNIEnv *env, jclass clazz,
-                                                        jlong context_ptr, jstring source,
-                                                        jstring file_name) {
-    JSValue val = executeScript(env, clazz, context_ptr, source, file_name);
-    return JS_VALUE_GET_BOOL(val);
-}extern "C"
 JNIEXPORT jobject JNICALL
 Java_com_quickjs_android_QuickJS__1executeScript(JNIEnv *env, jclass clazz, jlong context_ptr,
+                                                 jint expected_type,
                                                  jstring source, jstring file_name) {
     JSContext *ctx = reinterpret_cast<JSContext *>(context_ptr);
-    JSValue val = executeScript(env, clazz, context_ptr, source, file_name);
-    if (JS_IsString(val)) {
-
-    } else if (JS_IsBool(val)) {
-
-    } else if (JS_IsBigFloat(val)) {
-        // double
-    } else if (JS_IsBigInt(ctx, val)) {
-        // long
-    } else if (JS_IsNull(val)) {
-        return NULL;
-    } else if (JS_IsNumber(val)) {
-
-    }
-    return NULL;
-}
-extern "C"
-JNIEXPORT jlong JNICALL
-Java_com_quickjs_android_QuickJS__1executeArrayScript(JNIEnv *env, jclass clazz, jlong context_ptr,
-                                                      jstring source, jstring file_name) {
-    JSValue val = executeScript(env, clazz, context_ptr, source, file_name);
-    return val;
-
-}extern "C"
-JNIEXPORT jlong JNICALL
-Java_com_quickjs_android_QuickJS__1executeObjectScript(JNIEnv *env, jclass clazz, jlong context_ptr,
-                                                       jstring source, jstring file_name) {
-    JSValue val = executeScript(env, clazz, context_ptr, source, file_name);
-    return val;
-}
-
-extern "C"
-JNIEXPORT void JNICALL
-Java_com_quickjs_android_QuickJS__1executeVoidScript(JNIEnv *env, jclass clazz, jlong context_ptr,
-                                                     jstring source, jstring file_name) {
-    executeScript(env, clazz, context_ptr, source, file_name);
+    const char *source_ = env->GetStringUTFChars(source, NULL);
+    const int source_length = env->GetStringUTFLength(source);
+    const char *file_name_ = env->GetStringUTFChars(file_name, NULL);
+    int flags = 0;
+    JSValue val = JS_Eval(ctx, source_, (size_t) source_length, file_name_, flags);
+    return To_JObject(env, context_ptr, expected_type, val);
 }
 extern "C"
 JNIEXPORT jlong JNICALL
@@ -268,21 +290,7 @@ Java_com_quickjs_android_QuickJS__1getString(JNIEnv *env, jclass clazz, jlong co
     jstring j_str = env->NewStringUTF(str);
     return j_str;
 }
-extern "C"
-JNIEXPORT jobject JNICALL
-Java_com_quickjs_android_QuickJS__1executeFunction(JNIEnv *env, jclass clazz, jlong context_ptr,
-                                                   jint expected_type, jlong object_handle,
-                                                   jstring name, jlong parameters_handle) {
-    const char *name_ = env->GetStringUTFChars(name, NULL);
-    JSContext *ctx = reinterpret_cast<JSContext *>(context_ptr);
-    JSValue this_obj = object_handle;
-    JSValue func_obj = JS_GetPropertyStr(ctx, this_obj, name_);
-    JSValue argv = parameters_handle;
-    JSValue result = JS_Call(ctx, func_obj, this_obj, parameters_handle == 0 ? 0 : 1, &argv);
-    const char *str = JS_ToCString(ctx, result);
-    jstring j_str = env->NewStringUTF(str);
-    return j_str;
-}
+
 extern "C"
 JNIEXPORT jstring JNICALL
 Java_com_quickjs_android_QuickJS__1arrayGetString(JNIEnv *env, jclass clazz, jlong context_ptr,
@@ -389,4 +397,54 @@ Java_com_quickjs_android_QuickJS__1getKeys(JNIEnv *env, jclass clazz, jlong cont
         env->SetObjectArrayElement(stringArray, i, key);
     }
     return stringArray;
+}
+
+JSValue executeJSFunction(JNIEnv *env,
+                          jlong context_ptr, jlong object_handle,
+                          jstring name, jlong parameters_handle) {
+    const char *name_ = env->GetStringUTFChars(name, NULL);
+    JSContext *ctx = reinterpret_cast<JSContext *>(context_ptr);
+    JSValue this_obj = object_handle;
+    JSValue func_obj = JS_GetPropertyStr(ctx, this_obj, name_);
+    JSValue *argv = NULL;
+    if (parameters_handle != 0) {
+        JSValue jsValue = parameters_handle;
+        argv = &jsValue;
+    }
+    return JS_Call(ctx, func_obj, this_obj, 1, argv);
+}
+
+//extern "C"
+//JNIEXPORT jint JNICALL
+//Java_com_quickjs_android_QuickJS__1executeIntegerFunction(JNIEnv *env, jclass clazz,
+//                                                          jlong context_ptr, jlong object_handle,
+//                                                          jstring name, jlong parameters_handle) {
+//
+//    JSValue result = executeJSFunction(env, context_ptr, object_handle, name, parameters_handle);
+//    return JS_VALUE_GET_INT(result);
+//
+//}extern "C"
+//JNIEXPORT jdouble JNICALL
+//Java_com_quickjs_android_QuickJS__1executeDoubleFunction(JNIEnv *env, jclass clazz,
+//                                                         jlong context_ptr, jlong object_handle,
+//                                                         jstring name, jlong parameters_handle) {
+//    JSValue result = executeJSFunction(env, context_ptr, object_handle, name, parameters_handle);
+//    return JS_VALUE_GET_FLOAT64(result);
+//}extern "C"
+//JNIEXPORT jboolean JNICALL
+//Java_com_quickjs_android_QuickJS__1executeBooleanFunction(JNIEnv *env, jclass clazz,
+//                                                          jlong context_ptr, jlong object_handle,
+//                                                          jstring name, jlong parameters_handle) {
+//    JSValue result = executeJSFunction(env, context_ptr, object_handle, name, parameters_handle);
+//    return JS_VALUE_GET_BOOL(result);
+//}
+
+
+extern "C"
+JNIEXPORT jobject JNICALL
+Java_com_quickjs_android_QuickJS__1executeFunction(JNIEnv *env, jclass clazz, jlong context_ptr,
+                                                   jint expected_type, jlong object_handle,
+                                                   jstring name, jlong parameters_handle) {
+    JSValue result = executeJSFunction(env, context_ptr, object_handle, name, parameters_handle);
+    return To_JObject(env, context_ptr, expected_type, result);
 }
