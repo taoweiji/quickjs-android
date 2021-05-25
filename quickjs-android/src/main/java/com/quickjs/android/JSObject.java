@@ -88,10 +88,6 @@ public class JSObject extends JSValue {
         return this;
     }
 
-    Object executeFunction(int expectedType, String name, JSArray parameters) {
-        long parametersHandle = parameters == null ? 0L : parameters.getHandle();
-        return QuickJS.executeFunction(context, expectedType, objectHandle, name, parametersHandle);
-    }
 
     public Object executeFunction(String name, JSArray parameters) {
         return executeFunction(JSValue.UNKNOWN, name, parameters);
@@ -125,15 +121,12 @@ public class JSObject extends JSValue {
         executeFunction(JSValue.NULL, name, parameters);
     }
 
-
     public Object executeJSFunction(String name) {
-        // TODO
-        return null;
+        return QuickJS.executeJSFunction(context, objectHandle, name, new Object[0]);
     }
 
     public Object executeJSFunction(String name, Object... parameters) {
-        // TODO
-        return null;
+        return QuickJS.executeJSFunction(context, objectHandle, name, parameters);
     }
 
     public boolean contains(String key) {
@@ -142,5 +135,11 @@ public class JSObject extends JSValue {
 
     public String[] getKeys() {
         return QuickJS._getKeys(getContextPtr(), this.objectHandle);
+    }
+
+
+    Object executeFunction(int expectedType, String name, JSArray parameters) {
+        long parametersHandle = parameters == null ? 0L : parameters.getHandle();
+        return QuickJS.executeFunction(context, expectedType, objectHandle, name, parametersHandle);
     }
 }
