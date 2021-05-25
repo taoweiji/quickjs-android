@@ -21,6 +21,7 @@ public class JSContext extends JSObject {
 
     @Override
     public void close() {
+        super.close();
         QuickJS._releaseContext(contextPtr);
     }
 

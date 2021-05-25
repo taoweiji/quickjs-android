@@ -28,10 +28,6 @@ public class QuickJS {
         _releaseRuntime(runtimePtr);
     }
 
-    long getRuntimePtr() {
-        return this.runtimePtr;
-    }
-
     static Object executeFunction(JSContext context, int expectedType, long objectHandle, String name, long parametersHandle) {
         Object object = _executeFunction(context.getContextPtr(), expectedType, objectHandle, name, parametersHandle);
         return toJavaObject(context, object, expectedType);
