@@ -15,6 +15,11 @@ public class QuickJS {
 
     native static String[] _getKeys(long contextPtr, long objectHandle);
 
+    static Object executeScript(JSContext jsContext, int expectedType, String source, String fileName) {
+        Object object = _executeScript(jsContext.getContextPtr(), expectedType, source, fileName);
+        return toJavaObject(jsContext, object, expectedType);
+    }
+
 
     public JSContext createContext() {
         return new JSContext(_createContext(runtimePtr));
@@ -28,6 +33,23 @@ public class QuickJS {
         return this.runtimePtr;
     }
 
+    static Object executeFunction(JSContext context, int expectedType, long objectHandle, String name, long parametersHandle) {
+        Object object = _executeFunction(context.getContextPtr(), expectedType, objectHandle, name, parametersHandle);
+        return toJavaObject(context, object, expectedType);
+    }
+
+    static Object toJavaObject(JSContext context, Object object, int expectedType) {
+        if (object == null) return null;
+        switch (expectedType) {
+            case JSValue.JS_ARRAY:
+                return new JSArray(context, (long) object);
+            case JSValue.JS_OBJECT:
+                return new JSObject(context, (long) object);
+        }
+        return object;
+    }
+
+
     static native long _createRuntime();
 
     static native void _releaseRuntime(long runtimePtr);
@@ -36,21 +58,7 @@ public class QuickJS {
 
     static native void _releaseContext(long contextPtr);
 
-    static native int _executeIntegerScript(long contextPtr, String source, String fileName);
-
-    static native double _executeDoubleScript(long contextPtr, String source, String fileName);
-
-    static native String _executeStringScript(long contextPtr, String source, String fileName);
-
-    static native boolean _executeBooleanScript(long contextPtr, String source, String fileName);
-
-    static native Object _executeScript(long contextPtr, String source, String fileName);
-
-    static native void _executeVoidScript(long contextPtr, String source, String fileName);
-
-    static native long _executeArrayScript(long contextPtr, String source, String fileName);
-
-    static native long _executeObjectScript(long contextPtr, String source, String fileName);
+    private static native Object _executeScript(long contextPtr, int expectedType, String source, String fileName);
 
     static native long _getGlobalObject(long contextPtr);
 
@@ -92,7 +100,7 @@ public class QuickJS {
 
     static native void _arrayAddObject(long contextPtr, long objectHandle, long value);
 
-    static native Object _executeFunction(long contextPtr, int expectedType, long objectHandle, String name, long parametersHandle);
+    private static native Object _executeFunction(long contextPtr, int expectedType, long objectHandle, String name, long parametersHandle);
 
     static native long _initNewJSObject(long contextPtr);
 

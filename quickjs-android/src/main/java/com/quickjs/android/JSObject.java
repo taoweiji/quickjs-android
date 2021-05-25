@@ -15,6 +15,11 @@ public class JSObject extends JSValue {
         this.initialize(this.context.getContextPtr(), data);
     }
 
+    public JSObject(JSContext context, long objectHandle) {
+        this.context = context;
+        this.objectHandle = objectHandle;
+    }
+
     public JSObject set(String key, int value) {
         QuickJS._set(getContextPtr(), this.objectHandle, key, value);
         return this;
@@ -83,43 +88,41 @@ public class JSObject extends JSValue {
         return this;
     }
 
-    public Object executeFunction(String name, JSArray parameters) {
+    Object executeFunction(int expectedType, String name, JSArray parameters) {
         long parametersHandle = parameters == null ? 0L : parameters.getHandle();
-        return QuickJS._executeFunction(getContextPtr(), 0, objectHandle, name, parametersHandle);
+        return QuickJS.executeFunction(context, expectedType, objectHandle, name, parametersHandle);
+    }
+
+    public Object executeFunction(String name, JSArray parameters) {
+        return executeFunction(JSValue.UNKNOWN, name, parameters);
     }
 
     public int executeIntegerFunction(String name, JSArray parameters) {
-        // TODO
-        return 0;
+        return (int) executeFunction(JSValue.INTEGER, name, parameters);
     }
 
     public double executeDoubleFunction(String name, JSArray parameters) {
-        // TODO
-        return 0;
-    }
-
-    public String executeStringFunction(String name, JSArray parameters) {
-        long parametersHandle = parameters == null ? 0L : parameters.getHandle();
-        return (String) QuickJS._executeFunction(getContextPtr(), 0, objectHandle, name, parametersHandle);
+        return (double) executeFunction(JSValue.DOUBLE, name, parameters);
     }
 
     public boolean executeBooleanFunction(String name, JSArray parameters) {
-        // TODO
-        return false;
+        return (boolean) executeFunction(JSValue.BOOLEAN, name, parameters);
+    }
+
+    public String executeStringFunction(String name, JSArray parameters) {
+        return (String) executeFunction(JSValue.STRING, name, parameters);
     }
 
     public JSArray executeArrayFunction(String name, JSArray parameters) {
-        // TODO
-        return null;
+        return (JSArray) executeFunction(JSValue.JS_ARRAY, name, parameters);
     }
 
     public JSObject executeObjectFunction(String name, JSArray parameters) {
-        // TODO
-        return null;
+        return (JSObject) executeFunction(JSValue.JS_OBJECT, name, parameters);
     }
 
     public void executeVoidFunction(String name, JSArray parameters) {
-        // TODO
+        executeFunction(JSValue.NULL, name, parameters);
     }
 
 

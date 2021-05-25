@@ -1,7 +1,9 @@
 package com.quickjs.android.example;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -33,20 +35,24 @@ public class MainActivity extends AppCompatActivity {
 //        jsContext.add("", 1);
 //        jsContext.close();
 //        quickJS.close();
+
         test();
+        Integer integer = new Integer(3);
     }
 
     void test() {
         QuickJS quickJS = QuickJS.createRuntime();
         JSContext jsContext = quickJS.createContext();
-        jsContext.set("name", "Wiki");
-        jsContext.set("age", 18);
-        jsContext.set("gender", 1);
-//        jsContext.executeScript("function sayHello(param) {return param[0];}", "file.js");
-//        JSArray jsArray = new JSArray(jsContext);
-//        jsArray.push("Hello");
-//        String result = jsContext.executeStringFunction("sayHello", jsArray);
-        Log.e("QuickJS", Arrays.toString(jsContext.getKeys()));
+//        jsContext.set("name", "Wiki");
+//        jsContext.set("age", 18);
+//        jsContext.set("gender", 1);
+        jsContext.executeScript("function sayHello(param) {return param[3];}", "file.js");
+        JSArray jsArray = new JSArray(jsContext);
+        jsArray.push("Hello");
+        jsArray.push(true);
+        jsArray.push(1);
+        jsArray.push(3.14);
+        Log.e("QuickJS", String.valueOf(jsContext.executeDoubleFunction("sayHello", jsArray)));
     }
 
     void testV8() {
