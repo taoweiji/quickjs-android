@@ -11,11 +11,11 @@ public class JSValue {
     public static final int STRING = 4;
     public static final int JS_ARRAY = 5;
     public static final int JS_OBJECT = 6;
-    public static final int V8_FUNCTION = 7;
-    public static final int V8_TYPED_ARRAY = 8;
+    public static final int JS_FUNCTION = 7;
+    public static final int JS_TYPED_ARRAY = 8;
     public static final int BYTE = 9;
     public static final int INT_8_ARRAY = 9;
-    public static final int V8_ARRAY_BUFFER = 10;
+    public static final int JS_ARRAY_BUFFER = 10;
     public static final int UNSIGNED_INT_8_ARRAY = 11;
     public static final int UNSIGNED_INT_8_CLAMPED_ARRAY = 12;
     public static final int INT_16_ARRAY = 13;

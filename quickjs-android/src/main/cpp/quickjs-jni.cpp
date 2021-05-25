@@ -12,11 +12,11 @@ const int TYPE_BOOLEAN = 3;
 const int TYPE_STRING = 4;
 const int TYPE_JS_ARRAY = 5;
 const int TYPE_JS_OBJECT = 6;
-const int TYPE_V8_FUNCTION = 7;
-const int TYPE_V8_TYPED_ARRAY = 8;
+const int TYPE_JS_FUNCTION = 7;
+const int TYPE_JS_TYPED_ARRAY = 8;
 const int TYPE_BYTE = 9;
 const int TYPE_INT_8_ARRAY = 9;
-const int TYPE_V8_ARRAY_BUFFER = 10;
+const int TYPE_JS_ARRAY_BUFFER = 10;
 const int TYPE_UNSIGNED_INT_8_ARRAY = 11;
 const int TYPE_UNSIGNED_INT_8_CLAMPED_ARRAY = 12;
 const int TYPE_INT_16_ARRAY = 13;
@@ -29,10 +29,14 @@ jclass integerCls = nullptr;
 jclass longCls = nullptr;
 jclass doubleCls = nullptr;
 jclass booleanCls = nullptr;
+
 jmethodID integerInitMethodID = nullptr;
 jmethodID longInitMethodID = nullptr;
 jmethodID doubleInitMethodID = nullptr;
 jmethodID booleanInitMethodID = nullptr;
+
+jclass quickJSCls = nullptr;
+jmethodID callJavaVoidCallbackMethodID = nullptr;
 
 jobject To_JObject(JNIEnv *env, jlong context_ptr, int expected_type, JSValue result) {
     JSContext *ctx = reinterpret_cast<JSContext *>(context_ptr);
@@ -78,7 +82,10 @@ jobject To_JObject(JNIEnv *env, jlong context_ptr, int expected_type, JSValue re
     return nullptr;
 }
 
+JavaVM *jvm;
+
 JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *) {
+    jvm = vm;
     JNIEnv *env;
     jint onLoad_err = -1;
     if (vm->GetEnv((void **) &env, JNI_VERSION_1_6) != JNI_OK) {
@@ -92,11 +99,14 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *) {
     longCls = (jclass) env->NewGlobalRef((env)->FindClass("java/lang/Long"));
     doubleCls = (jclass) env->NewGlobalRef((env)->FindClass("java/lang/Double"));
     booleanCls = (jclass) env->NewGlobalRef((env)->FindClass("java/lang/Boolean"));
+    quickJSCls = (jclass) env->NewGlobalRef((env)->FindClass("com/quickjs/android/QuickJS"));
 
     integerInitMethodID = env->GetMethodID(integerCls, "<init>", "(I)V");
     longInitMethodID = env->GetMethodID(longCls, "<init>", "(J)V");
     doubleInitMethodID = env->GetMethodID(doubleCls, "<init>", "(D)V");
     booleanInitMethodID = env->GetMethodID(booleanCls, "<init>", "(Z)V");
+    callJavaVoidCallbackMethodID = env->GetStaticMethodID(quickJSCls, "callJavaVoidCallback",
+                                                          "(JJJJ)V");
     return JNI_VERSION_1_6;
 }
 
@@ -138,9 +148,11 @@ Java_com_quickjs_android_QuickJS__1executeScript(JNIEnv *env, jclass clazz, jlon
     const char *source_ = env->GetStringUTFChars(source, NULL);
     const int source_length = env->GetStringUTFLength(source);
     const char *file_name_ = env->GetStringUTFChars(file_name, NULL);
-    int flags = 0;
-    JSValue val = JS_Eval(ctx, source_, (size_t) source_length, file_name_, flags);
-    return To_JObject(env, context_ptr, expected_type, val);
+    JSValue val = JS_Eval(ctx, source_, (size_t) source_length, file_name_, JS_EVAL_TYPE_GLOBAL);
+    jobject result = To_JObject(env, context_ptr, expected_type, val);
+    // TODO
+    JS_FreeValue(ctx, val);
+    return result;
 }
 extern "C"
 JNIEXPORT jlong JNICALL
@@ -398,7 +410,10 @@ Java_com_quickjs_android_QuickJS__1contains(JNIEnv *env, jclass clazz, jlong con
     JSContext *ctx = reinterpret_cast<JSContext *>(context_ptr);
     JSValue this_obj = object_handle;
     const char *key_ = env->GetStringUTFChars(key, NULL);
-    return JS_HasProperty(ctx, this_obj, JS_NewAtom(ctx, key_));
+    JSAtom atom = JS_NewAtom(ctx, key_);
+    int result = JS_HasProperty(ctx, this_obj, atom);
+    JS_FreeAtom(ctx, atom);
+    return result;
 }extern "C"
 JNIEXPORT jobjectArray JNICALL
 Java_com_quickjs_android_QuickJS__1getKeys(JNIEnv *env, jclass clazz, jlong context_ptr,
@@ -439,10 +454,56 @@ Java_com_quickjs_android_QuickJS__1executeFunction(JNIEnv *env, jclass clazz, jl
                                                    jstring name, jlong parameters_handle) {
     JSValue result = executeJSFunction(env, context_ptr, object_handle, name, parameters_handle);
     return To_JObject(env, context_ptr, expected_type, result);
-}extern "C"
+}
+extern "C"
+JNIEXPORT jobject JNICALL
+Java_com_quickjs_android_QuickJS__1executeFunction2(JNIEnv *env, jclass clazz, jlong context_ptr,
+                                                    jint expected_type, jlong object_handle,
+                                                    jlong functionHandle, jlong parameters_handle) {
+    JSContext *ctx = reinterpret_cast<JSContext *>(context_ptr);
+    JSValue this_obj = object_handle;
+    JSValue func_obj = functionHandle;
+    JSValue *argv = NULL;
+    if (parameters_handle != 0) {
+        JSValue jsValue = parameters_handle;
+        argv = &jsValue;
+    }
+    JSValue result = JS_Call(ctx, func_obj, this_obj, 1, argv);
+    return To_JObject(env, context_ptr, expected_type, result);
+}
+
+extern "C"
 JNIEXPORT jobject JNICALL
 Java_com_quickjs_android_QuickJS__1executeJSFunction(JNIEnv *env, jclass clazz, jlong context_ptr,
                                                      jlong object_handle, jstring name,
                                                      jobjectArray parameters) {
     // TODO: implement _executeJSFunction()
+}
+
+JSValue callJavaCallback(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+
+    return JS_NewInt32(ctx, 1228);
+}
+
+JSValue callJavaVoidCallback(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    JNIEnv *env;
+    jvm->GetEnv((void **) &env, JNI_VERSION_1_6);
+    long contextPtr = reinterpret_cast<long>(ctx);
+    long objectHandle = 0;
+    long functionHandle = this_val;
+    long argsHandle = reinterpret_cast<long>(argv);
+
+    env->CallStaticVoidMethod(quickJSCls, callJavaVoidCallbackMethodID, contextPtr, objectHandle,
+                              functionHandle, argsHandle);
+    return NULL;
+}
+
+extern "C"
+JNIEXPORT jlong JNICALL
+Java_com_quickjs_android_QuickJS__1initNewJSFunction(JNIEnv *env, jclass clazz, jlong context_ptr,
+                                                     jboolean void_method) {
+    JSContext *ctx = reinterpret_cast<JSContext *>(context_ptr);
+    JSValue jsValue = JS_NewCFunction(ctx, void_method ? callJavaVoidCallback : callJavaCallback,
+                                      "test", 1);
+    return jsValue;
 }

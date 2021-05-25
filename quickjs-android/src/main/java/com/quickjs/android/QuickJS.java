@@ -1,5 +1,11 @@
 package com.quickjs.android;
 
+import androidx.annotation.Keep;
+
+import java.util.HashMap;
+import java.util.Map;
+
+@Keep
 public class QuickJS {
     private long runtimePtr;
 
@@ -24,6 +30,7 @@ public class QuickJS {
 
     native static long _arrayGetArray(long contextPtr, long objectHandle, int index);
 
+
     public JSContext createContext() {
         return new JSContext(_createContext(runtimePtr));
     }
@@ -36,6 +43,12 @@ public class QuickJS {
         Object object = _executeFunction(context.getContextPtr(), expectedType, objectHandle, name, parametersHandle);
         return toJavaObject(context, object, expectedType);
     }
+
+    static Object executeFunction(JSContext context, int expectedType, long objectHandle, long functionHandle, long parametersHandle) {
+        Object object = _executeFunction2(context.getContextPtr(), expectedType, objectHandle, functionHandle, parametersHandle);
+        return toJavaObject(context, object, expectedType);
+    }
+
 
     static Object executeJSFunction(JSContext context, long objectHandle, String name, Object[] parameters) {
         Object object = _executeJSFunction(context.getContextPtr(), objectHandle, name, parameters);
@@ -50,6 +63,8 @@ public class QuickJS {
                 return new JSArray(context, (long) object);
             case JSValue.JS_OBJECT:
                 return new JSObject(context, (long) object);
+            case JSValue.JS_FUNCTION:
+                return new JSFunction(context, (long) object);
         }
         return object;
     }
@@ -107,15 +122,37 @@ public class QuickJS {
 
     private static native Object _executeFunction(long contextPtr, int expectedType, long objectHandle, String name, long parametersHandle);
 
+    private static native Object _executeFunction2(long contextPtr, int expectedType, long objectHandle, long functionHandle, long parametersHandle);
+
     native static Object _executeJSFunction(long contextPtr, long objectHandle, String name, Object[] parameters);
 
     static native long _initNewJSObject(long contextPtr);
 
     static native long _initNewJSArray(long contextPtr);
 
+    native static long _initNewJSFunction(long contextPtr, boolean voidMethod);
+
     static native void _release(long contextPtr, long objectHandle);
 
     static native long _registerJavaMethod(long contextPtr, long objectHandle, String jsFunctionName, boolean voidMethod);
+
+    static Map<Long, MethodDescriptor> functionRegistry = new HashMap<>();
+
+    @Keep
+    static void callJavaVoidCallback(long contextPtr, long objectHandle, long functionHandle, long argsHandle) {
+        MethodDescriptor methodDescriptor = functionRegistry.get(functionHandle);
+        if (methodDescriptor == null) return;
+        JSObject jsObject = null;
+        JSArray jsArray = null;
+        JSContext context = new JSContext(contextPtr);
+        if (objectHandle != 0) {
+            jsObject = new JSObject(context, objectHandle);
+        }
+        if (argsHandle != 0) {
+            jsArray = new JSArray(context, argsHandle);
+        }
+        methodDescriptor.voidCallback.invoke(jsObject, jsArray);
+    }
 
     static {
         System.loadLibrary("quickjs");
