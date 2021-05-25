@@ -398,8 +398,7 @@ Java_com_quickjs_android_QuickJS__1contains(JNIEnv *env, jclass clazz, jlong con
     JSContext *ctx = reinterpret_cast<JSContext *>(context_ptr);
     JSValue this_obj = object_handle;
     const char *key_ = env->GetStringUTFChars(key, NULL);
-    JSValue jsValue = JS_GetPropertyStr(ctx, this_obj, key_);
-    return JS_IsNull(jsValue);
+    return JS_HasProperty(ctx, this_obj, JS_NewAtom(ctx, key_));
 }extern "C"
 JNIEXPORT jobjectArray JNICALL
 Java_com_quickjs_android_QuickJS__1getKeys(JNIEnv *env, jclass clazz, jlong context_ptr,
