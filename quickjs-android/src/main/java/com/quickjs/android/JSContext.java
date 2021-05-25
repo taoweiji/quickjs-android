@@ -6,7 +6,7 @@ import java.util.Map;
 public class JSContext extends JSObject {
     private final long contextPtr;
 
-    Map<Long, MethodDescriptor> functionRegistry = new HashMap<>();
+//    Map<Long, MethodDescriptor> functionRegistry = new HashMap<>();
 
     JSContext(long contextPtr) {
         super();
@@ -74,13 +74,13 @@ public class JSContext extends JSObject {
     void registerCallback(JavaCallback callback, long functionHandle) {
         MethodDescriptor methodDescriptor = new MethodDescriptor();
         methodDescriptor.callback = callback;
-        this.functionRegistry.put(functionHandle, methodDescriptor);
+        QuickJS.functionRegistry.put(functionHandle, methodDescriptor);
     }
 
     void registerCallback(JavaVoidCallback callback, long functionHandle) {
         MethodDescriptor methodDescriptor = new MethodDescriptor();
         methodDescriptor.voidCallback = callback;
-        this.functionRegistry.put(functionHandle, methodDescriptor);
+        QuickJS.functionRegistry.put(functionHandle, methodDescriptor);
     }
 
     long initNewJSObject(long contextPtr) {
