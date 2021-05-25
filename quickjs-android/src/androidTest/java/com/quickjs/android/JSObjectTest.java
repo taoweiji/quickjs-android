@@ -90,30 +90,73 @@ public class JSObjectTest {
 
     @Test
     public void executeFunction() {
+
     }
 
     @Test
     public void executeIntegerFunction() {
+        context.executeVoidScript("function test(data){ return data[0]}", "file.js");
+        JSArray array = new JSArray(context);
+        array.push(Integer.MAX_VALUE);
+        int result = context.executeIntegerFunction("test", array);
+        array.close();
+        assertEquals(Integer.MAX_VALUE, result);
     }
 
     @Test
     public void executeDoubleFunction() {
+        context.executeVoidScript("function test(data){ return data[0]}", "file.js");
+        JSArray array = new JSArray(context);
+        array.push(3.14);
+        double result = context.executeDoubleFunction("test", array);
+        array.close();
+        assertEquals(3.14, result, 0);
+
     }
 
     @Test
     public void executeBooleanFunction() {
+        context.executeVoidScript("function test(data){ return data[0]}", "file.js");
+        JSArray array = new JSArray(context);
+        array.push(true);
+        boolean result = context.executeBooleanFunction("test", array);
+        array.close();
+        assertTrue(result);
+
     }
 
     @Test
     public void executeStringFunction() {
+        context.executeVoidScript("function test(data){ return data[0]}", "file.js");
+        JSArray array = new JSArray(context);
+        array.push("Hello");
+        String result = context.executeStringFunction("test", array);
+        array.close();
+        assertEquals("Hello", result);
+
     }
 
     @Test
     public void executeArrayFunction() {
+        context.executeVoidScript("function test(data){ return data}", "file.js");
+        JSArray array = new JSArray(context);
+        array.push("Hello");
+        JSArray result = context.executeArrayFunction("test", array);
+        array.close();
+        assertEquals("Hello", result.getString(0));
+
     }
 
     @Test
     public void executeObjectFunction() {
+        context.executeVoidScript("function test(data){ return data[0]}", "file.js");
+        JSArray array = new JSArray(context);
+        JSObject value = new JSObject(context);
+        value.set("name", "Wiki");
+        array.push(value);
+        JSArray result = (JSArray) context.executeObjectFunction("test", array);
+        array.close();
+        assertEquals("Hello", result.getString("name"));
     }
 
     @Test
@@ -130,9 +173,20 @@ public class JSObjectTest {
 
     @Test
     public void contains() {
+        object.set("name", "Wiki");
+        object.set("age", 18);
+        assertTrue(object.contains("name"));
+        assertTrue(object.contains("age"));
+        assertFalse(object.contains("age2"));
     }
 
     @Test
     public void getKeys() {
+        object.set("name", "Wiki");
+        object.set("age", 18);
+        String[] result = object.getKeys();
+        assertEquals("name", result[0]);
+        assertEquals("age", result[1]);
+        assertEquals(2, result.length);
     }
 }
