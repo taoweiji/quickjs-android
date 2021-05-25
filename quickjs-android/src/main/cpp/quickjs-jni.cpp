@@ -492,9 +492,12 @@ JSValue callJavaVoidCallback(JSContext *ctx, JSValueConst this_val, int argc, JS
     long objectHandle = 0;
     long functionHandle = this_val;
     long argsHandle = reinterpret_cast<long>(argv);
-
     env->CallStaticVoidMethod(quickJSCls, callJavaVoidCallbackMethodID, contextPtr, objectHandle,
                               functionHandle, argsHandle);
+//    env->CallStaticVoidMethod(quickJSCls, callJavaVoidCallbackMethodID, contextPtr, objectHandle,
+//                              functionHandle, argsHandle);
+//
+
     return NULL;
 }
 
