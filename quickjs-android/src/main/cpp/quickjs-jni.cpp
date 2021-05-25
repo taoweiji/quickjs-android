@@ -324,7 +324,30 @@ Java_com_quickjs_android_QuickJS__1arrayGetInteger(JNIEnv *env, jclass clazz, jl
     JSValue this_obj = object_handle;
     JSValue jsValue = JS_GetPropertyUint32(ctx, this_obj, index);
     return JS_VALUE_GET_INT(jsValue);
+}
+extern "C"
+JNIEXPORT jlong JNICALL
+Java_com_quickjs_android_QuickJS__1arrayGetObject(JNIEnv *env, jclass clazz, jlong context_ptr,
+                                                  jlong object_handle, jint index) {
+    JSContext *ctx = reinterpret_cast<JSContext *>(context_ptr);
+    JSValue this_obj = object_handle;
+    JSValue jsValue = JS_GetPropertyUint32(ctx, this_obj, index);
+    if (JS_IsNull(jsValue)) return 0;
+    if (JS_IsObject(jsValue)) return jsValue;
+    return 0;
 }extern "C"
+JNIEXPORT jlong JNICALL
+Java_com_quickjs_android_QuickJS__1arrayGetArray(JNIEnv *env, jclass clazz, jlong context_ptr,
+                                                 jlong object_handle, jint index) {
+    JSContext *ctx = reinterpret_cast<JSContext *>(context_ptr);
+    JSValue this_obj = object_handle;
+    JSValue jsValue = JS_GetPropertyUint32(ctx, this_obj, index);
+    if (JS_IsNull(jsValue)) return 0;
+    if (JS_IsArray(ctx, jsValue)) return jsValue;
+    return 0;
+}
+
+extern "C"
 JNIEXPORT void JNICALL
 Java_com_quickjs_android_QuickJS__1arrayAdd__JJI(JNIEnv *env, jclass clazz, jlong context_ptr,
                                                  jlong object_handle, jint value) {

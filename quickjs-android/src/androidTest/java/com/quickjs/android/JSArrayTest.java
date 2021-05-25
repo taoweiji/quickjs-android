@@ -1,5 +1,6 @@
 package com.quickjs.android;
 
+import org.json.JSONArray;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -71,5 +72,23 @@ public class JSArrayTest {
         array.push(1.0);
         array.push("Hello");
         assertEquals(4, array.length());
+    }
+
+    @Test
+    public void getObject() {
+        JSObject user = new JSObject(context);
+        user.set("name", "Wiki");
+        array.push(user);
+        assertEquals("Wiki", array.getObject(0).getString("name"));
+        user.close();
+    }
+
+    @Test
+    public void getArray() {
+        JSArray user = new JSArray(context);
+        user.push("Wiki");
+        array.push(user);
+        assertEquals("Wiki", array.getArray(0).getString(0));
+        user.close();
     }
 }
