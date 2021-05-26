@@ -23,11 +23,12 @@ public class JSFunctionTest {
         JSFunction jsFunction = new JSFunction(context, new JavaCallback() {
             @Override
             public Object invoke(JSObject jsObject, JSArray jsArray) {
-                return null;
+                return 1228;
             }
         });
         context.set("test", jsFunction);
         int result = context.executeIntegerFunction("test", null);
+//        int result = context.executeIntegerScript("test()", "file.js");
         assertEquals(1228, result);
     }
 
