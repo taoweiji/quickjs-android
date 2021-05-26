@@ -218,4 +218,14 @@ public class JSObjectTest {
         assertEquals("Hello", context.executeFunction2("test1", "Hello", Integer.MAX_VALUE));
         assertEquals(Integer.MAX_VALUE, context.executeFunction2("test2", "Hello", Integer.MAX_VALUE));
     }
+
+    @Test
+    public void console() {
+        JSObject console = new JSObject(context);
+        console.registerJavaMethod(array -> {
+            assertEquals("Hello", array.getString(0));
+        }, "log");
+        context.set("console", console);
+        context.executeVoidScript("console.log('Hello')", "file.js");
+    }
 }
