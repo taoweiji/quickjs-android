@@ -151,7 +151,7 @@ public class QuickJS {
         if (argsHandle != 0) {
             jsArray = new JSArray(context, argsHandle);
         }
-        methodDescriptor.voidCallback.invoke(jsObject, jsArray);
+        methodDescriptor.voidCallback.invoke(jsArray);
     }
 
     @Keep
@@ -167,7 +167,7 @@ public class QuickJS {
         if (argsHandle != 0) {
             jsArray = new JSArray(context, argsHandle);
         }
-        return methodDescriptor.callback.invoke(jsObject, jsArray);
+        return methodDescriptor.callback.invoke(jsArray);
     }
 
 
