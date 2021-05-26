@@ -29,14 +29,22 @@ jclass integerCls = nullptr;
 jclass longCls = nullptr;
 jclass doubleCls = nullptr;
 jclass booleanCls = nullptr;
+jclass stringCls = nullptr;
 
 jmethodID integerInitMethodID = nullptr;
 jmethodID longInitMethodID = nullptr;
 jmethodID doubleInitMethodID = nullptr;
 jmethodID booleanInitMethodID = nullptr;
 
+jmethodID intValueMethodID = nullptr;
+jmethodID longValueMethodID = nullptr;
+jmethodID doubleValueMethodID = nullptr;
+jmethodID booleanValueMethodID = nullptr;
+
+
 jclass quickJSCls = nullptr;
 jmethodID callJavaVoidCallbackMethodID = nullptr;
+jmethodID callJavaCallbackMethodID = nullptr;
 
 jobject To_JObject(JNIEnv *env, jlong context_ptr, int expected_type, JSValue result) {
     JSContext *ctx = reinterpret_cast<JSContext *>(context_ptr);
@@ -99,6 +107,7 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *) {
     longCls = (jclass) env->NewGlobalRef((env)->FindClass("java/lang/Long"));
     doubleCls = (jclass) env->NewGlobalRef((env)->FindClass("java/lang/Double"));
     booleanCls = (jclass) env->NewGlobalRef((env)->FindClass("java/lang/Boolean"));
+    stringCls = (jclass) env->NewGlobalRef((env)->FindClass("java/lang/String"));
     quickJSCls = (jclass) env->NewGlobalRef((env)->FindClass("com/quickjs/android/QuickJS"));
 
     integerInitMethodID = env->GetMethodID(integerCls, "<init>", "(I)V");
@@ -107,6 +116,13 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *) {
     booleanInitMethodID = env->GetMethodID(booleanCls, "<init>", "(Z)V");
     callJavaVoidCallbackMethodID = env->GetStaticMethodID(quickJSCls, "callJavaVoidCallback",
                                                           "(JJJJ)V");
+    callJavaCallbackMethodID = env->GetStaticMethodID(quickJSCls, "callJavaCallback",
+                                                      "(JJJJ)Ljava/lang/Object;");
+
+    intValueMethodID = env->GetMethodID(integerCls, "intValue", "()I");
+    longValueMethodID = env->GetMethodID(longCls, "longValue", "()J");
+    doubleValueMethodID = env->GetMethodID(doubleCls, "doubleValue", "()D");
+    booleanValueMethodID = env->GetMethodID(booleanCls, "booleanValue", "()Z");
     return JNI_VERSION_1_6;
 }
 
@@ -483,12 +499,38 @@ Java_com_quickjs_android_QuickJS__1executeJSFunction(JNIEnv *env, jclass clazz, 
 JSValue
 callJavaCallback(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv, int magic,
                  JSValue *func_data) {
-    return JS_NewInt32(ctx, 1228);
+    JNIEnv *env;
+    jvm->GetEnv((void **) &env, JNI_VERSION_1_6);
+    JSValue func = JS_GetPropertyUint32(ctx, *func_data, 0);
+    JSValue args = JS_NewArray(ctx);
+    if (argv != nullptr) {
+        for (int i = 0; i < argc; ++i) {
+            JSValue it = argv[i];
+            JS_SetPropertyUint32(ctx, args, i, it);
+        }
+    }
+    jlong contextPtr = reinterpret_cast<long>(ctx);
+    jlong objectHandle = this_val;
+    jlong functionHandle = func;
+    jlong argsHandle = args;
+    jobject result = env->CallStaticObjectMethod(quickJSCls, callJavaCallbackMethodID,
+                                                 contextPtr,
+                                                 objectHandle,
+                                                 functionHandle,
+                                                 argsHandle);
+    if (env->IsInstanceOf(result, integerCls)) {
+        return JS_NewInt32(ctx, env->CallIntMethod(result, intValueMethodID));
+    } else if (env->IsInstanceOf(result, doubleCls)) {
+        return JS_NewFloat64(ctx, env->CallDoubleMethod(result, doubleValueMethodID));
+    } else if (env->IsInstanceOf(result, booleanCls)) {
+        return JS_NewFloat64(ctx, env->CallBooleanMethod(result, booleanValueMethodID));
+    } else if (env->IsInstanceOf(result, longCls)) {
+        return JS_NewInt64(ctx, env->CallLongMethod(result, longValueMethodID));
+    } else if (env->IsInstanceOf(result, stringCls)) {
+        return JS_NewString(ctx, env->GetStringUTFChars((jstring) result, NULL));
+    }
+    return 0;
 }
-
-typedef struct {
-    long javaMethodId;
-} JavaMethod;
 
 JSValue
 callJavaVoidCallback(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv, int magic,
@@ -497,9 +539,11 @@ callJavaVoidCallback(JSContext *ctx, JSValueConst this_val, int argc, JSValueCon
     jvm->GetEnv((void **) &env, JNI_VERSION_1_6);
     JSValue func = JS_GetPropertyUint32(ctx, *func_data, 0);
     JSValue args = JS_NewArray(ctx);
-    for (int i = 0; i < argc; ++i) {
-        JSValue it = argv[i];
-        JS_SetPropertyUint32(ctx, args, i, it);
+    if (argv != nullptr) {
+        for (int i = 0; i < argc; ++i) {
+            JSValue it = argv[i];
+            JS_SetPropertyUint32(ctx, args, i, it);
+        }
     }
     jlong contextPtr = reinterpret_cast<long>(ctx);
     jlong objectHandle = this_val;
@@ -509,8 +553,7 @@ callJavaVoidCallback(JSContext *ctx, JSValueConst this_val, int argc, JSValueCon
                               contextPtr,
                               objectHandle,
                               functionHandle,
-                              argsHandle
-    );
+                              argsHandle);
     return 0;
 }
 

@@ -154,6 +154,23 @@ public class QuickJS {
         methodDescriptor.voidCallback.invoke(jsObject, jsArray);
     }
 
+    @Keep
+    static Object callJavaCallback(long contextPtr, long objectHandle, long functionHandle, long argsHandle) {
+        MethodDescriptor methodDescriptor = functionRegistry.get(functionHandle);
+        if (methodDescriptor == null) return null;
+        JSObject jsObject = null;
+        JSArray jsArray = null;
+        JSContext context = new JSContext(contextPtr);
+        if (objectHandle != 0) {
+            jsObject = new JSObject(context, objectHandle);
+        }
+        if (argsHandle != 0) {
+            jsArray = new JSArray(context, argsHandle);
+        }
+        return methodDescriptor.callback.invoke(jsObject, jsArray);
+    }
+
+
     static {
         System.loadLibrary("quickjs");
         System.loadLibrary("quickjs-android");
