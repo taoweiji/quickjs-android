@@ -452,30 +452,6 @@ Java_com_quickjs_android_QuickJS__1getKeys(JNIEnv *env, jclass clazz, jlong cont
     }
     return stringArray;
 }
-
-JSValue executeJSFunction(JNIEnv *env,
-                          jlong context_ptr, jlong object_handle,
-                          jstring name, jlong parameters_handle) {
-    const char *name_ = env->GetStringUTFChars(name, NULL);
-    JSContext *ctx = reinterpret_cast<JSContext *>(context_ptr);
-    JSValue this_obj = object_handle;
-    JSValue func_obj = JS_GetPropertyStr(ctx, this_obj, name_);
-    JSValue *argv = NULL;
-    if (parameters_handle != 0) {
-        JSValue jsValue = parameters_handle;
-        argv = &jsValue;
-    }
-    return JS_Call(ctx, func_obj, this_obj, 1, argv);
-}
-
-extern "C"
-JNIEXPORT jobject JNICALL
-Java_com_quickjs_android_QuickJS__1executeFunction(JNIEnv *env, jclass clazz, jlong context_ptr,
-                                                   jint expected_type, jlong object_handle,
-                                                   jstring name, jlong parameters_handle) {
-    JSValue result = executeJSFunction(env, context_ptr, object_handle, name, parameters_handle);
-    return To_JObject(env, context_ptr, expected_type, result);
-}
 extern "C"
 JNIEXPORT jobject JNICALL
 Java_com_quickjs_android_QuickJS__1executeFunction2(JNIEnv *env, jclass clazz, jlong context_ptr,
@@ -499,12 +475,35 @@ Java_com_quickjs_android_QuickJS__1executeFunction2(JNIEnv *env, jclass clazz, j
     return To_JObject(env, context_ptr, expected_type, result);
 }
 
+JSValue executeJSFunction(JNIEnv *env,
+                          jlong context_ptr, jlong object_handle,
+                          jstring name, jlong parameters_handle) {
+    const char *name_ = env->GetStringUTFChars(name, NULL);
+    JSContext *ctx = reinterpret_cast<JSContext *>(context_ptr);
+    JSValue this_obj = object_handle;
+    JSValue func_obj = JS_GetPropertyStr(ctx, this_obj, name_);
+    JSValue *argv = nullptr;
+    int argc = 0;
+    if (parameters_handle != 0) {
+        JSValue argArray = parameters_handle;
+        argc = JS_VALUE_GET_INT(JS_GetPropertyStr(ctx, argArray, "length"));
+        argv = new JSValue[argc];
+        for (int i = 0; i < argc; ++i) {
+            argv[i] = JS_GetPropertyUint32(ctx, argArray, i);
+        }
+    }
+    JSValue result = JS_Call(ctx, func_obj, this_obj, argc, argv);
+    delete argv;
+    return result;
+}
+
 extern "C"
 JNIEXPORT jobject JNICALL
-Java_com_quickjs_android_QuickJS__1executeJSFunction(JNIEnv *env, jclass clazz, jlong context_ptr,
-                                                     jlong object_handle, jstring name,
-                                                     jobjectArray parameters) {
-    // TODO: implement _executeJSFunction()
+Java_com_quickjs_android_QuickJS__1executeFunction(JNIEnv *env, jclass clazz, jlong context_ptr,
+                                                   jint expected_type, jlong object_handle,
+                                                   jstring name, jlong parameters_handle) {
+    JSValue result = executeJSFunction(env, context_ptr, object_handle, name, parameters_handle);
+    return To_JObject(env, context_ptr, expected_type, result);
 }
 
 JSValue

@@ -21,9 +21,9 @@ public class JSObjectTest {
 
     @After
     public void tearDown() throws Exception {
-        object.close();
-        context.close();
-        quickJS.close();
+//        object.close();
+//        context.close();
+//        quickJS.close();
     }
 
     @Test
@@ -80,20 +80,34 @@ public class JSObjectTest {
         value.close();
     }
 
+
     @Test
-    public void registerJavaMethod1() {
-        String[] result = new String[1];
-        object.registerJavaMethod(jsArray -> {
-            result[0] = jsArray.getString(0);
-        }, "setMessage");
-        JSArray jsArray = new JSArray(context);
-        jsArray.push("Hello");
-        object.executeVoidFunction("setMessage", jsArray);
-        assertEquals("Hello", result[0]);
+    public void call2() {
+        context.registerJavaMethod(new JavaVoidCallback() {
+            @Override
+            public void invoke(JSArray array) {
+                assertEquals("Hello", array.getString(0));
+            }
+        }, "test");
+        JSArray args = new JSArray(context);
+        args.push("Hello");
+        args.push(3.14);
+        context.executeVoidFunction("test", args);
     }
 
     @Test
-    public void registerJavaMethod2() {
+    public void call3() {
+        context.registerJavaMethod(new JavaCallback() {
+            @Override
+            public Object invoke(JSArray array) {
+                return array.getString(0);
+            }
+        }, "test");
+        JSArray args = new JSArray(context);
+        args.push("Hello");
+        args.push(3.14);
+        String result = context.executeStringFunction("test", args);
+        assertEquals("Hello", result);
     }
 
     @Test
