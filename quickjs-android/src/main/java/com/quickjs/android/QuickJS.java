@@ -53,8 +53,25 @@ public class QuickJS {
 
 
     static Object executeJSFunction(JSContext context, long objectHandle, String name, Object[] parameters) {
-        Object object = _executeJSFunction(context.getContextPtr(), objectHandle, name, parameters);
-        return toJavaObject(context, object, JSValue.UNKNOWN);
+        JSArray args = new JSArray(context);
+        if (parameters != null) {
+            for (Object item : parameters) {
+                if (item instanceof Integer) {
+                    args.push((int) item);
+                } else if (item instanceof Double) {
+                    args.push((double) item);
+                } else if (item instanceof Boolean) {
+                    args.push((boolean) item);
+                } else if (item instanceof String) {
+                    args.push((String) item);
+                } else if (item instanceof JSValue) {
+                    args.push((JSValue) item);
+                } else {
+                    args.push(JSValue.getNull());
+                }
+            }
+        }
+        return executeFunction(context, JSValue.UNKNOWN, objectHandle, name, args.objectHandle);
     }
 
 
@@ -125,8 +142,6 @@ public class QuickJS {
     private static native Object _executeFunction(long contextPtr, int expectedType, long objectHandle, String name, long parametersHandle);
 
     private static native Object _executeFunction2(long contextPtr, int expectedType, long objectHandle, long functionHandle, long parametersHandle);
-
-    native static Object _executeJSFunction(long contextPtr, long objectHandle, String name, Object[] parameters);
 
     static native long _initNewJSObject(long contextPtr);
 

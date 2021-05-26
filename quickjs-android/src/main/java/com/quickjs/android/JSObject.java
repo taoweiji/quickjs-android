@@ -130,11 +130,7 @@ public class JSObject extends JSValue {
         executeFunction(JSValue.NULL, name, parameters);
     }
 
-    public Object executeJSFunction(String name) {
-        return QuickJS.executeJSFunction(context, objectHandle, name, new Object[0]);
-    }
-
-    public Object executeJSFunction(String name, Object... parameters) {
+    public Object executeFunction2(String name, Object... parameters) {
         return QuickJS.executeJSFunction(context, objectHandle, name, parameters);
     }
 
