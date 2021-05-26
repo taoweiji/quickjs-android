@@ -480,33 +480,50 @@ Java_com_quickjs_android_QuickJS__1executeJSFunction(JNIEnv *env, jclass clazz, 
     // TODO: implement _executeJSFunction()
 }
 
-JSValue callJavaCallback(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
-
+JSValue
+callJavaCallback(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv, int magic,
+                 JSValue *func_data) {
     return JS_NewInt32(ctx, 1228);
 }
 
-JSValue callJavaVoidCallback(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+typedef struct {
+    long javaMethodId;
+} JavaMethod;
+
+JSValue
+callJavaVoidCallback(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv, int magic,
+                     JSValue *func_data) {
     JNIEnv *env;
     jvm->GetEnv((void **) &env, JNI_VERSION_1_6);
-    long contextPtr = reinterpret_cast<long>(ctx);
-    long objectHandle = 0;
-    long functionHandle = this_val;
-    long argsHandle = reinterpret_cast<long>(argv);
-    env->CallStaticVoidMethod(quickJSCls, callJavaVoidCallbackMethodID, contextPtr, objectHandle,
-                              functionHandle, argsHandle);
-//    env->CallStaticVoidMethod(quickJSCls, callJavaVoidCallbackMethodID, contextPtr, objectHandle,
-//                              functionHandle, argsHandle);
-//
-
-    return NULL;
+    JSValue func = JS_GetPropertyUint32(ctx, *func_data, 0);
+    JSValue args = JS_NewArray(ctx);
+    for (int i = 0; i < argc; ++i) {
+        JSValue it = argv[i];
+        JS_SetPropertyUint32(ctx, args, i, it);
+    }
+    jlong contextPtr = reinterpret_cast<long>(ctx);
+    jlong objectHandle = this_val;
+    jlong functionHandle = func;
+    jlong argsHandle = args;
+    env->CallStaticVoidMethod(quickJSCls, callJavaVoidCallbackMethodID,
+                              contextPtr,
+                              objectHandle,
+                              functionHandle,
+                              argsHandle
+    );
+    return 0;
 }
 
 extern "C"
 JNIEXPORT jlong JNICALL
-Java_com_quickjs_android_QuickJS__1initNewJSFunction(JNIEnv *env, jclass clazz, jlong context_ptr,
+Java_com_quickjs_android_QuickJS__1initNewJSFunction(JNIEnv *env,
+                                                     jclass clazz,
+                                                     jlong context_ptr,
                                                      jboolean void_method) {
     JSContext *ctx = reinterpret_cast<JSContext *>(context_ptr);
-    JSValue jsValue = JS_NewCFunction(ctx, void_method ? callJavaVoidCallback : callJavaCallback,
-                                      "test", 1);
-    return jsValue;
+    JSCFunctionData *functionData = void_method ? callJavaVoidCallback : callJavaCallback;
+    JSValue func_data = JS_NewArray(ctx);
+    JSValue func = JS_NewCFunctionData(ctx, functionData, 1, 0, 1, &func_data);
+    JS_SetPropertyUint32(ctx, func_data, 0, func);
+    return (long) func;
 }
