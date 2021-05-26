@@ -71,10 +71,19 @@ public class JSObject extends JSValue {
 
     public JSObject getObject(String key) {
         long ptr = QuickJS._getObject(this.getContextPtr(), this.objectHandle, key);
-        JSObject jsObject = new JSObject();
-        jsObject.context = context;
-        jsObject.objectHandle = ptr;
-        return jsObject;
+        int type = QuickJS._getObjectType(this.getContextPtr(), ptr);
+        switch (type) {
+            case JSValue.JS_FUNCTION:
+                return new JSFunction(context, ptr);
+            case JSValue.JS_ARRAY:
+                return new JSArray(context, ptr);
+        }
+        return new JSObject(context, ptr);
+    }
+
+    public int getType(String key) {
+        long ptr = QuickJS._getObject(this.getContextPtr(), this.objectHandle, key);
+        return QuickJS._getObjectType(this.getContextPtr(), ptr);
     }
 
 

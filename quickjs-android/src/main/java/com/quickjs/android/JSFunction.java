@@ -20,6 +20,8 @@ public class JSFunction extends JSObject {
     }
 
     public Object call(JSObject receiver, JSArray parameters) {
-        return QuickJS.executeFunction(context, JSValue.UNKNOWN, receiver.objectHandle, objectHandle, parameters.objectHandle);
+        long parametersHandle = parameters == null ? 0 : parameters.objectHandle;
+        long receiverHandle = receiver == null ? 0 : receiver.objectHandle;
+        return QuickJS.executeFunction2(context, JSValue.UNKNOWN, receiverHandle, objectHandle, parametersHandle);
     }
 }

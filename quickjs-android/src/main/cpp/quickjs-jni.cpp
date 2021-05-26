@@ -46,8 +46,34 @@ jclass quickJSCls = nullptr;
 jmethodID callJavaVoidCallbackMethodID = nullptr;
 jmethodID callJavaCallbackMethodID = nullptr;
 
+int getObjectType(JSContext *ctx, JSValue result) {
+    if (JS_IsArray(ctx, result)) {
+        return TYPE_JS_ARRAY;
+    } else if (JS_IsFunction(ctx, result)) {
+        return TYPE_JS_FUNCTION;
+    } else if (JS_IsObject(result)) {
+        return TYPE_JS_OBJECT;
+    } else if (JS_IsString(result)) {
+        return TYPE_STRING;
+    } else if (JS_IsBigFloat(result)) {
+        return TYPE_DOUBLE;
+    } else if (JS_IsBool(result)) {
+        return TYPE_BOOLEAN;
+    } else if (JS_IsBigInt(ctx, result)) {
+        return TYPE_INTEGER;
+    } else if (JS_IsNull(result)) {
+        return TYPE_NULL;
+    } else if (JS_IsUndefined(result)) {
+        return TYPE_UNDEFINED;
+    }
+    return TYPE_UNKNOWN;
+}
+
 jobject To_JObject(JNIEnv *env, jlong context_ptr, int expected_type, JSValue result) {
     JSContext *ctx = reinterpret_cast<JSContext *>(context_ptr);
+    if (expected_type == TYPE_UNKNOWN) {
+        expected_type = getObjectType(ctx, result);
+    }
     switch (expected_type) {
         case TYPE_NULL:
             return nullptr;
@@ -62,30 +88,9 @@ jobject To_JObject(JNIEnv *env, jlong context_ptr, int expected_type, JSValue re
         case TYPE_STRING:
             return env->NewStringUTF(JS_ToCString(ctx, result));
         case TYPE_JS_ARRAY:
-            return env->NewObject(integerCls, integerInitMethodID, (long) result);
         case TYPE_JS_OBJECT:
-            return env->NewObject(integerCls, integerInitMethodID, (long) result);
-    }
-    if (JS_IsArray(ctx, result)) {
-        // TODO
-        return env->NewObject(integerCls, integerInitMethodID, (long) result);
-    } else if (JS_IsObject(result)) {
-        // TODO
-        return env->NewObject(integerCls, integerInitMethodID, (long) result);
-    } else if (JS_IsString(result)) {
-        return env->NewStringUTF(JS_ToCString(ctx, result));
-    } else if (JS_IsBool(result)) {
-        return env->NewObject(booleanCls, booleanInitMethodID, JS_VALUE_GET_BOOL(result));
-    } else if (JS_IsBigFloat(result)) {
-        double pres;
-        JS_ToFloat64(ctx, &pres, result);
-        return env->NewObject(doubleCls, doubleInitMethodID, pres);
-    } else if (JS_IsBigInt(ctx, result)) {
-        // long
-    } else if (JS_IsNull(result)) {
-        return nullptr;
-    } else if (JS_IsNumber(result)) {
-
+        case TYPE_JS_FUNCTION:
+            return env->NewObject(longCls, longInitMethodID, (jlong) result);
     }
     return nullptr;
 }
@@ -479,12 +484,18 @@ Java_com_quickjs_android_QuickJS__1executeFunction2(JNIEnv *env, jclass clazz, j
     JSContext *ctx = reinterpret_cast<JSContext *>(context_ptr);
     JSValue this_obj = object_handle;
     JSValue func_obj = functionHandle;
-    JSValue *argv = NULL;
+    JSValue *argv = nullptr;
+    int argc = 0;
     if (parameters_handle != 0) {
-        JSValue jsValue = parameters_handle;
-        argv = &jsValue;
+        JSValue argArray = parameters_handle;
+        argc = JS_VALUE_GET_INT(JS_GetPropertyStr(ctx, argArray, "length"));
+        argv = new JSValue[argc];
+        for (int i = 0; i < argc; ++i) {
+            argv[i] = JS_GetPropertyUint32(ctx, argArray, i);
+        }
     }
-    JSValue result = JS_Call(ctx, func_obj, this_obj, 1, argv);
+    JSValue result = JS_Call(ctx, func_obj, this_obj, argc, argv);
+    delete argv;
     return To_JObject(env, context_ptr, expected_type, result);
 }
 
@@ -569,4 +580,28 @@ Java_com_quickjs_android_QuickJS__1initNewJSFunction(JNIEnv *env,
     JSValue func = JS_NewCFunctionData(ctx, functionData, 1, 0, 1, &func_data);
     JS_SetPropertyUint32(ctx, func_data, 0, func);
     return (long) func;
+}
+extern "C"
+JNIEXPORT jlong JNICALL
+Java_com_quickjs_android_QuickJS__1registerJavaMethod(JNIEnv *env, jclass clazz, jlong context_ptr,
+                                                      jlong object_handle, jstring function_name,
+                                                      jboolean void_method) {
+    JSContext *ctx = reinterpret_cast<JSContext *>(context_ptr);
+    JSCFunctionData *functionData = void_method ? callJavaVoidCallback : callJavaCallback;
+    JSValue func_data = JS_NewArray(ctx);
+    JSValue func = JS_NewCFunctionData(ctx, functionData, 1, 0, 1, &func_data);
+    JS_SetPropertyUint32(ctx, func_data, 0, func);
+    JSValue this_obj = object_handle;
+    JS_SetPropertyStr(ctx, this_obj, env->GetStringUTFChars(function_name, NULL), func);
+    return (long) func;
+}
+
+
+extern "C"
+JNIEXPORT jint JNICALL
+Java_com_quickjs_android_QuickJS__1getObjectType(JNIEnv *env, jclass clazz, jlong context_ptr,
+                                                 jlong object_handle) {
+    JSContext *ctx = reinterpret_cast<JSContext *>(context_ptr);
+    JSValue value = object_handle;
+    return getObjectType(ctx, value);
 }

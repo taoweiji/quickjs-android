@@ -30,6 +30,8 @@ public class QuickJS {
 
     native static long _arrayGetArray(long contextPtr, long objectHandle, int index);
 
+    native static int _getObjectType(long contextPtr, long objectHandle);
+
 
     public JSContext createContext() {
         return new JSContext(_createContext(runtimePtr));
@@ -44,7 +46,7 @@ public class QuickJS {
         return toJavaObject(context, object, expectedType);
     }
 
-    static Object executeFunction(JSContext context, int expectedType, long objectHandle, long functionHandle, long parametersHandle) {
+    static Object executeFunction2(JSContext context, int expectedType, long objectHandle, long functionHandle, long parametersHandle) {
         Object object = _executeFunction2(context.getContextPtr(), expectedType, objectHandle, functionHandle, parametersHandle);
         return toJavaObject(context, object, expectedType);
     }
