@@ -83,7 +83,7 @@ public class JSObjectTest {
     @Test
     public void registerJavaMethod1() {
         String[] result = new String[1];
-        object.registerJavaMethod((jsObject, jsArray) -> {
+        object.registerJavaMethod(jsArray -> {
             result[0] = jsArray.getString(0);
         }, "setMessage");
         JSArray jsArray = new JSArray(context);
