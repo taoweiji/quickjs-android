@@ -117,7 +117,7 @@ public class JSObjectTest {
 
     @Test
     public void executeIntegerFunction() {
-        context.executeVoidScript("function test(data){ return data[0]}", "file.js");
+        context.executeVoidScript("function test(data){ return data}", "file.js");
         JSArray array = new JSArray(context);
         array.push(Integer.MAX_VALUE);
         int result = context.executeIntegerFunction("test", array);
@@ -127,7 +127,7 @@ public class JSObjectTest {
 
     @Test
     public void executeDoubleFunction() {
-        context.executeVoidScript("function test(data){ return data[0]}", "file.js");
+        context.executeVoidScript("function test(data){ return data}", "file.js");
         JSArray array = new JSArray(context);
         array.push(3.14);
         double result = context.executeDoubleFunction("test", array);
@@ -137,7 +137,7 @@ public class JSObjectTest {
 
     @Test
     public void executeBooleanFunction() {
-        context.executeVoidScript("function test(data){ return data[0]}", "file.js");
+        context.executeVoidScript("function test(data){ return data}", "file.js");
         JSArray array = new JSArray(context);
         array.push(true);
         boolean result = context.executeBooleanFunction("test", array);
@@ -147,7 +147,7 @@ public class JSObjectTest {
 
     @Test
     public void executeStringFunction() {
-        context.executeVoidScript("function test(data){ return data[0]}", "file.js");
+        context.executeVoidScript("function test(data){ return data}", "file.js");
         JSArray array = new JSArray(context);
         array.push("Hello");
         String result = context.executeStringFunction("test", array);
@@ -159,22 +159,24 @@ public class JSObjectTest {
     public void executeArrayFunction() {
         context.executeVoidScript("function test(data){ return data}", "file.js");
         JSArray array = new JSArray(context);
-        array.push("Hello");
-        JSArray result = context.executeArrayFunction("test", array);
+        JSArray arg = new JSArray(context);
+        arg.push("Hello");
+        array.push(arg);
+        String result = context.executeArrayFunction("test", array).getString(0);
         array.close();
-        assertEquals("Hello", result.getString(0));
+        assertEquals("Hello", result);
     }
 
     @Test
     public void executeObjectFunction() {
-        context.executeVoidScript("function test(data){ return data[0]}", "file.js");
+        context.executeVoidScript("function test(data){ return data}", "file.js");
         JSArray array = new JSArray(context);
         JSObject value = new JSObject(context);
         value.set("name", "Wiki");
         array.push(value);
-        JSArray result = (JSArray) context.executeObjectFunction("test", array);
+        JSObject result = context.executeObjectFunction("test", array);
         array.close();
-        assertEquals("Hello", result.getString("name"));
+        assertEquals("Wiki", result.getString("name"));
     }
 
     @Test
@@ -207,5 +209,13 @@ public class JSObjectTest {
         assertEquals("name", result[0]);
         assertEquals("age", result[1]);
         assertEquals(2, result.length);
+    }
+
+    @Test
+    public void executeFunction2() {
+        context.executeVoidScript("function test1(arg1,arg2){ return arg1}", "file.js");
+        context.executeVoidScript("function test2(arg1,arg2){ return arg2}", "file2.js");
+        assertEquals("Hello", context.executeFunction2("test1", "Hello", Integer.MAX_VALUE));
+        assertEquals(Integer.MAX_VALUE, context.executeFunction2("test2", "Hello", Integer.MAX_VALUE));
     }
 }

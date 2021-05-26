@@ -50,4 +50,9 @@ public class JSValue {
     public void close() {
         QuickJS._release(getContextPtr(), this.objectHandle);
     }
+    public static JSValue getNull(){
+        return new JSValue();
+    }
+
+
 }
