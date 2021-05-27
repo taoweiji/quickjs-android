@@ -2,78 +2,61 @@ package com.quickjs.android;
 
 public class JSArray extends JSObject {
 
-    JSArray() {
-
-    }
 
     public JSArray(JSContext context) {
-        this.context = context;
-        this.initialize(this.context.getContextPtr(), null);
+        super(context, QuickJS._initNewJSArray(context.getContextPtr()));
     }
 
-    public JSArray(JSContext context, long objectHandle) {
-        this.context = context;
-        this.objectHandle = objectHandle;
-    }
-
-
-    @Override
-    protected void initialize(long contextPtr, Object data) {
-        long objectHandle = QuickJS._initNewJSArray(contextPtr);
-        this.released = false;
-        this.addObjectReference(objectHandle);
+    JSArray(JSContext context, long tag, int u_int32, double u_float64, long u_ptr) {
+        super(context, tag, u_int32, u_float64, u_ptr);
     }
 
     public int getInteger(int index) {
-        return QuickJS._arrayGetInteger(this.getContextPtr(), this.objectHandle, index);
+        return QuickJS._arrayGetInteger(this.getContextPtr(), this, index);
     }
 
     public boolean getBoolean(int index) {
-        return QuickJS._arrayGetBoolean(this.getContextPtr(), this.objectHandle, index);
+        return QuickJS._arrayGetBoolean(this.getContextPtr(), this, index);
     }
 
     public double getDouble(int index) {
-        return QuickJS._arrayGetDouble(this.getContextPtr(), this.objectHandle, index);
+        return QuickJS._arrayGetDouble(this.getContextPtr(), this, index);
     }
 
     public String getString(int index) {
-        return QuickJS._arrayGetString(this.getContextPtr(), this.objectHandle, index);
+        return QuickJS._arrayGetString(this.getContextPtr(), this, index);
     }
 
     public JSObject getObject(int index) {
-        long ptr = QuickJS._arrayGetObject(this.getContextPtr(), this.objectHandle, index);
-        if (ptr == 0) return null;
-        return new JSObject(context, ptr);
+        return QuickJS._arrayGetObject(this.getContextPtr(), this, index);
     }
 
     public JSArray getArray(int index) {
-        long ptr = QuickJS._arrayGetArray(this.getContextPtr(), this.objectHandle, index);
-        if (ptr == 0) return null;
-        return new JSArray(context, ptr);
+        return QuickJS._arrayGetArray(this.getContextPtr(), this, index);
     }
 
     public JSArray push(int value) {
-        QuickJS._arrayAdd(getContextPtr(), this.objectHandle, value);
+        QuickJS._arrayAdd(getContextPtr(), this, value);
         return this;
     }
 
     public JSArray push(double value) {
-        QuickJS._arrayAdd(getContextPtr(), this.objectHandle, value);
+        QuickJS._arrayAdd(getContextPtr(), this, value);
         return this;
     }
 
     public JSArray push(String value) {
-        QuickJS._arrayAdd(getContextPtr(), this.objectHandle, value);
+        QuickJS._arrayAdd(getContextPtr(), this, value);
         return this;
     }
 
     public JSArray push(boolean value) {
-        QuickJS._arrayAdd(getContextPtr(), this.objectHandle, value);
+        QuickJS._arrayAdd(getContextPtr(), this, value);
         return this;
     }
 
     public JSArray push(JSValue value) {
-        QuickJS._arrayAddObject(getContextPtr(), this.objectHandle, value.objectHandle);
+        QuickJS._arrayAdd(getContextPtr(), this, value);
         return this;
     }
 

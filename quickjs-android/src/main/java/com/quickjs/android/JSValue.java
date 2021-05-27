@@ -25,33 +25,67 @@ public class JSValue {
     public static final int UNDEFINED = 99;
 
     protected JSContext context;
-    protected long objectHandle;
-    protected boolean released;
+//    protected long objectHandle;
+//    protected boolean released;
 
-    protected void initialize(long contextPtr, Object data) {
-        long objectHandle = this.context.initNewJSObject(contextPtr);
-        this.released = false;
-        this.addObjectReference(objectHandle);
+    long tag;
+    int u_int32;
+    double u_float64;
+    long u_ptr;
+
+    JSValue(JSContext context, long tag, int u_int32, double u_float64, long u_ptr) {
+        this.context = context;
+        this.tag = tag;
+        this.u_int32 = u_int32;
+        this.u_float64 = u_float64;
+        this.u_ptr = u_ptr;
     }
 
-    protected void addObjectReference(long objectHandle) {
-        this.objectHandle = objectHandle;
-        // TODO 考虑自动管理
+    JSValue(JSContext context, JSValue value) {
+        this.context = context;
+        this.tag = value.tag;
+        this.u_int32 = value.u_int32;
+        this.u_float64 = value.u_float64;
+        this.u_ptr = value.u_ptr;
     }
+
+    //    typedef union JSValueUnion {
+//        int32_t int32;
+//        double float64;
+//        void *ptr;
+//    } JSValueUnion;
+//
+//    typedef struct JSValue {
+//        JSValueUnion u;
+//        int64_t tag;
+//    } JSValue;
+
+//    protected void initialize(long contextPtr, Object data) {
+//        long objectHandle = this.context.initNewJSObject(contextPtr);
+//        this.released = false;
+//        this.addObjectReference(objectHandle);
+//    }
+
+//    protected void addObjectReference(long objectHandle) {
+//        this.objectHandle = objectHandle;
+//        // TODO 考虑自动管理
+//    }
 
     long getContextPtr() {
         return context.getContextPtr();
     }
 
-    long getHandle() {
-        return this.objectHandle;
-    }
+//    long getHandle() {
+//        return this.objectHandle;
+//    }
 
     public void close() {
-        QuickJS._release(getContextPtr(), this.objectHandle);
+        QuickJS._release(getContextPtr(), this);
     }
-    public static JSValue getNull(){
-        return new JSValue();
+
+    public static JSValue getNull() {
+        // TODO
+        return null;
     }
 
 
