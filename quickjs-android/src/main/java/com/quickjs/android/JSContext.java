@@ -9,9 +9,8 @@ public class JSContext extends JSObject {
 //    Map<Long, MethodDescriptor> functionRegistry = new HashMap<>();
 
     JSContext(long contextPtr) {
-        super();
+        super(null, QuickJS._getGlobalObject(contextPtr));
         this.contextPtr = contextPtr;
-        this.objectHandle = QuickJS._getGlobalObject(contextPtr);
         this.context = this;
     }
 
@@ -61,30 +60,26 @@ public class JSContext extends JSObject {
         return (JSObject) executeScript(JSValue.JS_OBJECT, source, fileName);
     }
 
-    void registerCallback(JavaCallback callback, long objectHandle, String jsFunctionName) {
-        long functionHandle = QuickJS._registerJavaMethod(this.getContextPtr(), objectHandle, jsFunctionName, false);
+    void registerCallback(JavaCallback callback, JSValue objectHandle, String jsFunctionName) {
+        JSFunction functionHandle = QuickJS._registerJavaMethod(this.getContextPtr(), objectHandle, jsFunctionName, false);
         registerCallback(callback, functionHandle);
     }
 
-    void registerCallback(JavaVoidCallback callback, long objectHandle, String jsFunctionName) {
-        long functionHandle = QuickJS._registerJavaMethod(this.getContextPtr(), objectHandle, jsFunctionName, true);
+    void registerCallback(JavaVoidCallback callback, JSValue objectHandle, String jsFunctionName) {
+        JSFunction functionHandle = QuickJS._registerJavaMethod(this.getContextPtr(), objectHandle, jsFunctionName, true);
         registerCallback(callback, functionHandle);
     }
 
-    void registerCallback(JavaCallback callback, long functionHandle) {
+    void registerCallback(JavaCallback callback, JSFunction functionHandle) {
         MethodDescriptor methodDescriptor = new MethodDescriptor();
         methodDescriptor.callback = callback;
-        QuickJS.functionRegistry.put(functionHandle, methodDescriptor);
+        QuickJS.functionRegistry.put(functionHandle.tag, methodDescriptor);
     }
 
-    void registerCallback(JavaVoidCallback callback, long functionHandle) {
+    void registerCallback(JavaVoidCallback callback, JSFunction functionHandle) {
         MethodDescriptor methodDescriptor = new MethodDescriptor();
         methodDescriptor.voidCallback = callback;
-        QuickJS.functionRegistry.put(functionHandle, methodDescriptor);
-    }
-
-    long initNewJSObject(long contextPtr) {
-        return QuickJS._initNewJSObject(contextPtr);
+        QuickJS.functionRegistry.put(functionHandle.tag, methodDescriptor);
     }
 
 }

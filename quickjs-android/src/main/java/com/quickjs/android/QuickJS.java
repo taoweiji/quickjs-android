@@ -17,20 +17,20 @@ public class QuickJS {
         return new QuickJS(_createRuntime());
     }
 
-    native static boolean _contains(long contextPtr, long objectHandle, String key);
+    native static boolean _contains(long contextPtr, JSValue objectHandle, String key);
 
-    native static String[] _getKeys(long contextPtr, long objectHandle);
+    native static String[] _getKeys(long contextPtr, JSValue objectHandle);
 
     static Object executeScript(JSContext context, int expectedType, String source, String fileName) {
         Object object = _executeScript(context.getContextPtr(), expectedType, source, fileName);
         return toJavaObject(context, object, expectedType);
     }
 
-    native static long _arrayGetObject(long contextPtr, long objectHandle, int index);
+    native static JSObject _arrayGetObject(long contextPtr, JSValue objectHandle, int index);
 
-    native static long _arrayGetArray(long contextPtr, long objectHandle, int index);
+    native static JSArray _arrayGetArray(long contextPtr, JSValue objectHandle, int index);
 
-    native static int _getObjectType(long contextPtr, long objectHandle);
+    native static int _getObjectType(long contextPtr, JSValue objectHandle);
 
 
     public JSContext createContext() {
@@ -41,18 +41,18 @@ public class QuickJS {
         _releaseRuntime(runtimePtr);
     }
 
-    static Object executeFunction(JSContext context, int expectedType, long objectHandle, String name, long parametersHandle) {
+    static Object executeFunction(JSContext context, int expectedType, JSValue objectHandle, String name, JSValue parametersHandle) {
         Object object = _executeFunction(context.getContextPtr(), expectedType, objectHandle, name, parametersHandle);
         return toJavaObject(context, object, expectedType);
     }
 
-    static Object executeFunction2(JSContext context, int expectedType, long objectHandle, long functionHandle, long parametersHandle) {
+    static Object executeFunction2(JSContext context, int expectedType, JSValue objectHandle, JSValue functionHandle, JSValue parametersHandle) {
         Object object = _executeFunction2(context.getContextPtr(), expectedType, objectHandle, functionHandle, parametersHandle);
         return toJavaObject(context, object, expectedType);
     }
 
 
-    static Object executeJSFunction(JSContext context, long objectHandle, String name, Object[] parameters) {
+    static Object executeJSFunction(JSContext context, JSValue objectHandle, String name, Object[] parameters) {
         JSArray args = new JSArray(context);
         if (parameters != null) {
             for (Object item : parameters) {
@@ -71,20 +71,20 @@ public class QuickJS {
                 }
             }
         }
-        return executeFunction(context, JSValue.UNKNOWN, objectHandle, name, args.objectHandle);
+        return executeFunction(context, JSValue.UNKNOWN, objectHandle, name, args);
     }
 
 
     static Object toJavaObject(JSContext context, Object object, int expectedType) {
-        if (object == null) return null;
-        switch (expectedType) {
-            case JSValue.JS_ARRAY:
-                return new JSArray(context, (long) object);
-            case JSValue.JS_OBJECT:
-                return new JSObject(context, (long) object);
-            case JSValue.JS_FUNCTION:
-                return new JSFunction(context, (long) object);
-        }
+//        if (object == null) return null;
+//        switch (expectedType) {
+//            case JSValue.JS_ARRAY:
+//                return new JSArray(context, (long) object);
+//            case JSValue.JS_OBJECT:
+//                return new JSObject(context, (long) object);
+//            case JSValue.JS_FUNCTION:
+//                return new JSFunction(context, (long) object);
+//        }
         return object;
     }
 
@@ -99,92 +99,94 @@ public class QuickJS {
 
     private static native Object _executeScript(long contextPtr, int expectedType, String source, String fileName);
 
-    static native long _getGlobalObject(long contextPtr);
+    static native JSObject _getGlobalObject(long contextPtr);
 
-    static native void _set(long contextPtr, long objectHandle, String key, int value);
+//    static native void _set(long contextPtr, JSValue objectHandle, String key, int value);
 
-    static native void _set(long contextPtr, long objectHandle, String key, double value);
+//    static native void _set(long contextPtr, JSValue objectHandle, String key, double value);
 
-    static native void _set(long contextPtr, long objectHandle, String key, boolean value);
+//    static native void _set(long contextPtr, JSValue objectHandle, String key, boolean value);
 
-    static native void _set(long contextPtr, long objectHandle, String key, String value);
+    static native void _set(long contextPtr, JSValue objectHandle, String key, Object value);
 
-    static native void _setObject(long contextPtr, long objectHandle, String key, long value);
+//    static native void _setObject(long contextPtr, JSValue objectHandle, String key, JSValue value);
 
-    static native int _getInteger(long contextPtr, long objectHandle, String key);
+    static native int _getInteger(long contextPtr, JSValue objectHandle, String key);
 
-    static native boolean _getBoolean(long contextPtr, long objectHandle, String key);
+    static native boolean _getBoolean(long contextPtr, JSValue objectHandle, String key);
 
-    static native double _getDouble(long contextPtr, long objectHandle, String key);
+    static native double _getDouble(long contextPtr, JSValue objectHandle, String key);
 
-    static native String _getString(long contextPtr, long objectHandle, String key);
+    static native String _getString(long contextPtr, JSValue objectHandle, String key);
 
-    static native long _getObject(long contextPtr, long objectHandle, String key);
+    static native JSValue _getObject(long contextPtr, JSValue objectHandle, String key);
 
-    static native String _arrayGetString(long contextPtr, long objectHandle, int index);
+    static native String _arrayGetString(long contextPtr, JSValue objectHandle, int index);
 
-    static native double _arrayGetDouble(long contextPtr, long objectHandle, int index);
+    static native double _arrayGetDouble(long contextPtr, JSValue objectHandle, int index);
 
-    static native boolean _arrayGetBoolean(long contextPtr, long objectHandle, int index);
+    static native boolean _arrayGetBoolean(long contextPtr, JSValue objectHandle, int index);
 
-    static native int _arrayGetInteger(long contextPtr, long objectHandle, int index);
+    static native int _arrayGetInteger(long contextPtr, JSValue objectHandle, int index);
 
-    static native void _arrayAdd(long contextPtr, long objectHandle, int value);
+//    static native void _arrayAdd(long contextPtr, JSValue objectHandle, int value);
+//
+//    static native void _arrayAdd(long contextPtr, JSValue objectHandle, double value);
+//
+//    static native void _arrayAdd(long contextPtr, JSValue objectHandle, boolean value);
+//
+//    static native void _arrayAdd(long contextPtr, JSValue objectHandle, String value);
+    static native void _arrayAdd(long contextPtr, JSValue objectHandle, Object value);
 
-    static native void _arrayAdd(long contextPtr, long objectHandle, double value);
+//    static native void _arrayAddObject(long contextPtr, JSValue objectHandle, JSValue value);
 
-    static native void _arrayAdd(long contextPtr, long objectHandle, boolean value);
+    private static native Object _executeFunction(long contextPtr, int expectedType, JSValue objectHandle, String name, JSValue parametersHandle);
 
-    static native void _arrayAdd(long contextPtr, long objectHandle, String value);
+    private static native Object _executeFunction2(long contextPtr, int expectedType, JSValue objectHandle, JSValue functionHandle, JSValue parametersHandle);
 
-    static native void _arrayAddObject(long contextPtr, long objectHandle, long value);
+    static native JSObject _initNewJSObject(long contextPtr);
 
-    private static native Object _executeFunction(long contextPtr, int expectedType, long objectHandle, String name, long parametersHandle);
+    static native JSArray _initNewJSArray(long contextPtr);
 
-    private static native Object _executeFunction2(long contextPtr, int expectedType, long objectHandle, long functionHandle, long parametersHandle);
+    native static JSFunction _initNewJSFunction(long contextPtr, boolean voidMethod);
 
-    static native long _initNewJSObject(long contextPtr);
+    static native void _release(long contextPtr, JSValue objectHandle);
 
-    static native long _initNewJSArray(long contextPtr);
-
-    native static long _initNewJSFunction(long contextPtr, boolean voidMethod);
-
-    static native void _release(long contextPtr, long objectHandle);
-
-    static native long _registerJavaMethod(long contextPtr, long objectHandle, String jsFunctionName, boolean voidMethod);
+    static native JSFunction _registerJavaMethod(long contextPtr, JSValue objectHandle, String jsFunctionName, boolean voidMethod);
 
     static Map<Long, MethodDescriptor> functionRegistry = new HashMap<>();
 
     @Keep
-    static void callJavaVoidCallback(long contextPtr, long objectHandle, long functionHandle, long argsHandle) {
+    static void callJavaVoidCallback(long contextPtr, JSValue objectHandle, JSValue functionHandle, JSArray argsHandle) {
         MethodDescriptor methodDescriptor = functionRegistry.get(functionHandle);
         if (methodDescriptor == null) return;
-        JSObject jsObject = null;
-        JSArray jsArray = null;
         JSContext context = new JSContext(contextPtr);
-        if (objectHandle != 0) {
-            jsObject = new JSObject(context, objectHandle);
-        }
-        if (argsHandle != 0) {
-            jsArray = new JSArray(context, argsHandle);
-        }
-        methodDescriptor.voidCallback.invoke(jsArray);
+        methodDescriptor.voidCallback.invoke(argsHandle);
     }
 
     @Keep
-    static Object callJavaCallback(long contextPtr, long objectHandle, long functionHandle, long argsHandle) {
+    static Object callJavaCallback(long contextPtr, JSValue objectHandle, JSValue functionHandle, JSArray argsHandle) {
         MethodDescriptor methodDescriptor = functionRegistry.get(functionHandle);
         if (methodDescriptor == null) return null;
-        JSObject jsObject = null;
-        JSArray jsArray = null;
         JSContext context = new JSContext(contextPtr);
-        if (objectHandle != 0) {
-            jsObject = new JSObject(context, objectHandle);
+        return methodDescriptor.callback.invoke(argsHandle);
+    }
+
+    private static Map<Long, JSContext> contextMap = new HashMap<>();
+
+    @Keep
+    static JSValue createJSValue(long contextPtr, int type, long tag, int u_int32, double u_float64, long u_ptr) {
+        JSContext context = contextMap.get(contextPtr);
+        switch (type) {
+            case JSValue.JS_FUNCTION:
+                return new JSFunction(context, tag, u_int32, u_float64, u_ptr);
+            case JSValue.JS_ARRAY:
+                return new JSArray(context, tag, u_int32, u_float64, u_ptr);
+            case JSValue.JS_OBJECT:
+                return new JSObject(context, tag, u_int32, u_float64, u_ptr);
+            default:
+                return new JSValue(context, tag, u_int32, u_float64, u_ptr);
         }
-        if (argsHandle != 0) {
-            jsArray = new JSArray(context, argsHandle);
-        }
-        return methodDescriptor.callback.invoke(jsArray);
     }
 
 
