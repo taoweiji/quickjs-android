@@ -37,22 +37,26 @@ public class MainActivity extends AppCompatActivity {
 //        quickJS.close();
 
         test();
-        Integer integer = new Integer(3);
+//        Integer integer = new Integer(3);
     }
 
     void test() {
         QuickJS quickJS = QuickJS.createRuntime();
         JSContext jsContext = quickJS.createContext();
-//        jsContext.set("name", "Wiki");
+//        int result = jsContext.executeIntegerScript("int a=1228;\na;", "file.js");
+//
+        jsContext.set("name", "Wiki");
+        Log.e("QuickJS", String.valueOf(jsContext.getString("name")));
 //        jsContext.set("age", 18);
 //        jsContext.set("gender", 1);
-        jsContext.executeScript("function sayHello(param) {return param[3];}", "file.js");
-        JSArray jsArray = new JSArray(jsContext);
-        jsArray.push("Hello");
-        jsArray.push(true);
-        jsArray.push(1);
-        jsArray.push(3.14);
-        Log.e("QuickJS", String.valueOf(jsContext.executeDoubleFunction("sayHello", jsArray)));
+//        jsContext.executeScript("function sayHello(param) {return param[3];}", "file.js");
+//        JSArray jsArray = new JSArray(jsContext);
+//        jsArray.length();
+//        jsArray.push("Hello");
+//        jsArray.push(true);
+//        jsArray.push(1);
+//        jsArray.push(3.14);
+//        Log.e("QuickJS", String.valueOf(jsContext.executeDoubleFunction("sayHello", jsArray)));
     }
 
     void testV8() {
