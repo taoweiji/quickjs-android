@@ -22,9 +22,9 @@ public class JSArrayTest {
 
     @After
     public void tearDown() throws Exception {
-        array.close();
-        context.close();
-        quickJS.close();
+//        array.close();
+//        context.close();
+//        quickJS.close();
     }
 
     @Test

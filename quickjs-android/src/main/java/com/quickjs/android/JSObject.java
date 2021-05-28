@@ -10,7 +10,7 @@ public class JSObject extends JSValue {
         super(context, value);
     }
 
-     JSObject(JSContext context, long tag, int u_int32, double u_float64, long u_ptr) {
+    JSObject(JSContext context, long tag, int u_int32, double u_float64, long u_ptr) {
         super(context, tag, u_int32, u_float64, u_ptr);
     }
 
@@ -62,7 +62,7 @@ public class JSObject extends JSValue {
     }
 
     public JSArray getArray(String key) {
-        JSValue value = QuickJS._getObject(this.getContextPtr(), this, key);
+        JSValue value = getObject(key);
         if (value instanceof JSArray) {
             return (JSArray) value;
         }
