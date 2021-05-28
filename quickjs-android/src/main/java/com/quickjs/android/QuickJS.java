@@ -34,7 +34,9 @@ public class QuickJS {
 
 
     public JSContext createContext() {
-        return new JSContext(_createContext(runtimePtr));
+        JSContext context = new JSContext(_createContext(runtimePtr));
+        sContextMap.put(context.getContextPtr(), context);
+        return context;
     }
 
     public void close() {
@@ -129,7 +131,7 @@ public class QuickJS {
 
     static native int _arrayGetInteger(long contextPtr, JSValue objectHandle, int index);
 
-//    static native void _arrayAdd(long contextPtr, JSValue objectHandle, int value);
+    //    static native void _arrayAdd(long contextPtr, JSValue objectHandle, int value);
 //
 //    static native void _arrayAdd(long contextPtr, JSValue objectHandle, double value);
 //
@@ -158,25 +160,23 @@ public class QuickJS {
 
     @Keep
     static void callJavaVoidCallback(long contextPtr, JSValue objectHandle, JSValue functionHandle, JSArray argsHandle) {
-        MethodDescriptor methodDescriptor = functionRegistry.get(functionHandle);
+        MethodDescriptor methodDescriptor = functionRegistry.get(functionHandle.tag);
         if (methodDescriptor == null) return;
-        JSContext context = new JSContext(contextPtr);
         methodDescriptor.voidCallback.invoke(argsHandle);
     }
 
     @Keep
     static Object callJavaCallback(long contextPtr, JSValue objectHandle, JSValue functionHandle, JSArray argsHandle) {
-        MethodDescriptor methodDescriptor = functionRegistry.get(functionHandle);
+        MethodDescriptor methodDescriptor = functionRegistry.get(functionHandle.tag);
         if (methodDescriptor == null) return null;
-        JSContext context = new JSContext(contextPtr);
         return methodDescriptor.callback.invoke(argsHandle);
     }
 
-    private static Map<Long, JSContext> contextMap = new HashMap<>();
+    private static final Map<Long, JSContext> sContextMap = new HashMap<>();
 
     @Keep
     static JSValue createJSValue(long contextPtr, int type, long tag, int u_int32, double u_float64, long u_ptr) {
-        JSContext context = contextMap.get(contextPtr);
+        JSContext context = sContextMap.get(contextPtr);
         switch (type) {
             case JSValue.JS_FUNCTION:
                 return new JSFunction(context, tag, u_int32, u_float64, u_ptr);

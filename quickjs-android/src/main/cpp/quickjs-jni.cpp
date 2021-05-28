@@ -505,7 +505,7 @@ JSValue executeJSFunction(JNIEnv *env,
     JSValue func_obj = JS_GetPropertyStr(ctx, this_obj, name_);
     JSValue *argv = nullptr;
     int argc = 0;
-    if (parameters_handle != 0) {
+    if (parameters_handle != nullptr) {
         JSValue argArray = TO_JS_VALUE(env, parameters_handle);
         argc = JS_VALUE_GET_INT(JS_GetPropertyStr(ctx, argArray, "length"));
         argv = new JSValue[argc];
@@ -643,6 +643,9 @@ Java_com_quickjs_android_QuickJS__1set(JNIEnv *env, jclass clazz, jlong context_
     } else if (env->IsInstanceOf(value, doubleCls)) {
         double value_ = env->CallDoubleMethod(value, doubleValueMethodID);
         JS_SetPropertyStr(ctx, this_obj, key_, JS_NewFloat64(ctx, value_));
+    } else if (env->IsInstanceOf(value, booleanCls)) {
+        bool value_ = env->CallBooleanMethod(value, booleanValueMethodID);
+        JS_SetPropertyStr(ctx, this_obj, key_, JS_NewBool(ctx, value_));
     } else if (env->IsInstanceOf(value, stringCls)) {
         const char *value_ = env->GetStringUTFChars((jstring) value, NULL);
         JS_SetPropertyStr(ctx, this_obj, key_, JS_NewString(ctx, value_));
@@ -669,6 +672,9 @@ Java_com_quickjs_android_QuickJS__1arrayAdd(JNIEnv *env, jclass clazz, jlong con
     } else if (env->IsInstanceOf(value, doubleCls)) {
         double value_ = env->CallDoubleMethod(value, doubleValueMethodID);
         JS_SetPropertyUint32(ctx, this_obj, len, JS_NewFloat64(ctx, value_));
+    } else if (env->IsInstanceOf(value, booleanCls)) {
+        bool value_ = env->CallBooleanMethod(value, booleanValueMethodID);
+        JS_SetPropertyUint32(ctx, this_obj, len, JS_NewBool(ctx, value_));
     } else if (env->IsInstanceOf(value, stringCls)) {
         const char *value_ = env->GetStringUTFChars((jstring) value, NULL);
         JS_SetPropertyUint32(ctx, this_obj, len, JS_NewString(ctx, value_));

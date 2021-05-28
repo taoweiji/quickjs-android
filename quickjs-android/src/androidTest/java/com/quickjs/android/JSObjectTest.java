@@ -216,6 +216,8 @@ public class JSObjectTest {
         context.executeVoidScript("function test1(arg1,arg2){ return arg1}", "file.js");
         context.executeVoidScript("function test2(arg1,arg2){ return arg2}", "file2.js");
         assertEquals("Hello", context.executeFunction2("test1", "Hello", Integer.MAX_VALUE));
+        assertEquals("H", context.executeFunction2("test2", "Hello", "H"));
+        assertEquals(true, context.executeFunction2("test2", "Hello", true));
         assertEquals(Integer.MAX_VALUE, context.executeFunction2("test2", "Hello", Integer.MAX_VALUE));
     }
 
