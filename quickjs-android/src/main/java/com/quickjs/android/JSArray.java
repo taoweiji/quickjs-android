@@ -32,7 +32,11 @@ public class JSArray extends JSObject {
     }
 
     public JSArray getArray(int index) {
-        return QuickJS._arrayGetArray(this.getContextPtr(), this, index);
+        JSObject object = getObject(index);
+        if (object instanceof JSArray) {
+            return (JSArray) object;
+        }
+        return null;
     }
 
     public JSArray push(int value) {

@@ -388,16 +388,6 @@ Java_com_quickjs_android_QuickJS__1arrayGetObject(JNIEnv *env, jclass clazz, jlo
     if (JS_IsNull(jsValue)) return 0;
     if (JS_IsObject(jsValue)) return TO_JAVA_OBJECT(env, ctx, jsValue);
     return nullptr;
-}extern "C"
-JNIEXPORT jobject JNICALL
-Java_com_quickjs_android_QuickJS__1arrayGetArray(JNIEnv *env, jclass clazz, jlong context_ptr,
-                                                 jobject object_handle, jint index) {
-    JSContext *ctx = reinterpret_cast<JSContext *>(context_ptr);
-    JSValue this_obj = TO_JS_VALUE(env, object_handle);
-    JSValue jsValue = JS_GetPropertyUint32(ctx, this_obj, index);
-    if (JS_IsNull(jsValue)) return 0;
-    if (JS_IsArray(ctx, jsValue)) return TO_JAVA_OBJECT(env, ctx, jsValue);
-    return nullptr;
 }
 
 extern "C"
