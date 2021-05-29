@@ -22,7 +22,9 @@ public class JSContext extends JSObject {
     }
 
     void addObjRef(JSValue reference) {
-        refs.add(reference);
+        if (reference.getClass() != JSValue.class) {
+            refs.add(reference);
+        }
     }
 
     void releaseObjRef(JSValue reference) {

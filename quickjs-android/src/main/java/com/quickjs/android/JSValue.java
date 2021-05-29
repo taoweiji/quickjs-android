@@ -7,14 +7,14 @@ public class JSValue implements Closeable {
     static final int TYPE_NULL = 0;
     static final int TYPE_UNKNOWN = 0;
     static final int TYPE_INTEGER = 1;
-    static final int TYPE_INT_32_ARRAY = 1;
     static final int TYPE_DOUBLE = 2;
-    static final int TYPE_FLOAT_64_ARRAY = 2;
     static final int TYPE_BOOLEAN = 3;
     static final int TYPE_STRING = 4;
     static final int TYPE_JS_ARRAY = 5;
     static final int TYPE_JS_OBJECT = 6;
     static final int TYPE_JS_FUNCTION = 7;
+    static final int TYPE_INT_32_ARRAY = 1;
+    static final int TYPE_FLOAT_64_ARRAY = 2;
     static final int TYPE_JS_TYPED_ARRAY = 8;
     static final int TYPE_BYTE = 9;
     static final int TYPE_INT_8_ARRAY = 9;
@@ -28,7 +28,6 @@ public class JSValue implements Closeable {
     static final int TYPE_UNDEFINED = 99;
 
     protected JSContext context;
-//    protected boolean released;
 
     long tag;
     int u_int32;
@@ -49,7 +48,7 @@ public class JSValue implements Closeable {
     }
 
     JSValue(JSContext context, JSValue value) {
-        value.released = true;
+//        value.released = true;
         this.context = context;
         this.tag = value.tag;
         this.u_int32 = value.u_int32;

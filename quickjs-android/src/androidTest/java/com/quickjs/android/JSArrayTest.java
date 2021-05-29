@@ -23,7 +23,6 @@ public class JSArrayTest {
     @After
     public void tearDown() throws Exception {
         array.close();
-        array.close();
         context.close();
         quickJS.close();
     }
