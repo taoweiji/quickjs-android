@@ -184,7 +184,7 @@ public class JSObject extends JSValue {
     }
 
 
-    Object executeFunction(int expectedType, String name, JSArray parameters) {
+    protected Object executeFunction(int expectedType, String name, JSArray parameters) {
         return QuickJS._executeFunction(context.getContextPtr(), expectedType, this, name, parameters);
     }
 
@@ -216,7 +216,7 @@ public class JSObject extends JSValue {
         }
 
         @Override
-        Object executeFunction(int expectedType, String name, JSArray parameters) {
+        protected Object executeFunction(int expectedType, String name, JSArray parameters) {
             throw new UnsupportedOperationException();
         }
     }

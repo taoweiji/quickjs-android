@@ -55,6 +55,7 @@ public class JSValue implements Closeable {
         this.u_float64 = value.u_float64;
         this.u_ptr = value.u_ptr;
         if (context != null) {
+            context.releaseObjRef(value);
             context.addObjRef(this);
         }
     }
