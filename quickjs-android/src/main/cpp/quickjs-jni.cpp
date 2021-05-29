@@ -264,8 +264,6 @@ Java_com_quickjs_android_QuickJS__1executeScript(JNIEnv *env, jclass clazz, jlon
     const char *file_name_ = env->GetStringUTFChars(file_name, nullptr);
     JSValue val = JS_Eval(ctx, source_, (size_t) source_length, file_name_, JS_EVAL_TYPE_GLOBAL);
     jobject result = To_JObject(env, context_ptr, expected_type, val);
-    // TODO
-    JS_FreeValue(ctx, val);
     return result;
 }
 extern "C"

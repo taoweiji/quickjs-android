@@ -43,10 +43,13 @@ public class JSContext extends JSObject {
         QuickJS.sContextMap.remove(getContextPtr());
     }
 
-    public Object executeScript(int expectedType, String source, String fileName) {
-        return QuickJS.executeScript(this, expectedType, source, fileName);
+    private Object executeScript(int expectedType, String source, String fileName) {
+        return QuickJS._executeScript(this.getContextPtr(), expectedType, source, fileName);
     }
 
+    /**
+     * @return Integer/Double/Boolean/String/JSObject/JSArray/JSFunction
+     */
     public Object executeScript(String source, String fileName) {
         return executeScript(JSValue.TYPE_UNKNOWN, source, fileName);
     }
@@ -77,16 +80,6 @@ public class JSContext extends JSObject {
 
     public JSObject executeObjectScript(String source, String fileName) {
         return (JSObject) executeScript(JSValue.TYPE_JS_OBJECT, source, fileName);
-    }
-
-    void registerCallback(JavaCallback callback, JSValue objectHandle, String jsFunctionName) {
-        JSFunction functionHandle = QuickJS._registerJavaMethod(this.getContextPtr(), objectHandle, jsFunctionName, false);
-        registerCallback(callback, functionHandle);
-    }
-
-    void registerCallback(JavaVoidCallback callback, JSValue objectHandle, String jsFunctionName) {
-        JSFunction functionHandle = QuickJS._registerJavaMethod(this.getContextPtr(), objectHandle, jsFunctionName, true);
-        registerCallback(callback, functionHandle);
     }
 
     void registerCallback(JavaCallback callback, JSFunction functionHandle) {

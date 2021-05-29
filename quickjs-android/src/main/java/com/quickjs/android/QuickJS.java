@@ -19,12 +19,6 @@ public class QuickJS implements Closeable {
         return new QuickJS(_createRuntime());
     }
 
-
-    static Object executeScript(JSContext context, int expectedType, String source, String fileName) {
-        return _executeScript(context.getContextPtr(), expectedType, source, fileName);
-    }
-
-
     public JSContext createContext() {
         JSContext context = new JSContext(_createContext(runtimePtr));
         sContextMap.put(context.getContextPtr(), context);
@@ -39,7 +33,6 @@ public class QuickJS implements Closeable {
         public JavaVoidCallback voidCallback;
         public JavaCallback callback;
     }
-
 
     @Keep
     static void callJavaVoidCallback(JSValue objectHandle, JSValue functionHandle, JSArray argsHandle) {
@@ -118,7 +111,7 @@ public class QuickJS implements Closeable {
 
     static native void _releaseContext(long contextPtr);
 
-    private static native Object _executeScript(long contextPtr, int expectedType, String source, String fileName);
+    static native Object _executeScript(long contextPtr, int expectedType, String source, String fileName);
 
     static native JSObject _getGlobalObject(long contextPtr);
 

@@ -21,9 +21,9 @@ public class JSObjectTest {
 
     @After
     public void tearDown() throws Exception {
-//        object.close();
-//        context.close();
-//        quickJS.close();
+        object.close();
+        context.close();
+        quickJS.close();
     }
 
     @Test
@@ -80,30 +80,6 @@ public class JSObjectTest {
         value.close();
     }
 
-
-    @Test
-    public void call2() {
-        context.registerJavaMethod((receiver, array) -> {
-            assertEquals("Hello", array.getString(0));
-        }, "test");
-        JSArray args = new JSArray(context);
-        args.push("Hello");
-        args.push(3.14);
-        context.executeVoidFunction("test", args);
-        args.close();
-    }
-
-    @Test
-    public void call3() {
-        context.registerJavaMethod((receiver, args) -> {
-            return args.getString(0);
-        }, "test");
-        JSArray args = new JSArray(context);
-        args.push("Hello");
-        args.push(3.14);
-        assertEquals("Hello", context.executeStringFunction("test", args));
-        args.close();
-    }
 
     @Test
     public void executeFunction() {
@@ -173,18 +149,6 @@ public class JSObjectTest {
         assertEquals("Wiki", result.getString("name"));
     }
 
-    @Test
-    public void executeVoidFunction() {
-    }
-
-    @Test
-    public void executeJSFunction() {
-
-    }
-
-    @Test
-    public void testExecuteJSFunction() {
-    }
 
     @Test
     public void contains() {
