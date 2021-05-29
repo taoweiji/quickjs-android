@@ -74,6 +74,7 @@ public class QuickJS {
             case JSValue.TYPE_JS_ARRAY:
                 return new JSArray(context, tag, u_int32, u_float64, u_ptr);
             case JSValue.TYPE_JS_OBJECT:
+            case JSValue.TYPE_UNDEFINED:
                 return new JSObject(context, tag, u_int32, u_float64, u_ptr);
             default:
                 return new JSValue(context, tag, u_int32, u_float64, u_ptr);
@@ -95,7 +96,7 @@ public class QuickJS {
                 } else if (item instanceof JSValue) {
                     args.push((JSValue) item);
                 } else {
-                    args.push(new JSValue.NULL(context));
+                    args.push((JSValue) null);
                 }
             }
         }
@@ -141,6 +142,10 @@ public class QuickJS {
     native static boolean _contains(long contextPtr, JSValue objectHandle, String key);
 
     native static String[] _getKeys(long contextPtr, JSValue objectHandle);
+
+    native static boolean _isUndefined(long contextPtr, JSValue jsValue);
+
+    native static JSValue _Undefined(long contextPtr);
 
 
     static {

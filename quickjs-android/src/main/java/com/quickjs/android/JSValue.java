@@ -1,5 +1,8 @@
 package com.quickjs.android;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 public class JSValue {
     static final int TYPE_NULL = 0;
     static final int TYPE_UNKNOWN = 0;
@@ -56,16 +59,31 @@ public class JSValue {
         QuickJS._release(getContextPtr(), this);
     }
 
-    public static class Undefined extends JSObject {
-        public Undefined(JSContext context) {
-            super(context);
-        }
+    public boolean isUndefined() {
+        return QuickJS._isUndefined(getContextPtr(), this);
     }
 
-    public static class NULL extends JSObject {
-        public NULL(JSContext context) {
-            super(context);
-        }
+    public int getJSType() {
+        return QuickJS._getObjectType(getContextPtr(), this);
     }
 
+    public static JSValue Undefined(JSContext context) {
+        return QuickJS._Undefined(context.getContextPtr());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        JSValue jsValue = (JSValue) o;
+        return tag == jsValue.tag &&
+                u_int32 == jsValue.u_int32 &&
+                Double.compare(jsValue.u_float64, u_float64) == 0 &&
+                u_ptr == jsValue.u_ptr;
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(new Object[]{tag, u_int32, u_float64, u_ptr});
+    }
 }

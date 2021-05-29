@@ -67,7 +67,7 @@ jfieldID js_value_u_ptr_id;
 
 
 JSValue TO_JS_VALUE(JNIEnv *env, jobject object_handle) {
-    long tag = env->GetLongField(object_handle, js_value_tag_id);
+    jlong tag = env->GetLongField(object_handle, js_value_tag_id);
 #if defined(JS_NAN_BOXING)
     return tag;
 #else
@@ -82,7 +82,9 @@ JSValue TO_JS_VALUE(JNIEnv *env, jobject object_handle) {
 
 jobject TO_JAVA_OBJECT(JNIEnv *env, JSContext *ctx, JSValue value) {
     int type = TYPE_UNKNOWN;
-    if (JS_IsArray(ctx, value)) {
+    if (JS_IsUndefined(value)) {
+        type = TYPE_UNDEFINED;
+    } else if (JS_IsArray(ctx, value)) {
         type = TYPE_JS_ARRAY;
     } else if (JS_IsFunction(ctx, value)) {
         type = TYPE_JS_FUNCTION;
@@ -147,6 +149,9 @@ jobject To_JObject(JNIEnv *env, jlong context_ptr, int expected_type, JSValue re
     if (expected_type == TYPE_UNKNOWN) {
         expected_type = GetObjectType(ctx, result);
     }
+    if (JS_IsUndefined(result)) {
+        expected_type = TYPE_UNDEFINED;
+    }
     switch (expected_type) {
         case TYPE_NULL:
             return nullptr;
@@ -163,6 +168,7 @@ jobject To_JObject(JNIEnv *env, jlong context_ptr, int expected_type, JSValue re
         case TYPE_JS_ARRAY:
         case TYPE_JS_OBJECT:
         case TYPE_JS_FUNCTION:
+        case TYPE_UNDEFINED:
             return TO_JAVA_OBJECT(env, ctx, result);
     }
     return nullptr;
@@ -561,4 +567,16 @@ Java_com_quickjs_android_QuickJS__1arrayAdd(JNIEnv *env, jclass clazz, jlong con
     } else if (env->IsInstanceOf(value, jsValueCls)) {
         JS_SetPropertyUint32(ctx, this_obj, len, TO_JS_VALUE(env, value));
     }
+}
+extern "C"
+JNIEXPORT jboolean JNICALL
+Java_com_quickjs_android_QuickJS__1isUndefined(JNIEnv *env, jclass clazz, jlong context_ptr,
+                                               jobject js_value) {
+    JSValue value = TO_JS_VALUE(env, js_value);
+    return JS_IsUndefined(value);
+}extern "C"
+JNIEXPORT jobject JNICALL
+Java_com_quickjs_android_QuickJS__1Undefined(JNIEnv *env, jclass clazz, jlong context_ptr) {
+    auto *ctx = reinterpret_cast<JSContext *>(context_ptr);
+    return TO_JAVA_OBJECT(env, ctx, JS_UNDEFINED);
 }
