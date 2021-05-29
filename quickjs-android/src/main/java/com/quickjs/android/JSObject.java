@@ -14,12 +14,12 @@ public class JSObject extends JSValue {
         super(context, tag, u_int32, u_float64, u_ptr);
     }
 
-    JSObject setObject(String key, Object value) {
+    protected JSObject setObject(String key, Object value) {
         QuickJS._set(getContextPtr(), this, key, value);
         return this;
     }
 
-    Object get(int expectedType, String key) {
+    protected Object get(int expectedType, String key) {
         return QuickJS._get(this.getContextPtr(), expectedType, this, key);
     }
 
@@ -196,12 +196,12 @@ public class JSObject extends JSValue {
         }
 
         @Override
-        JSObject setObject(String key, Object value) {
+        protected JSObject setObject(String key, Object value) {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        Object get(int expectedType, String key) {
+        protected Object get(int expectedType, String key) {
             throw new UnsupportedOperationException();
         }
 
