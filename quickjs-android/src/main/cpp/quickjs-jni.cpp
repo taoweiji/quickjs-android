@@ -516,6 +516,7 @@ Java_com_quickjs_android_QuickJS__1initNewJSFunction(JNIEnv *env,
     JSValue func_data = JS_NewArray(ctx);
     JSValue func = JS_NewCFunctionData(ctx, functionData, 1, 0, 1, &func_data);
     JS_SetPropertyUint32(ctx, func_data, 0, func);
+//    JS_FreeValue(ctx, func_data);
     return TO_JAVA_OBJECT(env, ctx, func);
 }
 extern "C"
@@ -529,7 +530,9 @@ Java_com_quickjs_android_QuickJS__1registerJavaMethod(JNIEnv *env, jclass clazz,
     JSValue func = JS_NewCFunctionData(ctx, functionData, 1, 0, 1, &func_data);
     JS_SetPropertyUint32(ctx, func_data, 0, func);
     JSValue this_obj = TO_JS_VALUE(env, object_handle);
-    JS_SetPropertyStr(ctx, this_obj, env->GetStringUTFChars(function_name, nullptr), func);
+    JS_SetPropertyStr(ctx, this_obj, env->GetStringUTFChars(function_name, nullptr),
+                      JS_DupValue(ctx, func));
+    JS_FreeValue(ctx, func_data);
     return TO_JAVA_OBJECT(env, ctx, func);
 }
 

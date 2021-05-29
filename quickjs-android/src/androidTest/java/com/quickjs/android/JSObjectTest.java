@@ -183,12 +183,14 @@ public class JSObjectTest {
 
     @Test
     public void console() {
+        final String[] tmp = new String[1];
         JSObject console = new JSObject(context);
         console.registerJavaMethod((receiver, args) -> {
-            assertEquals("Hello", args.getString(0));
+            tmp[0] = args.getString(0);
         }, "log");
         context.set("console", console);
         context.executeVoidScript("console.log('Hello')", "file.js");
+        assertEquals("Hello", tmp[0]);
     }
 
     @Test
