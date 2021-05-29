@@ -18,31 +18,38 @@ public class JSValueTest {
 
     @After
     public void tearDown() throws Exception {
-//        context.close();
-//        quickJS.close();
+        context.close();
+        quickJS.close();
     }
 
     @Test
     public void isUndefined() {
+        JSArray array = new JSArray(context);
+        assertTrue(array.getObject(0).isUndefined());
+        array.close();
     }
 
     @Test
     public void getJSType() {
+        assertEquals(JSValue.TYPE_UNDEFINED, JSValue.Undefined(context).getJSType());
     }
 
     @Test
     public void undefined() {
+        assertTrue(JSValue.Undefined(context).isUndefined());
     }
 
     @Test
     public void testEquals() {
         JSArray array = new JSArray(context);
         assertEquals(JSValue.Undefined(context), array.getObject(0));
-        assertTrue(array.getObject(0).isUndefined());
         array.close();
     }
 
     @Test
     public void testHashCode() {
+        JSArray array = new JSArray(context);
+        assertEquals(JSValue.Undefined(context).hashCode(), array.getObject(0).hashCode());
+        array.close();
     }
 }
