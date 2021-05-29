@@ -1,8 +1,5 @@
 package com.quickjs.android;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class JSContext extends JSObject {
     private final long contextPtr;
 
@@ -29,35 +26,35 @@ public class JSContext extends JSObject {
     }
 
     public Object executeScript(String source, String fileName) {
-        return executeScript(JSValue.UNKNOWN, source, fileName);
+        return executeScript(JSValue.TYPE_UNKNOWN, source, fileName);
     }
 
     public int executeIntegerScript(String source, String fileName) {
-        return (int) executeScript(JSValue.INTEGER, source, fileName);
+        return (int) executeScript(JSValue.TYPE_INTEGER, source, fileName);
     }
 
     public double executeDoubleScript(String source, String fileName) {
-        return (double) executeScript(JSValue.DOUBLE, source, fileName);
+        return (double) executeScript(JSValue.TYPE_DOUBLE, source, fileName);
     }
 
     public boolean executeBooleanScript(String source, String fileName) {
-        return (boolean) executeScript(JSValue.BOOLEAN, source, fileName);
+        return (boolean) executeScript(JSValue.TYPE_BOOLEAN, source, fileName);
     }
 
     public String executeStringScript(String source, String fileName) {
-        return (String) executeScript(JSValue.STRING, source, fileName);
+        return (String) executeScript(JSValue.TYPE_STRING, source, fileName);
     }
 
     public void executeVoidScript(String source, String fileName) {
-        executeScript(JSValue.NULL, source, fileName);
+        executeScript(JSValue.TYPE_NULL, source, fileName);
     }
 
     public JSArray executeArrayScript(String source, String fileName) {
-        return (JSArray) executeScript(JSValue.JS_ARRAY, source, fileName);
+        return (JSArray) executeScript(JSValue.TYPE_JS_ARRAY, source, fileName);
     }
 
     public JSObject executeObjectScript(String source, String fileName) {
-        return (JSObject) executeScript(JSValue.JS_OBJECT, source, fileName);
+        return (JSObject) executeScript(JSValue.TYPE_JS_OBJECT, source, fileName);
     }
 
     void registerCallback(JavaCallback callback, JSValue objectHandle, String jsFunctionName) {
