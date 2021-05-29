@@ -71,13 +71,13 @@ public class JSContext extends JSObject {
     }
 
     void registerCallback(JavaCallback callback, JSFunction functionHandle) {
-        MethodDescriptor methodDescriptor = new MethodDescriptor();
+        QuickJS.MethodDescriptor methodDescriptor = new QuickJS.MethodDescriptor();
         methodDescriptor.callback = callback;
         QuickJS.functionRegistry.put(functionHandle.tag, methodDescriptor);
     }
 
     void registerCallback(JavaVoidCallback callback, JSFunction functionHandle) {
-        MethodDescriptor methodDescriptor = new MethodDescriptor();
+        QuickJS.MethodDescriptor methodDescriptor = new QuickJS.MethodDescriptor();
         methodDescriptor.voidCallback = callback;
         QuickJS.functionRegistry.put(functionHandle.tag, methodDescriptor);
     }

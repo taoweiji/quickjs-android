@@ -398,8 +398,13 @@ JNIEXPORT jobject JNICALL
 Java_com_quickjs_android_QuickJS__1executeFunction(JNIEnv *env, jclass clazz, jlong context_ptr,
                                                    jint expected_type, jobject object_handle,
                                                    jstring name, jobject parameters_handle) {
+    auto *ctx = reinterpret_cast<JSContext *>(context_ptr);
     JSValue result = executeJSFunction(env, context_ptr, object_handle, name, parameters_handle);
-    return To_JObject(env, context_ptr, expected_type, result);
+    jobject jResult = To_JObject(env, context_ptr, expected_type, result);
+    if (!env->IsInstanceOf(jResult, jsValueCls)) {
+        JS_FreeValue(ctx, result);
+    }
+    return jResult;
 }
 
 JSValue

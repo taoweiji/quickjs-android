@@ -83,31 +83,26 @@ public class JSObjectTest {
 
     @Test
     public void call2() {
-        context.registerJavaMethod(new JavaVoidCallback() {
-            @Override
-            public void invoke(JSArray array) {
-                assertEquals("Hello", array.getString(0));
-            }
+        context.registerJavaMethod((receiver, array) -> {
+            assertEquals("Hello", array.getString(0));
         }, "test");
         JSArray args = new JSArray(context);
         args.push("Hello");
         args.push(3.14);
         context.executeVoidFunction("test", args);
+        args.close();
     }
 
     @Test
     public void call3() {
-        context.registerJavaMethod(new JavaCallback() {
-            @Override
-            public Object invoke(JSArray array) {
-                return array.getString(0);
-            }
+        context.registerJavaMethod((receiver, args) -> {
+            return args.getString(0);
         }, "test");
         JSArray args = new JSArray(context);
         args.push("Hello");
         args.push(3.14);
-        String result = context.executeStringFunction("test", args);
-        assertEquals("Hello", result);
+        assertEquals("Hello", context.executeStringFunction("test", args));
+        args.close();
     }
 
     @Test
@@ -130,9 +125,8 @@ public class JSObjectTest {
         context.executeVoidScript("function test(data){ return data}", "file.js");
         JSArray array = new JSArray(context);
         array.push(3.14);
-        double result = context.executeDoubleFunction("test", array);
+        assertEquals(3.14, context.executeDoubleFunction("test", array), 0);
         array.close();
-        assertEquals(3.14, result, 0);
     }
 
     @Test
@@ -224,8 +218,8 @@ public class JSObjectTest {
     @Test
     public void console() {
         JSObject console = new JSObject(context);
-        console.registerJavaMethod(array -> {
-            assertEquals("Hello", array.getString(0));
+        console.registerJavaMethod((receiver, args) -> {
+            assertEquals("Hello", args.getString(0));
         }, "log");
         context.set("console", console);
         context.executeVoidScript("console.log('Hello')", "file.js");

@@ -25,7 +25,6 @@ public class JSValue {
     public static final int UNDEFINED = 99;
 
     protected JSContext context;
-//    protected long objectHandle;
 //    protected boolean released;
 
     long tag;
@@ -49,35 +48,9 @@ public class JSValue {
         this.u_ptr = value.u_ptr;
     }
 
-    //    typedef union JSValueUnion {
-//        int32_t int32;
-//        double float64;
-//        void *ptr;
-//    } JSValueUnion;
-//
-//    typedef struct JSValue {
-//        JSValueUnion u;
-//        int64_t tag;
-//    } JSValue;
-
-//    protected void initialize(long contextPtr, Object data) {
-//        long objectHandle = this.context.initNewJSObject(contextPtr);
-//        this.released = false;
-//        this.addObjectReference(objectHandle);
-//    }
-
-//    protected void addObjectReference(long objectHandle) {
-//        this.objectHandle = objectHandle;
-//        // TODO 考虑自动管理
-//    }
-
     long getContextPtr() {
         return context.getContextPtr();
     }
-
-//    long getHandle() {
-//        return this.objectHandle;
-//    }
 
     public void close() {
         QuickJS._release(getContextPtr(), this);
