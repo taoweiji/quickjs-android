@@ -103,12 +103,14 @@ public class JSObject extends JSValue {
 
 
     public JSObject registerJavaMethod(JavaCallback callback, String jsFunctionName) {
-        context.registerCallback(callback, this, jsFunctionName);
+        JSFunction functionHandle = QuickJS._registerJavaMethod(this.getContextPtr(), this, jsFunctionName, false);
+        context.registerCallback(callback, functionHandle);
         return this;
     }
 
     public JSObject registerJavaMethod(JavaVoidCallback callback, String jsFunctionName) {
-        context.registerCallback(callback, this, jsFunctionName);
+        JSFunction functionHandle = QuickJS._registerJavaMethod(this.getContextPtr(), this, jsFunctionName, true);
+        context.registerCallback(callback, functionHandle);
         return this;
     }
 
