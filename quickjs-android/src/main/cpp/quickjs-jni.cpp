@@ -202,10 +202,10 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *) {
     booleanInitMethodID = env->GetMethodID(booleanCls, "<init>", "(Z)V");
 
     callJavaVoidCallbackMethodID = env->GetStaticMethodID(quickJSCls, "callJavaVoidCallback",
-                                                          "(JLcom/quickjs/android/JSValue;Lcom/quickjs/android/JSValue;Lcom/quickjs/android/JSArray;)V");
+                                                          "(Lcom/quickjs/android/JSValue;Lcom/quickjs/android/JSValue;Lcom/quickjs/android/JSArray;)V");
 
     callJavaCallbackMethodID = env->GetStaticMethodID(quickJSCls, "callJavaCallback",
-                                                      "(JLcom/quickjs/android/JSValue;Lcom/quickjs/android/JSValue;Lcom/quickjs/android/JSArray;)Ljava/lang/Object;");
+                                                      "(Lcom/quickjs/android/JSValue;Lcom/quickjs/android/JSValue;Lcom/quickjs/android/JSArray;)Ljava/lang/Object;");
 
     createJSValueMethodID = env->GetStaticMethodID(quickJSCls, "createJSValue",
                                                    "(JIJIDJ)Lcom/quickjs/android/JSValue;");
@@ -447,16 +447,16 @@ callJavaCallback(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *
             JS_SetPropertyUint32(ctx, args, i, it);
         }
     }
-    jlong contextPtr = reinterpret_cast<long>(ctx);
     jobject objectHandle = TO_JAVA_OBJECT(env, ctx, this_val);
     jobject functionHandle = TO_JAVA_OBJECT(env, ctx, func);
     jobject argsHandle = TO_JAVA_OBJECT(env, ctx, args);
     jobject result = env->CallStaticObjectMethod(quickJSCls, callJavaCallbackMethodID,
-                                                 contextPtr,
                                                  objectHandle,
                                                  functionHandle,
                                                  argsHandle);
-    if (env->IsInstanceOf(result, integerCls)) {
+    if (result == nullptr) {
+        return JS_NULL;
+    } else if (env->IsInstanceOf(result, integerCls)) {
         return JS_NewInt32(ctx, env->CallIntMethod(result, intValueMethodID));
     } else if (env->IsInstanceOf(result, doubleCls)) {
         return JS_NewFloat64(ctx, env->CallDoubleMethod(result, doubleValueMethodID));
@@ -483,12 +483,10 @@ callJavaVoidCallback(JSContext *ctx, JSValueConst this_val, int argc, JSValueCon
             JS_SetPropertyUint32(ctx, args, i, it);
         }
     }
-    jlong contextPtr = reinterpret_cast<long>(ctx);
     jobject objectHandle = TO_JAVA_OBJECT(env, ctx, this_val);
     jobject functionHandle = TO_JAVA_OBJECT(env, ctx, func);
     jobject argsHandle = TO_JAVA_OBJECT(env, ctx, args);
     env->CallStaticVoidMethod(quickJSCls, callJavaVoidCallbackMethodID,
-                              contextPtr,
                               objectHandle,
                               functionHandle,
                               argsHandle);
