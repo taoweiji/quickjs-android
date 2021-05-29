@@ -18,16 +18,10 @@ public class QuickJS {
         return new QuickJS(_createRuntime());
     }
 
-    native static boolean _contains(long contextPtr, JSValue objectHandle, String key);
-
-    native static String[] _getKeys(long contextPtr, JSValue objectHandle);
 
     static Object executeScript(JSContext context, int expectedType, String source, String fileName) {
         return _executeScript(context.getContextPtr(), expectedType, source, fileName);
     }
-
-
-    native static int _getObjectType(long contextPtr, JSValue objectHandle);
 
 
     public JSContext createContext() {
@@ -38,6 +32,39 @@ public class QuickJS {
 
     public void close() {
         _releaseRuntime(runtimePtr);
+    }
+
+
+    static Map<Long, MethodDescriptor> functionRegistry = new HashMap<>();
+
+    @Keep
+    static void callJavaVoidCallback(long contextPtr, JSValue objectHandle, JSValue functionHandle, JSArray argsHandle) {
+        MethodDescriptor methodDescriptor = functionRegistry.get(functionHandle.tag);
+        if (methodDescriptor == null) return;
+        methodDescriptor.voidCallback.invoke(argsHandle);
+    }
+
+    @Keep
+    static Object callJavaCallback(long contextPtr, JSValue objectHandle, JSValue functionHandle, JSArray argsHandle) {
+        MethodDescriptor methodDescriptor = functionRegistry.get(functionHandle.tag);
+        if (methodDescriptor == null) return null;
+        return methodDescriptor.callback.invoke(argsHandle);
+    }
+
+
+    @Keep
+    static JSValue createJSValue(long contextPtr, int type, long tag, int u_int32, double u_float64, long u_ptr) {
+        JSContext context = sContextMap.get(contextPtr);
+        switch (type) {
+            case JSValue.JS_FUNCTION:
+                return new JSFunction(context, tag, u_int32, u_float64, u_ptr);
+            case JSValue.JS_ARRAY:
+                return new JSArray(context, tag, u_int32, u_float64, u_ptr);
+            case JSValue.JS_OBJECT:
+                return new JSObject(context, tag, u_int32, u_float64, u_ptr);
+            default:
+                return new JSValue(context, tag, u_int32, u_float64, u_ptr);
+        }
     }
 
     static Object executeFunction(JSContext context, int expectedType, JSValue objectHandle, String name, JSValue parametersHandle) {
@@ -85,25 +112,9 @@ public class QuickJS {
 
     static native void _set(long contextPtr, JSValue objectHandle, String key, Object value);
 
-    static native int _getInteger(long contextPtr, JSValue objectHandle, String key);
+    static native Object _get(long contextPtr, int expectedType, JSValue objectHandle, String key);
 
-    static native boolean _getBoolean(long contextPtr, JSValue objectHandle, String key);
-
-    static native double _getDouble(long contextPtr, JSValue objectHandle, String key);
-
-    static native String _getString(long contextPtr, JSValue objectHandle, String key);
-
-    static native JSValue _getObject(long contextPtr, JSValue objectHandle, String key);
-
-    static native String _arrayGetString(long contextPtr, JSValue objectHandle, int index);
-
-    static native double _arrayGetDouble(long contextPtr, JSValue objectHandle, int index);
-
-    static native boolean _arrayGetBoolean(long contextPtr, JSValue objectHandle, int index);
-
-    static native int _arrayGetInteger(long contextPtr, JSValue objectHandle, int index);
-
-    native static JSObject _arrayGetObject(long contextPtr, JSValue objectHandle, int index);
+    static native Object _arrayGet(long contextPtr, int expectedType, JSValue objectHandle, int index);
 
     static native void _arrayAdd(long contextPtr, JSValue objectHandle, Object value);
 
@@ -121,37 +132,11 @@ public class QuickJS {
 
     static native JSFunction _registerJavaMethod(long contextPtr, JSValue objectHandle, String jsFunctionName, boolean voidMethod);
 
-    static Map<Long, MethodDescriptor> functionRegistry = new HashMap<>();
+    native static int _getObjectType(long contextPtr, JSValue objectHandle);
 
-    @Keep
-    static void callJavaVoidCallback(long contextPtr, JSValue objectHandle, JSValue functionHandle, JSArray argsHandle) {
-        MethodDescriptor methodDescriptor = functionRegistry.get(functionHandle.tag);
-        if (methodDescriptor == null) return;
-        methodDescriptor.voidCallback.invoke(argsHandle);
-    }
+    native static boolean _contains(long contextPtr, JSValue objectHandle, String key);
 
-    @Keep
-    static Object callJavaCallback(long contextPtr, JSValue objectHandle, JSValue functionHandle, JSArray argsHandle) {
-        MethodDescriptor methodDescriptor = functionRegistry.get(functionHandle.tag);
-        if (methodDescriptor == null) return null;
-        return methodDescriptor.callback.invoke(argsHandle);
-    }
-
-
-    @Keep
-    static JSValue createJSValue(long contextPtr, int type, long tag, int u_int32, double u_float64, long u_ptr) {
-        JSContext context = sContextMap.get(contextPtr);
-        switch (type) {
-            case JSValue.JS_FUNCTION:
-                return new JSFunction(context, tag, u_int32, u_float64, u_ptr);
-            case JSValue.JS_ARRAY:
-                return new JSArray(context, tag, u_int32, u_float64, u_ptr);
-            case JSValue.JS_OBJECT:
-                return new JSObject(context, tag, u_int32, u_float64, u_ptr);
-            default:
-                return new JSValue(context, tag, u_int32, u_float64, u_ptr);
-        }
-    }
+    native static String[] _getKeys(long contextPtr, JSValue objectHandle);
 
 
     static {
