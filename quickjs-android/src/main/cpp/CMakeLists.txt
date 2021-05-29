@@ -5,7 +5,6 @@ add_library(
         ${PROJECT_NAME}
         SHARED
         quickjs-jni.cpp
-        java-method-jni.cpp
 )
 find_library(
         log-lib
