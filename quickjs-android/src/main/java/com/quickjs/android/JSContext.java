@@ -1,9 +1,15 @@
 package com.quickjs.android;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+
 public class JSContext extends JSObject {
     private final long contextPtr;
-
-//    Map<Long, MethodDescriptor> functionRegistry = new HashMap<>();
+    Map<Long, QuickJS.MethodDescriptor> functionRegistry = new HashMap<>();
+    private final Set<JSValue> refs = new HashSet<>();
 
     JSContext(long contextPtr) {
         super(null, QuickJS._getGlobalObject(contextPtr));
@@ -15,10 +21,24 @@ public class JSContext extends JSObject {
         return this.contextPtr;
     }
 
+    void addObjRef(JSValue reference) {
+        refs.add(reference);
+    }
+
+    void releaseObjRef(JSValue reference) {
+        refs.remove(reference);
+    }
+
     @Override
     public void close() {
         super.close();
+        JSValue[] arr = new JSValue[refs.size()];
+        refs.toArray(arr);
+        for (JSValue it : arr) {
+            it.close();
+        }
         QuickJS._releaseContext(contextPtr);
+        QuickJS.sContextMap.remove(getContextPtr());
     }
 
     public Object executeScript(int expectedType, String source, String fileName) {
@@ -70,13 +90,13 @@ public class JSContext extends JSObject {
     void registerCallback(JavaCallback callback, JSFunction functionHandle) {
         QuickJS.MethodDescriptor methodDescriptor = new QuickJS.MethodDescriptor();
         methodDescriptor.callback = callback;
-        QuickJS.functionRegistry.put(functionHandle.tag, methodDescriptor);
+        functionRegistry.put(functionHandle.tag, methodDescriptor);
     }
 
     void registerCallback(JavaVoidCallback callback, JSFunction functionHandle) {
         QuickJS.MethodDescriptor methodDescriptor = new QuickJS.MethodDescriptor();
         methodDescriptor.voidCallback = callback;
-        QuickJS.functionRegistry.put(functionHandle.tag, methodDescriptor);
+        functionRegistry.put(functionHandle.tag, methodDescriptor);
     }
 
 }

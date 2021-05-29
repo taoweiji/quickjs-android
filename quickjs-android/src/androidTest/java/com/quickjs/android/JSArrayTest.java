@@ -105,6 +105,6 @@ public class JSArrayTest {
         assertEquals(JSValue.TYPE_INTEGER, array.getType(1));
         assertEquals(JSValue.TYPE_BOOLEAN, array.getType(2));
         assertEquals(JSValue.TYPE_DOUBLE, array.getType(3));
-        array.close();
+//        array.close();
     }
 }
