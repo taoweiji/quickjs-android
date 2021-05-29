@@ -69,11 +69,11 @@ public class QuickJS {
     static JSValue createJSValue(long contextPtr, int type, long tag, int u_int32, double u_float64, long u_ptr) {
         JSContext context = sContextMap.get(contextPtr);
         switch (type) {
-            case JSValue.JS_FUNCTION:
+            case JSValue.TYPE_JS_FUNCTION:
                 return new JSFunction(context, tag, u_int32, u_float64, u_ptr);
-            case JSValue.JS_ARRAY:
+            case JSValue.TYPE_JS_ARRAY:
                 return new JSArray(context, tag, u_int32, u_float64, u_ptr);
-            case JSValue.JS_OBJECT:
+            case JSValue.TYPE_JS_OBJECT:
                 return new JSObject(context, tag, u_int32, u_float64, u_ptr);
             default:
                 return new JSValue(context, tag, u_int32, u_float64, u_ptr);
@@ -95,11 +95,11 @@ public class QuickJS {
                 } else if (item instanceof JSValue) {
                     args.push((JSValue) item);
                 } else {
-                    args.push(JSValue.getNull());
+                    args.push(new JSValue.NULL(context));
                 }
             }
         }
-        return _executeFunction(context.getContextPtr(), JSValue.UNKNOWN, objectHandle, name, args);
+        return _executeFunction(context.getContextPtr(), JSValue.TYPE_UNKNOWN, objectHandle, name, args);
     }
 
     static native long _createRuntime();

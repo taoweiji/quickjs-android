@@ -22,7 +22,7 @@ public class JSArray extends JSObject {
 
 
     public int getInteger(int index) {
-        Object result = get(JSValue.INTEGER, index);
+        Object result = get(JSValue.TYPE_INTEGER, index);
         if (result instanceof Integer) {
             return (int) result;
         }
@@ -30,7 +30,7 @@ public class JSArray extends JSObject {
     }
 
     public boolean getBoolean(int index) {
-        Object result = get(JSValue.BOOLEAN, index);
+        Object result = get(JSValue.TYPE_BOOLEAN, index);
         if (result instanceof Boolean) {
             return (boolean) result;
         }
@@ -38,7 +38,7 @@ public class JSArray extends JSObject {
     }
 
     public double getDouble(int index) {
-        Object result = get(JSValue.DOUBLE, index);
+        Object result = get(JSValue.TYPE_DOUBLE, index);
         if (result instanceof Double) {
             return (double) result;
         }
@@ -46,7 +46,7 @@ public class JSArray extends JSObject {
     }
 
     public String getString(int index) {
-        Object result = get(JSValue.STRING, index);
+        Object result = get(JSValue.TYPE_STRING, index);
         if (result instanceof String) {
             return (String) result;
         }
@@ -54,7 +54,7 @@ public class JSArray extends JSObject {
     }
 
     public JSObject getObject(int index) {
-        Object result = get(JSValue.JS_OBJECT, index);
+        Object result = get(JSValue.TYPE_JS_OBJECT, index);
         if (result instanceof JSObject) {
             return (JSObject) result;
         }
@@ -62,7 +62,7 @@ public class JSArray extends JSObject {
     }
 
     public JSArray getArray(int index) {
-        Object result = get(JSValue.JS_ARRAY, index);
+        Object result = get(JSValue.TYPE_JS_ARRAY, index);
         if (result instanceof JSArray) {
             return (JSArray) result;
         }

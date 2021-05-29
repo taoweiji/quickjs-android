@@ -19,6 +19,6 @@ public class JSFunction extends JSObject {
         if (receiver == null) {
             receiver = context;
         }
-        return QuickJS._executeFunction2(context.getContextPtr(), JSValue.UNKNOWN, receiver, this, parameters);
+        return QuickJS._executeFunction2(context.getContextPtr(), JSValue.TYPE_UNKNOWN, receiver, this, parameters);
     }
 }

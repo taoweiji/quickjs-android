@@ -52,7 +52,7 @@ public class JSObject extends JSValue {
     }
 
     public int getInteger(String key) {
-        Object result = get(JSValue.INTEGER, key);
+        Object result = get(JSValue.TYPE_INTEGER, key);
         if (result instanceof Integer) {
             return (int) result;
         }
@@ -60,7 +60,7 @@ public class JSObject extends JSValue {
     }
 
     public boolean getBoolean(String key) {
-        Object result = get(JSValue.BOOLEAN, key);
+        Object result = get(JSValue.TYPE_BOOLEAN, key);
         if (result instanceof Boolean) {
             return (boolean) result;
         }
@@ -68,7 +68,7 @@ public class JSObject extends JSValue {
     }
 
     public double getDouble(String key) {
-        Object result = get(JSValue.DOUBLE, key);
+        Object result = get(JSValue.TYPE_DOUBLE, key);
         if (result instanceof Double) {
             return (double) result;
         }
@@ -76,7 +76,7 @@ public class JSObject extends JSValue {
     }
 
     public String getString(String key) {
-        Object result = get(JSValue.STRING, key);
+        Object result = get(JSValue.TYPE_STRING, key);
         if (result instanceof String) {
             return (String) result;
         }
@@ -84,7 +84,7 @@ public class JSObject extends JSValue {
     }
 
     public JSArray getArray(String key) {
-        Object value = get(JSValue.JS_ARRAY, key);
+        Object value = get(JSValue.TYPE_JS_ARRAY, key);
         if (value instanceof JSArray) {
             return (JSArray) value;
         }
@@ -92,7 +92,7 @@ public class JSObject extends JSValue {
     }
 
     public JSObject getObject(String key) {
-        Object value = get(JSValue.JS_OBJECT, key);
+        Object value = get(JSValue.TYPE_JS_OBJECT, key);
         if (value instanceof JSObject) {
             return (JSObject) value;
         }
@@ -119,11 +119,11 @@ public class JSObject extends JSValue {
 
 
     public Object executeFunction(String name, JSArray parameters) {
-        return executeFunction(JSValue.UNKNOWN, name, parameters);
+        return executeFunction(JSValue.TYPE_UNKNOWN, name, parameters);
     }
 
     public int executeIntegerFunction(String name, JSArray parameters) {
-        Object result = executeFunction(JSValue.INTEGER, name, parameters);
+        Object result = executeFunction(JSValue.TYPE_INTEGER, name, parameters);
         if (result instanceof Integer) {
             return (int) result;
         }
@@ -131,7 +131,7 @@ public class JSObject extends JSValue {
     }
 
     public double executeDoubleFunction(String name, JSArray parameters) {
-        Object result = executeFunction(JSValue.DOUBLE, name, parameters);
+        Object result = executeFunction(JSValue.TYPE_DOUBLE, name, parameters);
         if (result instanceof Double) {
             return (double) result;
         }
@@ -139,7 +139,7 @@ public class JSObject extends JSValue {
     }
 
     public boolean executeBooleanFunction(String name, JSArray parameters) {
-        Object result = executeFunction(JSValue.BOOLEAN, name, parameters);
+        Object result = executeFunction(JSValue.TYPE_BOOLEAN, name, parameters);
         if (result instanceof Boolean) {
             return (boolean) result;
         }
@@ -147,7 +147,7 @@ public class JSObject extends JSValue {
     }
 
     public String executeStringFunction(String name, JSArray parameters) {
-        Object result = executeFunction(JSValue.STRING, name, parameters);
+        Object result = executeFunction(JSValue.TYPE_STRING, name, parameters);
         if (result instanceof String) {
             return (String) result;
         }
@@ -155,7 +155,7 @@ public class JSObject extends JSValue {
     }
 
     public JSArray executeArrayFunction(String name, JSArray parameters) {
-        Object result = executeFunction(JSValue.JS_ARRAY, name, parameters);
+        Object result = executeFunction(JSValue.TYPE_JS_ARRAY, name, parameters);
         if (result instanceof JSArray) {
             return (JSArray) result;
         }
@@ -163,7 +163,7 @@ public class JSObject extends JSValue {
     }
 
     public JSObject executeObjectFunction(String name, JSArray parameters) {
-        Object result = executeFunction(JSValue.JS_OBJECT, name, parameters);
+        Object result = executeFunction(JSValue.TYPE_JS_OBJECT, name, parameters);
         if (result instanceof JSObject) {
             return (JSObject) result;
         }
@@ -171,7 +171,7 @@ public class JSObject extends JSValue {
     }
 
     public void executeVoidFunction(String name, JSArray parameters) {
-        executeFunction(JSValue.NULL, name, parameters);
+        executeFunction(JSValue.TYPE_NULL, name, parameters);
     }
 
     public Object executeFunction2(String name, Object... parameters) {
