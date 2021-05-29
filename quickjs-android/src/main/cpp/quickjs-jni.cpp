@@ -258,10 +258,18 @@ JNIEXPORT jobject JNICALL
 Java_com_quickjs_android_QuickJS__1executeScript(JNIEnv *env, jclass clazz, jlong context_ptr,
                                                  jint expected_type,
                                                  jstring source, jstring file_name) {
+    if (source == nullptr) {
+        return nullptr;
+    }
     auto *ctx = reinterpret_cast<JSContext *>(context_ptr);
     const char *source_ = env->GetStringUTFChars(source, nullptr);
     const int source_length = env->GetStringUTFLength(source);
-    const char *file_name_ = env->GetStringUTFChars(file_name, nullptr);
+    const char *file_name_;
+    if (file_name == nullptr) {
+        file_name_ = "";
+    } else {
+        file_name_ = env->GetStringUTFChars(file_name, nullptr);
+    }
     JSValue val = JS_Eval(ctx, source_, (size_t) source_length, file_name_, JS_EVAL_TYPE_GLOBAL);
     jobject result = To_JObject(env, context_ptr, expected_type, val);
     return result;
@@ -308,7 +316,9 @@ Java_com_quickjs_android_QuickJS__1get(JNIEnv *env, jclass clazz, jlong context_
     auto *ctx = reinterpret_cast<JSContext *>(context_ptr);
     JSValue this_obj = TO_JS_VALUE(env, object_handle);
     JSValue result = JS_GetPropertyStr(ctx, this_obj, key_);
-    return To_JObject(env, context_ptr, expected_type, result);
+    jobject tmp = To_JObject(env, context_ptr, expected_type, result);
+    JS_FreeValue(ctx, result);
+    return tmp;
 }
 extern "C"
 JNIEXPORT jobject JNICALL
@@ -331,7 +341,9 @@ Java_com_quickjs_android_QuickJS__1arrayGet(JNIEnv *env, jclass clazz, jlong con
     auto *ctx = reinterpret_cast<JSContext *>(context_ptr);
     JSValue this_obj = TO_JS_VALUE(env, object_handle);
     JSValue result = JS_GetPropertyUint32(ctx, this_obj, index);
-    return To_JObject(env, context_ptr, expected_type, result);
+    jobject jo = To_JObject(env, context_ptr, expected_type, result);
+    JS_FreeValue(ctx, result);
+    return jo;
 }
 
 extern "C"
@@ -430,9 +442,7 @@ Java_com_quickjs_android_QuickJS__1executeFunction(JNIEnv *env, jclass clazz, jl
     auto *ctx = reinterpret_cast<JSContext *>(context_ptr);
     JSValue result = executeJSFunction(env, context_ptr, object_handle, name, parameters_handle);
     jobject jResult = To_JObject(env, context_ptr, expected_type, result);
-//    if (!env->IsInstanceOf(jResult, jsValueCls)) {
-//        JS_FreeValue(ctx, result);
-//    }
+    JS_FreeValue(ctx, result);
     return jResult;
 }
 
@@ -557,7 +567,9 @@ Java_com_quickjs_android_QuickJS__1set(JNIEnv *env, jclass clazz, jlong context_
         const char *value_ = env->GetStringUTFChars((jstring) value, nullptr);
         JS_SetPropertyStr(ctx, this_obj, key_, JS_NewString(ctx, value_));
     } else if (env->IsInstanceOf(value, jsValueCls)) {
-        JS_SetPropertyStr(ctx, this_obj, key_, TO_JS_VALUE(env, value));
+        // TODO 导致内存泄漏
+        JSValue tmp = JS_DupValue(ctx, TO_JS_VALUE(env, value));
+        JS_SetPropertyStr(ctx, this_obj, key_, tmp);
     }
 }
 
@@ -586,7 +598,9 @@ Java_com_quickjs_android_QuickJS__1arrayAdd(JNIEnv *env, jclass clazz, jlong con
         const char *value_ = env->GetStringUTFChars((jstring) value, nullptr);
         JS_SetPropertyUint32(ctx, this_obj, len, JS_NewString(ctx, value_));
     } else if (env->IsInstanceOf(value, jsValueCls)) {
-        JS_SetPropertyUint32(ctx, this_obj, len, TO_JS_VALUE(env, value));
+        // TODO 导致内存泄漏
+        JSValue tmp = JS_DupValue(ctx, TO_JS_VALUE(env, value));
+        JS_SetPropertyUint32(ctx, this_obj, len, tmp);
     }
 }
 extern "C"

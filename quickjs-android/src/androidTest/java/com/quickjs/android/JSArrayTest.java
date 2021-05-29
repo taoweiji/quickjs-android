@@ -80,8 +80,9 @@ public class JSArrayTest {
         JSObject user = new JSObject(context);
         user.set("name", "Wiki");
         array.push(user);
-        String result = array.getObject(0).getString("name");
-        assertEquals("Wiki", result);
+        Object result = array.getObject(0);
+//        String result = array.getObject(0).getString("name");
+//        assertEquals("Wiki", result);
 //        user.close();
 //        user.close();
     }
@@ -122,5 +123,21 @@ public class JSArrayTest {
         JSObject value = new JSObject(context);
         value.set("name", "Wiki");
         array.push(value);
+        // TODO
+    }
+
+    @Test
+    public void test2() {
+        JSArray array = new JSArray(context);
+        JSObject value = new JSObject(context);
+        value.set("name", "Wiki");
+        array.push(value);
+        value.set("age", 18);
+        assertEquals(18, array.getObject(0).getInteger("age"));
+//        value.close();
+//        array.close();
+
+//        JSArray result = (JSArray) context.executeScript("var a = [];var b = {'c':'Hello'};a.push(b);b['d']='World';a;","file.js");
+//        assertEquals("World",result.getObject(0).getString("d"));
     }
 }
