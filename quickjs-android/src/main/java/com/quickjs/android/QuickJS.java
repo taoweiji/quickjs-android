@@ -71,9 +71,9 @@ public class QuickJS {
         return _executeFunction(context.getContextPtr(), expectedType, objectHandle, name, parametersHandle);
     }
 
-    static Object executeFunction2(JSContext context, int expectedType, JSValue objectHandle, JSValue functionHandle, JSValue parametersHandle) {
-        return _executeFunction2(context.getContextPtr(), expectedType, objectHandle, functionHandle, parametersHandle);
-    }
+//    static Object executeFunction2(JSContext context, int expectedType, JSValue objectHandle, JSValue functionHandle, JSValue parametersHandle) {
+//        return _executeFunction2(context.getContextPtr(), expectedType, objectHandle, functionHandle, parametersHandle);
+//    }
 
 
     static Object executeJSFunction(JSContext context, JSValue objectHandle, String name, Object[] parameters) {
@@ -120,7 +120,7 @@ public class QuickJS {
 
     private static native Object _executeFunction(long contextPtr, int expectedType, JSValue objectHandle, String name, JSValue parametersHandle);
 
-    private static native Object _executeFunction2(long contextPtr, int expectedType, JSValue objectHandle, JSValue functionHandle, JSValue parametersHandle);
+    static native Object _executeFunction2(long contextPtr, int expectedType, JSValue objectHandle, JSValue functionHandle, JSValue parametersHandle);
 
     static native JSObject _initNewJSObject(long contextPtr);
 

@@ -111,7 +111,7 @@ jobject TO_JAVA_OBJECT(JNIEnv *env, JSContext *ctx, JSValue value) {
 }
 
 
-int getObjectType(JSContext *ctx, JSValue result) {
+int GetObjectType(JSContext *ctx, JSValue result) {
     if (JS_IsArray(ctx, result)) {
         return TYPE_JS_ARRAY;
     } else if (JS_IsFunction(ctx, result)) {
@@ -130,6 +130,14 @@ int getObjectType(JSContext *ctx, JSValue result) {
         return TYPE_NULL;
     } else if (JS_IsUndefined(result)) {
         return TYPE_UNDEFINED;
+    } else if (JS_IsNumber(result)) {
+        int tag = JS_VALUE_GET_TAG(result);
+        if (tag == JS_TAG_INT) {
+            return TYPE_INTEGER;
+        }
+        if (JS_TAG_IS_FLOAT64(tag)) {
+            return TYPE_DOUBLE;
+        }
     }
     return TYPE_UNKNOWN;
 }
@@ -137,7 +145,7 @@ int getObjectType(JSContext *ctx, JSValue result) {
 jobject To_JObject(JNIEnv *env, jlong context_ptr, int expected_type, JSValue result) {
     auto *ctx = reinterpret_cast<JSContext *>(context_ptr);
     if (expected_type == TYPE_UNKNOWN) {
-        expected_type = getObjectType(ctx, result);
+        expected_type = GetObjectType(ctx, result);
     }
     switch (expected_type) {
         case TYPE_NULL:
@@ -350,7 +358,7 @@ Java_com_quickjs_android_QuickJS__1executeFunction2(JNIEnv *env, jclass clazz, j
     JSValue func_obj = TO_JS_VALUE(env, functionHandle);
     JSValue *argv = nullptr;
     int argc = 0;
-    if (parameters_handle != 0) {
+    if (parameters_handle != nullptr) {
         JSValue argArray = TO_JS_VALUE(env, parameters_handle);
         argc = JS_VALUE_GET_INT(JS_GetPropertyStr(ctx, argArray, "length"));
         argv = new JSValue[argc];
@@ -490,7 +498,7 @@ Java_com_quickjs_android_QuickJS__1getObjectType(JNIEnv *env, jclass clazz, jlon
                                                  jobject object_handle) {
     auto *ctx = reinterpret_cast<JSContext *>(context_ptr);
     JSValue value = TO_JS_VALUE(env, object_handle);
-    return getObjectType(ctx, value);
+    return GetObjectType(ctx, value);
 }
 extern "C"
 JNIEXPORT void JNICALL

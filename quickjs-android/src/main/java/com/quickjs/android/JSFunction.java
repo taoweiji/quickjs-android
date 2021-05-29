@@ -16,6 +16,9 @@ public class JSFunction extends JSObject {
     }
 
     public Object call(JSObject receiver, JSArray parameters) {
-        return QuickJS.executeFunction2(context, JSValue.UNKNOWN, receiver, this, parameters);
+        if (receiver == null) {
+            receiver = context;
+        }
+        return QuickJS._executeFunction2(context.getContextPtr(), JSValue.UNKNOWN, receiver, this, parameters);
     }
 }
