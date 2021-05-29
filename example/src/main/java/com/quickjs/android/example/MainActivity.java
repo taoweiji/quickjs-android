@@ -22,41 +22,19 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        QuickJS quickJS = QuickJS.createV8Runtime();
-//        JSContext jsContext = quickJS.createContext();
-//        int resultInt = jsContext.executeIntegerScript("var a = 2+10;\n a;", "file.js");
-//        double resultDouble = jsContext.executeDoubleScript("var a = 2.0;\n a;", "file.js");
-//        boolean resultBool = jsContext.executeBooleanScript("var a = 1 > 0;\n a;", "file.js");
-//        String resultString = jsContext.executeStringScript("var a = 'Hello World';\n a;", "file.js");
-//        Log.e("quickjs", String.valueOf(resultInt));
-//        Log.e("quickjs", String.valueOf(resultDouble));
-//        Log.e("quickjs", String.valueOf(resultBool));
-//        Log.e("quickjs", String.valueOf(resultString));
-//        jsContext.add("", 1);
-//        jsContext.close();
-//        quickJS.close();
-
         test();
-//        Integer integer = new Integer(3);
     }
 
     void test() {
         QuickJS quickJS = QuickJS.createRuntime();
         JSContext jsContext = quickJS.createContext();
-//        int result = jsContext.executeIntegerScript("int a=1228;\na;", "file.js");
-//
-        jsContext.set("name", "Wiki");
-        Log.e("QuickJS", String.valueOf(jsContext.getString("name")));
-//        jsContext.set("age", 18);
-//        jsContext.set("gender", 1);
-//        jsContext.executeScript("function sayHello(param) {return param[3];}", "file.js");
-//        JSArray jsArray = new JSArray(jsContext);
-//        jsArray.length();
-//        jsArray.push("Hello");
-//        jsArray.push(true);
-//        jsArray.push(1);
-//        jsArray.push(3.14);
-//        Log.e("QuickJS", String.valueOf(jsContext.executeDoubleFunction("sayHello", jsArray)));
+
+        JSObject object = new JSObject(jsContext);
+        long start = System.currentTimeMillis();
+        for (int i = 0; i < 10000; i++) {
+            object.set(String.valueOf(i), i);
+        }
+        Log.e("test1", String.valueOf(System.currentTimeMillis() - start));
     }
 
     void testV8() {

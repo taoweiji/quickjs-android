@@ -14,55 +14,77 @@ public class JSObject extends JSValue {
         super(context, tag, u_int32, u_float64, u_ptr);
     }
 
+    // TODO
 //    protected JSObject(JSContext context, Object data) {
 //        this.context = context;
 //        this.initialize(this.context.getContextPtr(), data);
 //    }
 
 
-    public JSObject set(String key, int value) {
+    JSObject setObject(String key, Object value) {
         QuickJS._set(getContextPtr(), this, key, value);
         return this;
+    }
+
+    Object get(int expectedType, String key) {
+        return QuickJS._get(this.getContextPtr(), expectedType, this, key);
+    }
+
+
+    public JSObject set(String key, int value) {
+        return setObject(key, value);
     }
 
     public JSObject set(String key, double value) {
-        QuickJS._set(getContextPtr(), this, key, value);
-        return this;
+        return setObject(key, value);
     }
 
     public JSObject set(String key, String value) {
-        QuickJS._set(getContextPtr(), this, key, value);
-        return this;
+        return setObject(key, value);
     }
 
     public JSObject set(String key, boolean value) {
-        QuickJS._set(getContextPtr(), this, key, value);
-        return this;
+        return setObject(key, value);
     }
 
     public JSObject set(String key, JSValue value) {
-        QuickJS._set(getContextPtr(), this, key, value);
-        return this;
+        return setObject(key, value);
     }
 
     public int getInteger(String key) {
-        return QuickJS._getInteger(this.getContextPtr(), this, key);
+        Object result = get(JSValue.INTEGER, key);
+        if (result instanceof Integer) {
+            return (int) result;
+        }
+        return 0;
     }
 
     public boolean getBoolean(String key) {
-        return QuickJS._getBoolean(this.getContextPtr(), this, key);
+        Object result = get(JSValue.BOOLEAN, key);
+        if (result instanceof Boolean) {
+            return (boolean) result;
+        }
+        return false;
     }
 
     public double getDouble(String key) {
-        return QuickJS._getDouble(this.getContextPtr(), this, key);
+        Object result = get(JSValue.DOUBLE, key);
+        if (result instanceof Double) {
+            return (double) result;
+        }
+        return 0;
     }
 
     public String getString(String key) {
-        return QuickJS._getString(this.getContextPtr(), this, key);
+        Object result = get(JSValue.STRING, key);
+        if (result instanceof String) {
+            return (String) result;
+        }
+        return null;
     }
 
     public JSArray getArray(String key) {
-        JSValue value = getObject(key);
+        Object value = get(JSValue.JS_ARRAY, key);
         if (value instanceof JSArray) {
             return (JSArray) value;
         }
@@ -70,12 +92,13 @@ public class JSObject extends JSValue {
     }
 
     public JSObject getObject(String key) {
-        JSValue value = QuickJS._getObject(this.getContextPtr(), this, key);
+        Object value = get(JSValue.JS_OBJECT, key);
         if (value instanceof JSObject) {
             return (JSObject) value;
         }
         return null;
     }
+
 
     public int getType(String key) {
         // TODO

@@ -11,57 +11,82 @@ public class JSArray extends JSObject {
         super(context, tag, u_int32, u_float64, u_ptr);
     }
 
+    public Object get(int expectedType, int index) {
+        return QuickJS._arrayGet(this.getContextPtr(), expectedType, this, index);
+    }
+
+    public JSArray pushObject(Object value) {
+        QuickJS._arrayAdd(getContextPtr(), this, value);
+        return this;
+    }
+
+
     public int getInteger(int index) {
-        return QuickJS._arrayGetInteger(this.getContextPtr(), this, index);
+        Object result = get(JSValue.INTEGER, index);
+        if (result instanceof Integer) {
+            return (int) result;
+        }
+        return 0;
     }
 
     public boolean getBoolean(int index) {
-        return QuickJS._arrayGetBoolean(this.getContextPtr(), this, index);
+        Object result = get(JSValue.BOOLEAN, index);
+        if (result instanceof Boolean) {
+            return (boolean) result;
+        }
+        return false;
     }
 
     public double getDouble(int index) {
-        return QuickJS._arrayGetDouble(this.getContextPtr(), this, index);
+        Object result = get(JSValue.DOUBLE, index);
+        if (result instanceof Double) {
+            return (double) result;
+        }
+        return 0;
     }
 
     public String getString(int index) {
-        return QuickJS._arrayGetString(this.getContextPtr(), this, index);
+        Object result = get(JSValue.STRING, index);
+        if (result instanceof String) {
+            return (String) result;
+        }
+        return null;
     }
 
     public JSObject getObject(int index) {
-        return QuickJS._arrayGetObject(this.getContextPtr(), this, index);
+        Object result = get(JSValue.JS_OBJECT, index);
+        if (result instanceof JSObject) {
+            return (JSObject) result;
+        }
+        return null;
     }
 
     public JSArray getArray(int index) {
-        JSObject object = getObject(index);
-        if (object instanceof JSArray) {
-            return (JSArray) object;
+        Object result = get(JSValue.JS_ARRAY, index);
+        if (result instanceof JSArray) {
+            return (JSArray) result;
         }
         return null;
     }
 
     public JSArray push(int value) {
-        QuickJS._arrayAdd(getContextPtr(), this, value);
-        return this;
+        return pushObject(value);
     }
 
     public JSArray push(double value) {
-        QuickJS._arrayAdd(getContextPtr(), this, value);
-        return this;
+        return pushObject(value);
     }
 
     public JSArray push(String value) {
-        QuickJS._arrayAdd(getContextPtr(), this, value);
-        return this;
+        return pushObject(value);
     }
 
     public JSArray push(boolean value) {
-        QuickJS._arrayAdd(getContextPtr(), this, value);
-        return this;
+        return pushObject(value);
     }
 
     public JSArray push(JSValue value) {
-        QuickJS._arrayAdd(getContextPtr(), this, value);
-        return this;
+        return pushObject(value);
     }
 
     public int length() {
