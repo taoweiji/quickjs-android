@@ -9,7 +9,7 @@ import java.util.Set;
 public class JSContext extends JSObject {
     private final long contextPtr;
     Map<Long, QuickJS.MethodDescriptor> functionRegistry = new HashMap<>();
-    private final Set<JSValue> refs = new HashSet<>();
+     final Set<JSValue> refs = new HashSet<>();
 
     JSContext(long contextPtr) {
         super(null, QuickJS._getGlobalObject(contextPtr));
@@ -33,12 +33,12 @@ public class JSContext extends JSObject {
 
     @Override
     public void close() {
-        super.close();
         JSValue[] arr = new JSValue[refs.size()];
         refs.toArray(arr);
         for (JSValue it : arr) {
             it.close();
         }
+        super.close();
         QuickJS._releaseContext(contextPtr);
         QuickJS.sContextMap.remove(getContextPtr());
     }

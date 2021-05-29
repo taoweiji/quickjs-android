@@ -82,8 +82,8 @@ public class JSArrayTest {
         array.push(user);
         String result = array.getObject(0).getString("name");
         assertEquals("Wiki", result);
-        user.close();
-        user.close();
+//        user.close();
+//        user.close();
     }
 
     @Test
@@ -107,5 +107,20 @@ public class JSArrayTest {
         assertEquals(JSValue.TYPE_BOOLEAN, array.getType(2));
         assertEquals(JSValue.TYPE_DOUBLE, array.getType(3));
 //        array.close();
+    }
+
+    @Test
+    public void test() {
+//        JSArray array = new JSArray(context);
+//        JSObject value = new JSObject(context);
+//        value.set("name", "Wiki");
+//        array.push(value);
+//        value.close();
+//        array.close();
+
+        JSArray array = new JSArray(context);
+        JSObject value = new JSObject(context);
+        value.set("name", "Wiki");
+        array.push(value);
     }
 }

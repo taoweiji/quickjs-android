@@ -94,6 +94,8 @@ public class JSArray extends JSObject {
     }
 
     public JSArray push(JSValue value) {
+        // TODO
+//        value.released = true;
         return pushObject(value);
     }
 
