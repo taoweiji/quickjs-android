@@ -23,6 +23,7 @@ public class JSArrayTest {
     @After
     public void tearDown() throws Exception {
         array.close();
+        array.close();
         context.close();
         quickJS.close();
     }
@@ -82,6 +83,7 @@ public class JSArrayTest {
         array.push(user);
         String result = array.getObject(0).getString("name");
         assertEquals("Wiki", result);
+        user.close();
         user.close();
     }
 
