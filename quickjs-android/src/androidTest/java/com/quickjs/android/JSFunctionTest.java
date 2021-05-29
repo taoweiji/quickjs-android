@@ -69,15 +69,13 @@ public class JSFunctionTest {
         context.registerJavaMethod(new JavaCallback() {
             @Override
             public Object invoke(JSArray array) {
-                return array.getString(0);
+                return array.getDouble(1);
             }
         }, "test");
         JSFunction function = (JSFunction) context.getObject("test");
-        JSArray args = new JSArray(context);
-        args.push("Hello");
-        args.push(3.14);
-        String result = (String) function.call(context, args);
-        assertEquals("Hello", result);
+        JSArray parameters = new JSArray(context).push("Hello").push(3.14);
+        Object result = function.call(context, parameters);
+        assertEquals(3.14, result);
     }
 
 

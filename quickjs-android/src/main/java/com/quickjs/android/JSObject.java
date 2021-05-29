@@ -123,27 +123,51 @@ public class JSObject extends JSValue {
     }
 
     public int executeIntegerFunction(String name, JSArray parameters) {
-        return (int) executeFunction(JSValue.INTEGER, name, parameters);
+        Object result = executeFunction(JSValue.INTEGER, name, parameters);
+        if (result instanceof Integer) {
+            return (int) result;
+        }
+        return 0;
     }
 
     public double executeDoubleFunction(String name, JSArray parameters) {
-        return (double) executeFunction(JSValue.DOUBLE, name, parameters);
+        Object result = executeFunction(JSValue.DOUBLE, name, parameters);
+        if (result instanceof Double) {
+            return (double) result;
+        }
+        return 0;
     }
 
     public boolean executeBooleanFunction(String name, JSArray parameters) {
-        return (boolean) executeFunction(JSValue.BOOLEAN, name, parameters);
+        Object result = executeFunction(JSValue.BOOLEAN, name, parameters);
+        if (result instanceof Boolean) {
+            return (boolean) result;
+        }
+        return false;
     }
 
     public String executeStringFunction(String name, JSArray parameters) {
-        return (String) executeFunction(JSValue.STRING, name, parameters);
+        Object result = executeFunction(JSValue.STRING, name, parameters);
+        if (result instanceof String) {
+            return (String) result;
+        }
+        return null;
     }
 
     public JSArray executeArrayFunction(String name, JSArray parameters) {
-        return (JSArray) executeFunction(JSValue.JS_ARRAY, name, parameters);
+        Object result = executeFunction(JSValue.JS_ARRAY, name, parameters);
+        if (result instanceof JSArray) {
+            return (JSArray) result;
+        }
+        return null;
     }
 
     public JSObject executeObjectFunction(String name, JSArray parameters) {
-        return (JSObject) executeFunction(JSValue.JS_OBJECT, name, parameters);
+        Object result = executeFunction(JSValue.JS_OBJECT, name, parameters);
+        if (result instanceof JSObject) {
+            return (JSObject) result;
+        }
+        return null;
     }
 
     public void executeVoidFunction(String name, JSArray parameters) {
