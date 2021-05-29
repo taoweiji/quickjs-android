@@ -2,7 +2,6 @@ package com.quickjs.android;
 
 import java.io.Closeable;
 import java.util.Arrays;
-import java.util.Objects;
 
 public class JSValue implements Closeable {
     static final int TYPE_NULL = 0;
@@ -36,7 +35,7 @@ public class JSValue implements Closeable {
     double u_float64;
     long u_ptr;
 
-    boolean autoRelease = true;
+    boolean released = false;
 
     JSValue(JSContext context, long tag, int u_int32, double u_float64, long u_ptr) {
         this.context = context;
@@ -50,7 +49,7 @@ public class JSValue implements Closeable {
     }
 
     JSValue(JSContext context, JSValue value) {
-//        value.autoRelease = false;
+        value.released = true;
         this.context = context;
         this.tag = value.tag;
         this.u_int32 = value.u_int32;
@@ -67,10 +66,11 @@ public class JSValue implements Closeable {
 
     @Override
     public void close() {
-        if (autoRelease) {
+        if (!released) {
             QuickJS._release(getContextPtr(), this);
             context.releaseObjRef(this);
         }
+        released = true;
     }
 
     public boolean isUndefined() {

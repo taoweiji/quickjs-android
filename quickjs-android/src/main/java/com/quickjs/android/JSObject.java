@@ -190,7 +190,7 @@ public class JSObject extends JSValue {
 
         Undefined(JSContext context, long tag, int u_int32, double u_float64, long u_ptr) {
             super(context, tag, u_int32, u_float64, u_ptr);
-            autoRelease = false;
+            released = true;
         }
 
         @Override
