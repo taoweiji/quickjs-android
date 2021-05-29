@@ -75,7 +75,7 @@ public class QuickJS {
                 return new JSArray(context, tag, u_int32, u_float64, u_ptr);
             case JSValue.TYPE_JS_OBJECT:
             case JSValue.TYPE_UNDEFINED:
-                return new JSObject(context, tag, u_int32, u_float64, u_ptr);
+                return new JSObject.Undefined(context, tag, u_int32, u_float64, u_ptr);
             default:
                 return new JSValue(context, tag, u_int32, u_float64, u_ptr);
         }
@@ -146,6 +146,8 @@ public class QuickJS {
     native static boolean _isUndefined(long contextPtr, JSValue jsValue);
 
     native static JSValue _Undefined(long contextPtr);
+
+    native static JSValue _getValue(long contextPtr, JSObject jsObject, String key);
 
 
     static {

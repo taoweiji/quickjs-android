@@ -101,9 +101,11 @@ public class JSObject extends JSValue {
 
 
     public int getType(String key) {
-        // TODO
-//        long ptr = QuickJS._getObject(this.getContextPtr(), this, key);
-        return QuickJS._getObjectType(this.getContextPtr(), this);
+        JSValue value = QuickJS._getValue(this.getContextPtr(), this, key);
+        if (value == null) {
+            return JSValue.TYPE_NULL;
+        }
+        return value.getJSType();
     }
 
 
@@ -189,5 +191,37 @@ public class JSObject extends JSValue {
 
     Object executeFunction(int expectedType, String name, JSArray parameters) {
         return QuickJS._executeFunction(context.getContextPtr(), expectedType, this, name, parameters);
+    }
+
+    static class Undefined extends JSObject {
+
+        Undefined(JSContext context, long tag, int u_int32, double u_float64, long u_ptr) {
+            super(context, tag, u_int32, u_float64, u_ptr);
+        }
+
+        @Override
+        JSObject setObject(String key, Object value) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        Object get(int expectedType, String key) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public JSObject registerJavaMethod(JavaCallback callback, String jsFunctionName) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public JSObject registerJavaMethod(JavaVoidCallback callback, String jsFunctionName) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        Object executeFunction(int expectedType, String name, JSArray parameters) {
+            throw new UnsupportedOperationException();
+        }
     }
 }
