@@ -21,4 +21,10 @@ public class JSFunction extends JSObject {
         }
         return QuickJS._executeFunction2(context.getContextPtr(), JSValue.TYPE_UNKNOWN, receiver, this, parameters);
     }
+
+    @Override
+    public void close() {
+        super.close();
+        context.functionRegistry.remove(this.tag);
+    }
 }

@@ -2,13 +2,14 @@ package com.quickjs.android;
 
 import androidx.annotation.Keep;
 
+import java.io.Closeable;
 import java.util.HashMap;
 import java.util.Map;
 
 @Keep
-public class QuickJS {
+public class QuickJS implements Closeable {
     private final long runtimePtr;
-    private static final Map<Long, JSContext> sContextMap = new HashMap<>();
+    static final Map<Long, JSContext> sContextMap = new HashMap<>();
 
     private QuickJS(long runtimePtr) {
         this.runtimePtr = runtimePtr;
@@ -40,11 +41,13 @@ public class QuickJS {
     }
 
 
-    static Map<Long, MethodDescriptor> functionRegistry = new HashMap<>();
-
     @Keep
     static void callJavaVoidCallback(long contextPtr, JSValue objectHandle, JSValue functionHandle, JSArray argsHandle) {
-        MethodDescriptor methodDescriptor = functionRegistry.get(functionHandle.tag);
+        JSContext context = sContextMap.get(contextPtr);
+        if (context == null) {
+            return;
+        }
+        MethodDescriptor methodDescriptor = context.functionRegistry.get(functionHandle.tag);
         if (methodDescriptor == null) return;
         JSObject receiver = null;
         if (objectHandle instanceof JSObject) {
@@ -55,7 +58,11 @@ public class QuickJS {
 
     @Keep
     static Object callJavaCallback(long contextPtr, JSValue objectHandle, JSValue functionHandle, JSArray argsHandle) {
-        MethodDescriptor methodDescriptor = functionRegistry.get(functionHandle.tag);
+        JSContext context = sContextMap.get(contextPtr);
+        if (context == null) {
+            return null;
+        }
+        MethodDescriptor methodDescriptor = context.functionRegistry.get(functionHandle.tag);
         if (methodDescriptor == null) return null;
         JSObject receiver = null;
         if (objectHandle instanceof JSObject) {
@@ -63,7 +70,6 @@ public class QuickJS {
         }
         return methodDescriptor.callback.invoke(receiver, argsHandle);
     }
-
 
     @Keep
     static JSValue createJSValue(long contextPtr, int type, long tag, int u_int32, double u_float64, long u_ptr) {
@@ -74,6 +80,7 @@ public class QuickJS {
             case JSValue.TYPE_JS_ARRAY:
                 return new JSArray(context, tag, u_int32, u_float64, u_ptr);
             case JSValue.TYPE_JS_OBJECT:
+                return new JSObject(context, tag, u_int32, u_float64, u_ptr);
             case JSValue.TYPE_UNDEFINED:
                 return new JSObject.Undefined(context, tag, u_int32, u_float64, u_ptr);
             default:

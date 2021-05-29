@@ -151,6 +151,8 @@ jobject To_JObject(JNIEnv *env, jlong context_ptr, int expected_type, JSValue re
     }
     if (JS_IsUndefined(result)) {
         expected_type = TYPE_UNDEFINED;
+    } else if (JS_IsNull(result)) {
+        expected_type = TYPE_NULL;
     }
     switch (expected_type) {
         case TYPE_NULL:

@@ -14,13 +14,6 @@ public class JSObject extends JSValue {
         super(context, tag, u_int32, u_float64, u_ptr);
     }
 
-    // TODO
-//    protected JSObject(JSContext context, Object data) {
-//        this.context = context;
-//        this.initialize(this.context.getContextPtr(), data);
-//    }
-
-
     JSObject setObject(String key, Object value) {
         QuickJS._set(getContextPtr(), this, key, value);
         return this;
@@ -197,6 +190,7 @@ public class JSObject extends JSValue {
 
         Undefined(JSContext context, long tag, int u_int32, double u_float64, long u_ptr) {
             super(context, tag, u_int32, u_float64, u_ptr);
+            autoRelease = false;
         }
 
         @Override
