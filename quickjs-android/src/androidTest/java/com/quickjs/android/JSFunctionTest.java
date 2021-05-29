@@ -26,10 +26,10 @@ public class JSFunctionTest {
 
     @Test
     public void testJavaCallback() {
-        context.set("intFunction", new JSFunction(context, (receiver, args) -> Integer.MAX_VALUE));
-        context.set("doubleFunction", new JSFunction(context, (receiver, args) -> Double.MAX_VALUE));
-        context.set("boolFunction", new JSFunction(context, (receiver, args) -> true));
-        context.set("stringFunction", new JSFunction(context, (receiver, args) -> "Hello"));
+        context.set("intFunction", new JSFunction(context, (JavaCallback) (receiver, array) -> Integer.MAX_VALUE));
+        context.set("doubleFunction", new JSFunction(context, (JavaCallback) (receiver, args) -> Double.MAX_VALUE));
+        context.set("boolFunction", new JSFunction(context, (JavaCallback) (receiver, args) -> true));
+        context.set("stringFunction", new JSFunction(context, (JavaCallback) (receiver, args) -> "Hello"));
         assertEquals(Integer.MAX_VALUE, context.executeIntegerFunction("intFunction", null));
         assertEquals(Double.MAX_VALUE, context.executeDoubleFunction("doubleFunction", null), 1);
         assertTrue(context.executeBooleanFunction("boolFunction", null));
