@@ -149,6 +149,8 @@ public class QuickJS {
 
     native static JSValue _getValue(long contextPtr, JSObject jsObject, String key);
 
+    native static JSValue _arrayGetValue(long contextPtr, JSArray jsArray, int index);
+
 
     static {
         System.loadLibrary("quickjs");
