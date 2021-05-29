@@ -34,6 +34,11 @@ public class QuickJS {
         _releaseRuntime(runtimePtr);
     }
 
+    static class MethodDescriptor {
+        public JavaVoidCallback voidCallback;
+        public JavaCallback callback;
+    }
+
 
     static Map<Long, MethodDescriptor> functionRegistry = new HashMap<>();
 
@@ -41,14 +46,22 @@ public class QuickJS {
     static void callJavaVoidCallback(long contextPtr, JSValue objectHandle, JSValue functionHandle, JSArray argsHandle) {
         MethodDescriptor methodDescriptor = functionRegistry.get(functionHandle.tag);
         if (methodDescriptor == null) return;
-        methodDescriptor.voidCallback.invoke(argsHandle);
+        JSObject receiver = null;
+        if (objectHandle instanceof JSObject) {
+            receiver = (JSObject) objectHandle;
+        }
+        methodDescriptor.voidCallback.invoke(receiver, argsHandle);
     }
 
     @Keep
     static Object callJavaCallback(long contextPtr, JSValue objectHandle, JSValue functionHandle, JSArray argsHandle) {
         MethodDescriptor methodDescriptor = functionRegistry.get(functionHandle.tag);
         if (methodDescriptor == null) return null;
-        return methodDescriptor.callback.invoke(argsHandle);
+        JSObject receiver = null;
+        if (objectHandle instanceof JSObject) {
+            receiver = (JSObject) objectHandle;
+        }
+        return methodDescriptor.callback.invoke(receiver, argsHandle);
     }
 
 
@@ -66,15 +79,6 @@ public class QuickJS {
                 return new JSValue(context, tag, u_int32, u_float64, u_ptr);
         }
     }
-
-    static Object executeFunction(JSContext context, int expectedType, JSValue objectHandle, String name, JSValue parametersHandle) {
-        return _executeFunction(context.getContextPtr(), expectedType, objectHandle, name, parametersHandle);
-    }
-
-//    static Object executeFunction2(JSContext context, int expectedType, JSValue objectHandle, JSValue functionHandle, JSValue parametersHandle) {
-//        return _executeFunction2(context.getContextPtr(), expectedType, objectHandle, functionHandle, parametersHandle);
-//    }
-
 
     static Object executeJSFunction(JSContext context, JSValue objectHandle, String name, Object[] parameters) {
         JSArray args = new JSArray(context);
@@ -95,7 +99,7 @@ public class QuickJS {
                 }
             }
         }
-        return executeFunction(context, JSValue.UNKNOWN, objectHandle, name, args);
+        return _executeFunction(context.getContextPtr(), JSValue.UNKNOWN, objectHandle, name, args);
     }
 
     static native long _createRuntime();
@@ -118,7 +122,7 @@ public class QuickJS {
 
     static native void _arrayAdd(long contextPtr, JSValue objectHandle, Object value);
 
-    private static native Object _executeFunction(long contextPtr, int expectedType, JSValue objectHandle, String name, JSValue parametersHandle);
+    static native Object _executeFunction(long contextPtr, int expectedType, JSValue objectHandle, String name, JSValue parametersHandle);
 
     static native Object _executeFunction2(long contextPtr, int expectedType, JSValue objectHandle, JSValue functionHandle, JSValue parametersHandle);
 

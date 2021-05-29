@@ -188,6 +188,6 @@ public class JSObject extends JSValue {
 
 
     Object executeFunction(int expectedType, String name, JSArray parameters) {
-        return QuickJS.executeFunction(context, expectedType, this, name, parameters);
+        return QuickJS._executeFunction(context.getContextPtr(), expectedType, this, name, parameters);
     }
 }

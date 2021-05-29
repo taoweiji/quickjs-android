@@ -22,9 +22,9 @@ public class JSArrayTest {
 
     @After
     public void tearDown() throws Exception {
-//        array.close();
-//        context.close();
-//        quickJS.close();
+        array.close();
+        context.close();
+        quickJS.close();
     }
 
     @Test
@@ -80,7 +80,8 @@ public class JSArrayTest {
         JSObject user = new JSObject(context);
         user.set("name", "Wiki");
         array.push(user);
-        assertEquals("Wiki", array.getObject(0).getString("name"));
+        String result = array.getObject(0).getString("name");
+        assertEquals("Wiki", result);
         user.close();
     }
 
