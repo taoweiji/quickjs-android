@@ -335,6 +335,16 @@ Java_com_quickjs_android_QuickJS__1arrayGet(JNIEnv *env, jclass clazz, jlong con
 }
 
 extern "C"
+JNIEXPORT jobject JNICALL
+Java_com_quickjs_android_QuickJS__1arrayGetValue(JNIEnv *env, jclass clazz, jlong context_ptr,
+                                                 jobject object_handle, jint index) {
+    auto *ctx = reinterpret_cast<JSContext *>(context_ptr);
+    JSValue this_obj = TO_JS_VALUE(env, object_handle);
+    JSValue result = JS_GetPropertyUint32(ctx, this_obj, index);
+    return TO_JAVA_OBJECT(env, ctx, result);
+}
+
+extern "C"
 JNIEXPORT jboolean JNICALL
 Java_com_quickjs_android_QuickJS__1contains(JNIEnv *env, jclass clazz, jlong context_ptr,
                                             jobject object_handle, jstring key) {

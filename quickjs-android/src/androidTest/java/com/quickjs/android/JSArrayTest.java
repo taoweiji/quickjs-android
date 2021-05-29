@@ -93,4 +93,18 @@ public class JSArrayTest {
         assertEquals("Wiki", array.getArray(0).getString(0));
         user.close();
     }
+
+    @Test
+    public void getType() {
+        JSArray array = new JSArray(context);
+        array.push("1");
+        array.push(1);
+        array.push(true);
+        array.push(1.1);
+        assertEquals(JSValue.TYPE_STRING, array.getType(0));
+        assertEquals(JSValue.TYPE_INTEGER, array.getType(1));
+        assertEquals(JSValue.TYPE_BOOLEAN, array.getType(2));
+        assertEquals(JSValue.TYPE_DOUBLE, array.getType(3));
+        array.close();
+    }
 }
