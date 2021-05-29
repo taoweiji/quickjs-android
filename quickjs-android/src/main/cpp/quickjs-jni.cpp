@@ -310,7 +310,16 @@ Java_com_quickjs_android_QuickJS__1get(JNIEnv *env, jclass clazz, jlong context_
     JSValue result = JS_GetPropertyStr(ctx, this_obj, key_);
     return To_JObject(env, context_ptr, expected_type, result);
 }
-
+extern "C"
+JNIEXPORT jobject JNICALL
+Java_com_quickjs_android_QuickJS__1getValue(JNIEnv *env, jclass clazz, jlong context_ptr,
+                                            jobject object_handle, jstring key) {
+    const char *key_ = env->GetStringUTFChars(key, nullptr);
+    auto *ctx = reinterpret_cast<JSContext *>(context_ptr);
+    JSValue this_obj = TO_JS_VALUE(env, object_handle);
+    JSValue result = JS_GetPropertyStr(ctx, this_obj, key_);
+    return TO_JAVA_OBJECT(env, ctx, result);
+}
 
 
 

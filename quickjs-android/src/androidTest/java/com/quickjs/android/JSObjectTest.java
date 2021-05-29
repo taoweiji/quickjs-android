@@ -224,4 +224,16 @@ public class JSObjectTest {
         context.set("console", console);
         context.executeVoidScript("console.log('Hello')", "file.js");
     }
+
+    @Test
+    public void getType() {
+        context.set("key1", "1");
+        context.set("key2", 1);
+        context.set("key3", true);
+        context.set("key4", 1.1);
+        assertEquals(JSValue.TYPE_STRING, context.getType("key1"));
+        assertEquals(JSValue.TYPE_INTEGER, context.getType("key2"));
+        assertEquals(JSValue.TYPE_BOOLEAN, context.getType("key3"));
+        assertEquals(JSValue.TYPE_DOUBLE, context.getType("key4"));
+    }
 }
