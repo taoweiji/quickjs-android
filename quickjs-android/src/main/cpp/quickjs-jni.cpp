@@ -313,7 +313,7 @@ Java_com_quickjs_android_QuickJS__1get(JNIEnv *env, jclass clazz, jlong context_
     JSValue this_obj = TO_JS_VALUE(env, object_handle);
     JSValue result = JS_GetPropertyStr(ctx, this_obj, key_);
     jobject tmp = To_JObject(env, context_ptr, expected_type, result);
-    JS_FreeValue(ctx, result);
+//    JS_FreeValue(ctx, result);
     return tmp;
 }
 extern "C"
@@ -338,7 +338,7 @@ Java_com_quickjs_android_QuickJS__1arrayGet(JNIEnv *env, jclass clazz, jlong con
     JSValue this_obj = TO_JS_VALUE(env, object_handle);
     JSValue result = JS_GetPropertyUint32(ctx, this_obj, index);
     jobject jo = To_JObject(env, context_ptr, expected_type, result);
-    JS_FreeValue(ctx, result);
+//    JS_FreeValue(ctx, result);
     return jo;
 }
 
@@ -404,7 +404,6 @@ JSValue executeFunction(JNIEnv *env, jlong context_ptr, jobject object_handle, J
     JSValue result = JS_Call(ctx, func, this_obj, argc, argv);
     JS_FreeValue(ctx, func);
     JS_FreeValue(ctx, global);
-    // TODO this_obj 有问题
     if (argv != nullptr) {
         for (int i = 0; i < argc; ++i) {
             JS_FreeValue(ctx, argv[i]);
@@ -461,6 +460,12 @@ callJavaCallback(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *
     }
     jobject objectHandle = TO_JAVA_OBJECT(env, ctx, this_val);
     jobject argsHandle = TO_JAVA_OBJECT(env, ctx, args);
+    JSValue global = JS_GetGlobalObject(ctx);
+    if (global != this_val) {
+        JS_DupValue(ctx, this_val);
+    }
+    JS_FreeValue(ctx, global);
+//    JS_DupValue(ctx,args);
     jobject result = env->CallStaticObjectMethod(quickJSCls, callJavaCallbackMethodID,
                                                  context_ptr,
                                                  callbackId,
