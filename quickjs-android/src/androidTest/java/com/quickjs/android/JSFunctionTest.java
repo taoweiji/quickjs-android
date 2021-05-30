@@ -83,7 +83,7 @@ public class JSFunctionTest {
 
 
     @Test
-    public void testJavaVoidCallback() {
+    public void testJavaCallback4() {
         context.set("test", new JSFunction(context, (receiver, args) -> {
             assertEquals(1, args.getInteger(0));
             assertEquals(3.14, args.getDouble(1), 0);
