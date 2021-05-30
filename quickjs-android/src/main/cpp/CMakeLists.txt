@@ -4,7 +4,8 @@ add_subdirectory(./quickjs)
 add_library(
         ${PROJECT_NAME}
         SHARED
-        quickjs-jni.cpp)
+        quickjs-jni.cpp
+)
 find_library(
         log-lib
         log)
