@@ -384,55 +384,46 @@ Java_com_quickjs_android_QuickJS__1getKeys(JNIEnv *env, jclass clazz, jlong cont
     }
     return stringArray;
 }
+
+JSValue executeFunction(JNIEnv *env, jlong context_ptr, jobject object_handle, JSValue func_obj,
+                        jobject parameters_handle) {
+    auto *ctx = reinterpret_cast<JSContext *>(context_ptr);
+    JSValue this_obj = TO_JS_VALUE(env, object_handle);
+
+    JSValue *argv = nullptr;
+    int argc = 0;
+    if (parameters_handle != nullptr) {
+        JSValue argArray = TO_JS_VALUE(env, parameters_handle);
+        argc = JS_VALUE_GET_INT(JS_GetPropertyStr(ctx, argArray, "length"));
+        argv = new JSValue[argc];
+        for (int i = 0; i < argc; ++i) {
+            argv[i] = JS_DupValue(ctx, JS_GetPropertyUint32(ctx, argArray, i));
+        }
+    }
+    JSValue result = JS_Call(ctx, func_obj, JS_DupValue(ctx, this_obj), argc, argv);
+    if (argv != nullptr) {
+        for (int i = 0; i < argc; ++i) {
+//            JS_FreeValue(ctx, argv[i]);
+        }
+    }
+    JS_FreeValue(ctx, func_obj);
+    JS_FreeValue(ctx, func_obj);
+    return result;
+}
+
+
 extern "C"
 JNIEXPORT jobject JNICALL
 Java_com_quickjs_android_QuickJS__1executeFunction2(JNIEnv *env, jclass clazz, jlong context_ptr,
                                                     jint expected_type, jobject object_handle,
                                                     jobject functionHandle,
                                                     jobject parameters_handle) {
-    auto *ctx = reinterpret_cast<JSContext *>(context_ptr);
-    JSValue this_obj = TO_JS_VALUE(env, object_handle);
     JSValue func_obj = TO_JS_VALUE(env, functionHandle);
-    JSValue *argv = nullptr;
-    int argc = 0;
-    if (parameters_handle != nullptr) {
-        JSValue argArray = TO_JS_VALUE(env, parameters_handle);
-        argc = JS_VALUE_GET_INT(JS_GetPropertyStr(ctx, argArray, "length"));
-        argv = new JSValue[argc];
-        for (int i = 0; i < argc; ++i) {
-            argv[i] = JS_GetPropertyUint32(ctx, argArray, i);
-        }
-    }
-    JSValue result = JS_Call(ctx, func_obj, this_obj, argc, argv);
-    delete argv;
-    return To_JObject(env, context_ptr, expected_type, result);
-}
-
-JSValue executeJSFunction(JNIEnv *env,
-                          jlong context_ptr, jobject object_handle,
-                          jstring name, jobject parameters_handle) {
-    const char *name_ = env->GetStringUTFChars(name, nullptr);
-    auto *ctx = reinterpret_cast<JSContext *>(context_ptr);
-    JSValue this_obj = TO_JS_VALUE(env, object_handle);
-    JSValue func_obj = JS_GetPropertyStr(ctx, this_obj, name_);
-    JSValue *argv = nullptr;
-    int argc = 0;
-    if (parameters_handle != nullptr) {
-        JSValue argArray = TO_JS_VALUE(env, parameters_handle);
-        argc = JS_VALUE_GET_INT(JS_GetPropertyStr(ctx, argArray, "length"));
-        argv = new JSValue[argc];
-        for (int i = 0; i < argc; ++i) {
-            argv[i] = JS_GetPropertyUint32(ctx, argArray, i);
-        }
-    }
-    JSValue result = JS_Call(ctx, func_obj, this_obj, argc, argv);
-    for (int i = 0; i < argc; ++i) {
-        JS_FreeValue(ctx, argv[i]);
-    }
-    delete argv;
-    JS_FreeValue(ctx, func_obj);
+    JSValue value = executeFunction(env, context_ptr, object_handle, func_obj, parameters_handle);
+    jobject result = To_JObject(env, context_ptr, expected_type, value);
     return result;
 }
+
 
 extern "C"
 JNIEXPORT jobject JNICALL
@@ -440,10 +431,11 @@ Java_com_quickjs_android_QuickJS__1executeFunction(JNIEnv *env, jclass clazz, jl
                                                    jint expected_type, jobject object_handle,
                                                    jstring name, jobject parameters_handle) {
     auto *ctx = reinterpret_cast<JSContext *>(context_ptr);
-    JSValue result = executeJSFunction(env, context_ptr, object_handle, name, parameters_handle);
-    jobject jResult = To_JObject(env, context_ptr, expected_type, result);
-    JS_FreeValue(ctx, result);
-    return jResult;
+    JSValue this_obj = TO_JS_VALUE(env, object_handle);
+    JSValue func_obj = JS_GetPropertyStr(ctx, this_obj, env->GetStringUTFChars(name, nullptr));
+    JSValue value = executeFunction(env, context_ptr, object_handle, func_obj, parameters_handle);
+    jobject result = To_JObject(env, context_ptr, expected_type, value);
+    return result;
 }
 
 JSValue
@@ -515,8 +507,8 @@ Java_com_quickjs_android_QuickJS__1initNewJSFunction(JNIEnv *env,
     JSCFunctionData *functionData = void_method ? callJavaVoidCallback : callJavaCallback;
     JSValue func_data = JS_NewArray(ctx);
     JSValue func = JS_NewCFunctionData(ctx, functionData, 1, 0, 1, &func_data);
-    JS_SetPropertyUint32(ctx, func_data, 0, func);
-//    JS_FreeValue(ctx, func_data);
+    JS_SetPropertyUint32(ctx, func_data, 0, JS_DupValue(ctx, func));
+    JS_FreeValue(ctx, func_data);
     return TO_JAVA_OBJECT(env, ctx, func);
 }
 extern "C"

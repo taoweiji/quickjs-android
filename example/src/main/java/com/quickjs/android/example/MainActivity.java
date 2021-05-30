@@ -27,14 +27,14 @@ public class MainActivity extends AppCompatActivity {
 
     void test() {
         QuickJS quickJS = QuickJS.createRuntime();
-        JSContext jsContext = quickJS.createContext();
-
-        JSObject object = new JSObject(jsContext);
-        long start = System.currentTimeMillis();
-        for (int i = 0; i < 10000; i++) {
-            object.set(String.valueOf(i), i);
-        }
-        Log.e("test1", String.valueOf(System.currentTimeMillis() - start));
+        JSContext context = quickJS.createContext();
+        context.executeVoidScript("function test(data){ return data}", "file.js");
+        JSArray array = new JSArray(context);
+        array.push(Integer.MAX_VALUE);
+        int result = context.executeIntegerFunction("test", array);
+        array.close();
+        context.close();
+        quickJS.close();
     }
 
     void testV8() {
