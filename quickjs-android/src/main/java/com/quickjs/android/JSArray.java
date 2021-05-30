@@ -69,10 +69,10 @@ public class JSArray extends JSObject {
         return null;
     }
 
-    public int getType(int index) {
+    public TYPE getType(int index) {
         JSValue value = QuickJS._arrayGetValue(this.getContextPtr(), this, index);
         if (value == null) {
-            return JSValue.TYPE_NULL;
+            return JSValue.TYPE.NULL;
         }
         return value.getJSType();
     }

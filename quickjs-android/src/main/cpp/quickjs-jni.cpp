@@ -401,8 +401,11 @@ JSValue executeFunction(JNIEnv *env, jlong context_ptr, jobject object_handle, J
         }
     }
     JSValue func1 =  func;
+    JSValue this_obj1 = JS_DupValue(ctx,this_obj);
     JSValue result = JS_Call(ctx, func1, JS_UNDEFINED, argc, argv);
     JS_FreeValue(ctx, func1);
+    JS_FreeValue(ctx, this_obj1);
+    // TODO this_obj 有问题
     if (argv != nullptr) {
         for (int i = 0; i < argc; ++i) {
             JS_FreeValue(ctx, argv[i]);
