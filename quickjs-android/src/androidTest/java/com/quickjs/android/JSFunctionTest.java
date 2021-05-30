@@ -30,10 +30,14 @@ public class JSFunctionTest {
         context.set("doubleFunction", new JSFunction(context, (JavaCallback) (receiver, args) -> Double.MAX_VALUE));
         context.set("boolFunction", new JSFunction(context, (JavaCallback) (receiver, args) -> true));
         context.set("stringFunction", new JSFunction(context, (JavaCallback) (receiver, args) -> "Hello"));
+//        context.executeIntegerFunction("intFunction", null);
+//        context.executeIntegerFunction("intFunction", null);
         assertEquals(Integer.MAX_VALUE, context.executeIntegerFunction("intFunction", null));
+        assertEquals(Integer.MAX_VALUE, context.executeIntegerFunction("intFunction", null));
+//
         assertEquals(Double.MAX_VALUE, context.executeDoubleFunction("doubleFunction", null), 1);
-//        assertTrue(context.executeBooleanFunction("boolFunction", null));
-//        assertEquals("Hello", context.executeStringFunction("stringFunction", null));
+        assertTrue(context.executeBooleanFunction("boolFunction", null));
+        assertEquals("Hello", context.executeStringFunction("stringFunction", null));
     }
 
 

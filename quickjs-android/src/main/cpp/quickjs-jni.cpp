@@ -224,7 +224,7 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *) {
     return JNI_VERSION_1_6;
 }
 
-int getArrayLength(JSContext *ctx, JSValue this_obj) {
+int GetArrayLength(JSContext *ctx, JSValue this_obj) {
     JSValue lenValue = JS_GetPropertyStr(ctx, this_obj, "length");
     return JS_VALUE_GET_INT(lenValue);
 }
@@ -385,7 +385,7 @@ Java_com_quickjs_android_QuickJS__1getKeys(JNIEnv *env, jclass clazz, jlong cont
     return stringArray;
 }
 
-JSValue executeFunction(JNIEnv *env, jlong context_ptr, jobject object_handle, JSValue func_obj,
+JSValue executeFunction(JNIEnv *env, jlong context_ptr, jobject object_handle, JSValue func,
                         jobject parameters_handle) {
     auto *ctx = reinterpret_cast<JSContext *>(context_ptr);
     JSValue this_obj = TO_JS_VALUE(env, object_handle);
@@ -394,20 +394,20 @@ JSValue executeFunction(JNIEnv *env, jlong context_ptr, jobject object_handle, J
     int argc = 0;
     if (parameters_handle != nullptr) {
         JSValue argArray = TO_JS_VALUE(env, parameters_handle);
-        argc = JS_VALUE_GET_INT(JS_GetPropertyStr(ctx, argArray, "length"));
+        argc = GetArrayLength(ctx, argArray);
         argv = new JSValue[argc];
         for (int i = 0; i < argc; ++i) {
             argv[i] = JS_DupValue(ctx, JS_GetPropertyUint32(ctx, argArray, i));
         }
     }
-    JSValue result = JS_Call(ctx, func_obj, JS_DupValue(ctx, this_obj), argc, argv);
+    JSValue func1 =  func;
+    JSValue result = JS_Call(ctx, func1, JS_UNDEFINED, argc, argv);
+    JS_FreeValue(ctx, func1);
     if (argv != nullptr) {
         for (int i = 0; i < argc; ++i) {
-//            JS_FreeValue(ctx, argv[i]);
+            JS_FreeValue(ctx, argv[i]);
         }
     }
-    JS_FreeValue(ctx, func_obj);
-    JS_FreeValue(ctx, func_obj);
     return result;
 }
 
@@ -435,6 +435,7 @@ Java_com_quickjs_android_QuickJS__1executeFunction(JNIEnv *env, jclass clazz, jl
     JSValue func_obj = JS_GetPropertyStr(ctx, this_obj, env->GetStringUTFChars(name, nullptr));
     JSValue value = executeFunction(env, context_ptr, object_handle, func_obj, parameters_handle);
     jobject result = To_JObject(env, context_ptr, expected_type, value);
+    JS_FreeValue(ctx, func_obj);
     return result;
 }
 
@@ -574,7 +575,7 @@ Java_com_quickjs_android_QuickJS__1arrayAdd(JNIEnv *env, jclass clazz, jlong con
                                             jobject object_handle, jobject value) {
     auto *ctx = reinterpret_cast<JSContext *>(context_ptr);
     JSValue this_obj = TO_JS_VALUE(env, object_handle);
-    int len = getArrayLength(ctx, this_obj);
+    int len = GetArrayLength(ctx, this_obj);
     if (value == nullptr) {
         JS_SetPropertyUint32(ctx, this_obj, len, JS_NULL);
     } else if (env->IsInstanceOf(value, integerCls)) {
