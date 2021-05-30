@@ -179,10 +179,7 @@ public class JSValue implements Closeable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         JSValue jsValue = (JSValue) o;
-        return tag == jsValue.tag &&
-                u_int32 == jsValue.u_int32 &&
-                Double.compare(jsValue.u_float64, u_float64) == 0 &&
-                u_ptr == jsValue.u_ptr;
+        return jsValue.hashCode() == this.hashCode();
     }
 
     @Override
