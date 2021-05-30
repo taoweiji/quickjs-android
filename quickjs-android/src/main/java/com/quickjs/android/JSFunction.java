@@ -15,11 +15,12 @@ public class JSFunction extends JSObject {
         super(context, tag, u_int32, u_float64, u_ptr);
     }
 
-    public Object call(JSObject receiver, JSArray parameters) {
+    public Object call(JSValue.TYPE type, JSObject receiver, JSArray parameters) {
         if (receiver == null) {
             receiver = context;
         }
-        return QuickJS._executeFunction2(context.getContextPtr(), JSValue.TYPE_UNKNOWN, receiver, this, parameters);
+        Object result = QuickJS._executeFunction2(context.getContextPtr(), type.value, receiver, this, parameters);
+        return JSValue.checkType(result, type);
     }
 
     @Override

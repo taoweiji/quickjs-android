@@ -19,8 +19,9 @@ public class JSObject extends JSValue {
         return this;
     }
 
-    protected Object get(int expectedType, String key) {
-        return QuickJS._get(this.getContextPtr(), expectedType, this, key);
+    protected Object get(TYPE expectedType, String key) {
+        Object object = QuickJS._get(this.getContextPtr(), expectedType.value, this, key);
+        return JSValue.checkType(object, expectedType);
     }
 
 
@@ -45,58 +46,34 @@ public class JSObject extends JSValue {
     }
 
     public int getInteger(String key) {
-        Object result = get(JSValue.TYPE_INTEGER, key);
-        if (result instanceof Integer) {
-            return (int) result;
-        }
-        return 0;
+        return (int) get(JSValue.TYPE.INTEGER, key);
     }
 
     public boolean getBoolean(String key) {
-        Object result = get(JSValue.TYPE_BOOLEAN, key);
-        if (result instanceof Boolean) {
-            return (boolean) result;
-        }
-        return false;
+        return (boolean) get(JSValue.TYPE.BOOLEAN, key);
     }
 
     public double getDouble(String key) {
-        Object result = get(JSValue.TYPE_DOUBLE, key);
-        if (result instanceof Double) {
-            return (double) result;
-        }
-        return 0;
+        return (double) get(JSValue.TYPE.DOUBLE, key);
     }
 
     public String getString(String key) {
-        Object result = get(JSValue.TYPE_STRING, key);
-        if (result instanceof String) {
-            return (String) result;
-        }
-        return null;
+        return (String) get(JSValue.TYPE.STRING, key);
     }
 
     public JSArray getArray(String key) {
-        Object value = get(JSValue.TYPE_JS_ARRAY, key);
-        if (value instanceof JSArray) {
-            return (JSArray) value;
-        }
-        return null;
+        return (JSArray) get(JSValue.TYPE.JS_ARRAY, key);
     }
 
     public JSObject getObject(String key) {
-        Object value = get(JSValue.TYPE_JS_OBJECT, key);
-        if (value instanceof JSObject) {
-            return (JSObject) value;
-        }
-        return null;
+        return (JSObject) get(JSValue.TYPE.JS_OBJECT, key);
     }
 
 
-    public int getType(String key) {
+    public TYPE getType(String key) {
         JSValue value = QuickJS._getValue(this.getContextPtr(), this, key);
         if (value == null) {
-            return JSValue.TYPE_NULL;
+            return TYPE.NULL;
         }
         return value.getJSType();
     }
@@ -114,61 +91,36 @@ public class JSObject extends JSValue {
         return this;
     }
 
-
     public Object executeFunction(String name, JSArray parameters) {
-        return executeFunction(JSValue.TYPE_UNKNOWN, name, parameters);
+        return executeFunction(JSValue.TYPE.UNKNOWN, name, parameters);
     }
 
     public int executeIntegerFunction(String name, JSArray parameters) {
-        Object result = executeFunction(JSValue.TYPE_INTEGER, name, parameters);
-        if (result instanceof Integer) {
-            return (int) result;
-        }
-        return 0;
+        return (int) executeFunction(JSValue.TYPE.INTEGER, name, parameters);
     }
 
     public double executeDoubleFunction(String name, JSArray parameters) {
-        Object result = executeFunction(JSValue.TYPE_DOUBLE, name, parameters);
-        if (result instanceof Double) {
-            return (double) result;
-        }
-        return 0;
+        return (double) executeFunction(JSValue.TYPE.DOUBLE, name, parameters);
     }
 
     public boolean executeBooleanFunction(String name, JSArray parameters) {
-        Object result = executeFunction(JSValue.TYPE_BOOLEAN, name, parameters);
-        if (result instanceof Boolean) {
-            return (boolean) result;
-        }
-        return false;
+        return (boolean) executeFunction(JSValue.TYPE.BOOLEAN, name, parameters);
     }
 
     public String executeStringFunction(String name, JSArray parameters) {
-        Object result = executeFunction(JSValue.TYPE_STRING, name, parameters);
-        if (result instanceof String) {
-            return (String) result;
-        }
-        return null;
+        return (String) executeFunction(JSValue.TYPE.STRING, name, parameters);
     }
 
     public JSArray executeArrayFunction(String name, JSArray parameters) {
-        Object result = executeFunction(JSValue.TYPE_JS_ARRAY, name, parameters);
-        if (result instanceof JSArray) {
-            return (JSArray) result;
-        }
-        return null;
+        return (JSArray) executeFunction(JSValue.TYPE.JS_ARRAY, name, parameters);
     }
 
     public JSObject executeObjectFunction(String name, JSArray parameters) {
-        Object result = executeFunction(JSValue.TYPE_JS_OBJECT, name, parameters);
-        if (result instanceof JSObject) {
-            return (JSObject) result;
-        }
-        return null;
+        return (JSObject) executeFunction(JSValue.TYPE.JS_OBJECT, name, parameters);
     }
 
     public void executeVoidFunction(String name, JSArray parameters) {
-        executeFunction(JSValue.TYPE_NULL, name, parameters);
+        executeFunction(JSValue.TYPE.NULL, name, parameters);
     }
 
     public Object executeFunction2(String name, Object... parameters) {
@@ -184,8 +136,9 @@ public class JSObject extends JSValue {
     }
 
 
-    protected Object executeFunction(int expectedType, String name, JSArray parameters) {
-        return QuickJS._executeFunction(context.getContextPtr(), expectedType, this, name, parameters);
+    protected Object executeFunction(TYPE expectedType, String name, JSArray parameters) {
+        Object object = QuickJS._executeFunction(context.getContextPtr(), expectedType.value, this, name, parameters);
+        return JSValue.checkType(object, expectedType);
     }
 
     static class Undefined extends JSObject {
@@ -201,7 +154,7 @@ public class JSObject extends JSValue {
         }
 
         @Override
-        protected Object get(int expectedType, String key) {
+        protected Object get(TYPE expectedType, String key) {
             throw new UnsupportedOperationException();
         }
 
@@ -216,7 +169,7 @@ public class JSObject extends JSValue {
         }
 
         @Override
-        protected Object executeFunction(int expectedType, String name, JSArray parameters) {
+        protected Object executeFunction(TYPE expectedType, String name, JSArray parameters) {
             throw new UnsupportedOperationException();
         }
     }

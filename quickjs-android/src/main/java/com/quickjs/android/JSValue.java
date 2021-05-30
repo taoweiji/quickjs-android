@@ -36,6 +36,67 @@ public class JSValue implements Closeable {
 
     boolean released = false;
 
+    protected static Object checkType(Object result, TYPE type) {
+        switch (type.value) {
+            case TYPE_UNKNOWN:
+                return result;
+            case TYPE_INTEGER:
+                if (result instanceof Integer) {
+                    return result;
+                }
+                return 0;
+            case TYPE_DOUBLE:
+                if (result instanceof Double) {
+                    return result;
+                }
+                return 0;
+            case TYPE_BOOLEAN:
+                if (result instanceof Boolean) {
+                    return result;
+                }
+                return false;
+            case TYPE_STRING:
+                if (result instanceof String) {
+                    return result;
+                }
+                return null;
+            case TYPE_JS_ARRAY:
+                if (result instanceof JSArray) {
+                    return result;
+                }
+                return null;
+            case TYPE_JS_FUNCTION:
+                if (result instanceof JSFunction) {
+                    return result;
+                }
+                return null;
+            case TYPE_JS_OBJECT:
+                if (result instanceof JSObject) {
+                    return result;
+                }
+                return null;
+        }
+        return null;
+    }
+
+    public enum TYPE {
+        NULL(TYPE_NULL),
+        UNKNOWN(TYPE_UNKNOWN),
+        INTEGER(TYPE_INTEGER),
+        DOUBLE(TYPE_DOUBLE),
+        BOOLEAN(TYPE_BOOLEAN),
+        STRING(TYPE_STRING),
+        JS_ARRAY(TYPE_JS_ARRAY),
+        JS_OBJECT(TYPE_JS_OBJECT),
+        JS_FUNCTION(TYPE_JS_FUNCTION);
+
+        final int value;
+
+        TYPE(int value) {
+            this.value = value;
+        }
+    }
+
     JSValue(JSContext context, long tag, int u_int32, double u_float64, long u_ptr) {
         this.context = context;
         this.tag = tag;
@@ -77,8 +138,27 @@ public class JSValue implements Closeable {
         return QuickJS._isUndefined(getContextPtr(), this);
     }
 
-    public int getJSType() {
-        return QuickJS._getObjectType(getContextPtr(), this);
+    public TYPE getJSType() {
+        int value = QuickJS._getObjectType(getContextPtr(), this);
+        switch (value) {
+            case TYPE_UNKNOWN:
+                return TYPE.UNKNOWN;
+            case TYPE_INTEGER:
+                return TYPE.INTEGER;
+            case TYPE_DOUBLE:
+                return TYPE.DOUBLE;
+            case TYPE_BOOLEAN:
+                return TYPE.BOOLEAN;
+            case TYPE_STRING:
+                return TYPE.STRING;
+            case TYPE_JS_ARRAY:
+                return TYPE.JS_ARRAY;
+            case TYPE_JS_FUNCTION:
+                return TYPE.JS_FUNCTION;
+            case TYPE_JS_OBJECT:
+                return TYPE.JS_OBJECT;
+        }
+        return TYPE.UNKNOWN;
     }
 
     public static JSValue Undefined(JSContext context) {
