@@ -64,6 +64,13 @@ jfieldID js_value_u_int32_id;
 jfieldID js_value_u_float64_id;
 jfieldID js_value_u_ptr_id;
 
+bool JS_Equals(JSValue v1, JSValue v2) {
+#if defined(JS_NAN_BOXING)
+    return v1 == v2;
+#else
+    return v1.tag == v2.tag && v1.u.int32 == v2.u.int32 && v1.u.float64 == v2.u.float64 && v1.u.ptr == v2.u.ptr;
+#endif
+}
 
 JSValue TO_JS_VALUE(JNIEnv *env, jobject object_handle) {
     jlong tag = env->GetLongField(object_handle, js_value_tag_id);
@@ -398,7 +405,8 @@ JSValue executeFunction(JNIEnv *env, jlong context_ptr, jobject object_handle, J
     }
 //    JS_DupValue(ctx, this_obj);
     JSValue global = JS_GetGlobalObject(ctx);
-    if (this_obj == global) {
+
+    if (JS_Equals(this_obj, global)) {
         this_obj = JS_UNDEFINED;
     }
     JSValue result = JS_Call(ctx, func, this_obj, argc, argv);
@@ -409,7 +417,7 @@ JSValue executeFunction(JNIEnv *env, jlong context_ptr, jobject object_handle, J
             JS_FreeValue(ctx, argv[i]);
         }
     }
-    JS_FreeValue(ctx,result);
+    JS_FreeValue(ctx, result);
     return result;
 }
 
@@ -461,7 +469,7 @@ callJavaCallback(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *
     jobject objectHandle = TO_JAVA_OBJECT(env, ctx, this_val);
     jobject argsHandle = TO_JAVA_OBJECT(env, ctx, args);
     JSValue global = JS_GetGlobalObject(ctx);
-    if (global != this_val) {
+    if (!JS_Equals(global, this_val)) {
         JS_DupValue(ctx, this_val);
     }
     JS_FreeValue(ctx, global);

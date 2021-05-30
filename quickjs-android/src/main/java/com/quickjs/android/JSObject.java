@@ -172,5 +172,11 @@ public class JSObject extends JSValue {
         protected Object executeFunction(TYPE expectedType, String name, JSArray parameters) {
             throw new UnsupportedOperationException();
         }
+
+        @Override
+        public int hashCode() {
+            return JSValue.TYPE_UNDEFINED;
+        }
+
     }
 }

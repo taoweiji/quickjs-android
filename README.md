@@ -8,7 +8,7 @@ quickjs-android 是 QuickJS JavaScript 引擎的 JSI 框架，实现了 Java 调
 ##### 引入依赖
 
 ```groovy
-implementation 'io.github.taoweiji.quickjs:quickjs-android:0.1.0'
+implementation 'io.github.taoweiji.quickjs:quickjs-android:1.0.0'
 ```
 
 ##### 简单示例
