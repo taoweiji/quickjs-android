@@ -55,7 +55,6 @@ jmethodID booleanValueMethodID = nullptr;
 
 
 jclass quickJSCls = nullptr;
-jmethodID callJavaVoidCallbackMethodID = nullptr;
 jmethodID callJavaCallbackMethodID = nullptr;
 jmethodID createJSValueMethodID = nullptr;
 
@@ -201,11 +200,8 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *) {
     doubleInitMethodID = env->GetMethodID(doubleCls, "<init>", "(D)V");
     booleanInitMethodID = env->GetMethodID(booleanCls, "<init>", "(Z)V");
 
-    callJavaVoidCallbackMethodID = env->GetStaticMethodID(quickJSCls, "callJavaVoidCallback",
-                                                          "(JILcom/quickjs/android/JSValue;Lcom/quickjs/android/JSArray;)V");
-
     callJavaCallbackMethodID = env->GetStaticMethodID(quickJSCls, "callJavaCallback",
-                                                      "(JILcom/quickjs/android/JSValue;Lcom/quickjs/android/JSArray;)Ljava/lang/Object;");
+                                                      "(JILcom/quickjs/android/JSValue;Lcom/quickjs/android/JSArray;Z)Ljava/lang/Object;");
 
     createJSValueMethodID = env->GetStaticMethodID(quickJSCls, "createJSValue",
                                                    "(JIJIDJ)Lcom/quickjs/android/JSValue;");
@@ -448,6 +444,7 @@ callJavaCallback(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *
     JNIEnv *env;
     jvm->GetEnv((void **) &env, JNI_VERSION_1_6);
     int callbackId = JS_VALUE_GET_INT(func_data[0]);
+    bool void_method = JS_VALUE_GET_BOOL(func_data[1]);
     auto context_ptr = (jlong) ctx;
     JSValue args = JS_NewArray(ctx);
 
@@ -463,7 +460,9 @@ callJavaCallback(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *
                                                  context_ptr,
                                                  callbackId,
                                                  objectHandle,
-                                                 argsHandle);
+                                                 argsHandle,
+                                                 void_method
+    );
     if (result == nullptr) {
         return JS_NULL;
     } else if (env->IsInstanceOf(result, integerCls)) {
@@ -480,36 +479,12 @@ callJavaCallback(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *
     return JS_NULL;
 }
 
-JSValue
-callJavaVoidCallback(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv, int magic,
-                     JSValue *func_data) {
-    JNIEnv *env;
-    jvm->GetEnv((void **) &env, JNI_VERSION_1_6);
-    int callbackId = JS_VALUE_GET_INT(func_data[0]);
-    auto context_ptr = (jlong) ctx;
-    JSValue args = JS_NewArray(ctx);
-    if (argv != nullptr) {
-        for (int i = 0; i < argc; ++i) {
-            JSValue it = argv[i];
-            JS_SetPropertyUint32(ctx, args, i, it);
-        }
-    }
-    jobject objectHandle = TO_JAVA_OBJECT(env, ctx, this_val);
-    jobject argsHandle = TO_JAVA_OBJECT(env, ctx, args);
-    env->CallStaticVoidMethod(quickJSCls, callJavaVoidCallbackMethodID,
-                              context_ptr,
-                              callbackId,
-                              objectHandle,
-                              argsHandle);
-    return JS_NULL;
-}
-
 JSValue newFunction(jlong context_ptr, jboolean void_method, int callbackId) {
     auto *ctx = reinterpret_cast<JSContext *>(context_ptr);
-    JSCFunctionData *functionData = void_method ? callJavaVoidCallback : callJavaCallback;
-    JSValueConst func_data[1];
+    JSValueConst func_data[2];
     func_data[0] = JS_NewInt32(ctx, callbackId);
-    JSValue func = JS_NewCFunctionData(ctx, functionData, 1, 0, 1, func_data);
+    func_data[1] = JS_NewBool(ctx, void_method);
+    JSValue func = JS_NewCFunctionData(ctx, callJavaCallback, 1, 0, 2, func_data);
     return func;
 }
 
