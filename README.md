@@ -2,7 +2,7 @@
 [![Download](https://maven-badges.herokuapp.com/maven-central/io.github.taoweiji.quickjs/quickjs-android/badge.svg)](https://search.maven.org/search?q=io.github.taoweiji.quickjs)
 
 
-quickjs-android 是 QuickJS JavaScript 引擎的 Andoroid 接口框架，实现了 Java 调用内核功能。整体大小仅 500KB，是 Google V8 的不错替代品，启动速度比 V8更快，几乎完美支持[ES2020](https://tc39.github.io/ecma262/)。
+quickjs-android 是 QuickJS JavaScript 引擎的 Andoroid 接口框架，实现了 Java 调用内核功能。armeabi-v7a 的大小仅 350KB，是 Google V8 的不错替代品，启动速度比 V8更快，几乎完美支持[ES2020](https://tc39.github.io/ecma262/)。
 
 ### 使用教程
 
