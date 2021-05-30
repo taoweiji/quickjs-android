@@ -18,7 +18,7 @@ public class JSFunction extends JSObject {
 
     public Object call(JSValue.TYPE type, JSObject receiver, JSArray parameters) {
         if (receiver == null) {
-            receiver = context;
+            receiver = JSValue.Undefined(context);
         }
         Object result = QuickJS._executeFunction2(context.getContextPtr(), type.value, receiver, this, parameters);
         return JSValue.checkType(result, type);

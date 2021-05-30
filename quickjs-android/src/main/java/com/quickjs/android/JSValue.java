@@ -164,8 +164,8 @@ public class JSValue implements Closeable {
         return TYPE.UNKNOWN;
     }
 
-    public static JSValue Undefined(JSContext context) {
-        return QuickJS._Undefined(context.getContextPtr());
+    public static JSObject Undefined(JSContext context) {
+        return (JSObject) QuickJS._Undefined(context.getContextPtr());
     }
 
     public static JSValue NULL() {
