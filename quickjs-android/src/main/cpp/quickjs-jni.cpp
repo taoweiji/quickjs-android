@@ -409,6 +409,7 @@ JSValue executeFunction(JNIEnv *env, jlong context_ptr, jobject object_handle, J
             JS_FreeValue(ctx, argv[i]);
         }
     }
+    JS_FreeValue(ctx,result);
     return result;
 }
 
@@ -438,7 +439,6 @@ Java_com_quickjs_android_QuickJS__1executeFunction(JNIEnv *env, jclass clazz, jl
     JSValue func_obj = JS_GetPropertyStr(ctx, this_obj, env->GetStringUTFChars(name, nullptr));
     JSValue value = executeFunction(env, context_ptr, object_handle, func_obj, parameters_handle);
     jobject result = To_JObject(env, context_ptr, expected_type, value);
-//    JS_FreeValue(ctx, func_obj);
     return result;
 }
 
