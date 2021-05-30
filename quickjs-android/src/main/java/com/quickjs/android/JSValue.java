@@ -82,6 +82,7 @@ public class JSValue implements Closeable {
     public enum TYPE {
         NULL(TYPE_NULL),
         UNKNOWN(TYPE_UNKNOWN),
+        UNDEFINED(TYPE_UNDEFINED),
         INTEGER(TYPE_INTEGER),
         DOUBLE(TYPE_DOUBLE),
         BOOLEAN(TYPE_BOOLEAN),
@@ -141,6 +142,8 @@ public class JSValue implements Closeable {
     public TYPE getJSType() {
         int value = QuickJS._getObjectType(getContextPtr(), this);
         switch (value) {
+            case TYPE_UNDEFINED:
+                return TYPE.UNDEFINED;
             case TYPE_UNKNOWN:
                 return TYPE.UNKNOWN;
             case TYPE_INTEGER:

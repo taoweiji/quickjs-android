@@ -31,7 +31,7 @@ public class JSValueTest {
 
     @Test
     public void getJSType() {
-        assertEquals(JSValue.TYPE_UNDEFINED, JSValue.Undefined(context).getJSType());
+        assertEquals(JSValue.TYPE.UNDEFINED, JSValue.Undefined(context).getJSType());
     }
 
     @Test
