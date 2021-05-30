@@ -396,11 +396,14 @@ JSValue executeFunction(JNIEnv *env, jlong context_ptr, jobject object_handle, J
             argv[i] = JS_DupValue(ctx, JS_GetPropertyUint32(ctx, argArray, i));
         }
     }
-    JSValue func1 = func;
-    JSValue this_obj1 = JS_DupValue(ctx, this_obj);
-    JSValue result = JS_Call(ctx, func1, JS_UNDEFINED, argc, argv);
-    JS_FreeValue(ctx, func1);
-    JS_FreeValue(ctx, this_obj1);
+//    JS_DupValue(ctx, this_obj);
+    JSValue global = JS_GetGlobalObject(ctx);
+    if (this_obj == global) {
+        this_obj = JS_UNDEFINED;
+    }
+    JSValue result = JS_Call(ctx, func, this_obj, argc, argv);
+    JS_FreeValue(ctx, func);
+    JS_FreeValue(ctx, global);
     // TODO this_obj 有问题
     if (argv != nullptr) {
         for (int i = 0; i < argc; ++i) {
@@ -417,7 +420,9 @@ Java_com_quickjs_android_QuickJS__1executeFunction2(JNIEnv *env, jclass clazz, j
                                                     jint expected_type, jobject object_handle,
                                                     jobject functionHandle,
                                                     jobject parameters_handle) {
+    auto *ctx = reinterpret_cast<JSContext *>(context_ptr);
     JSValue func_obj = TO_JS_VALUE(env, functionHandle);
+    JS_DupValue(ctx, func_obj);
     JSValue value = executeFunction(env, context_ptr, object_handle, func_obj, parameters_handle);
     jobject result = To_JObject(env, context_ptr, expected_type, value);
     return result;
@@ -434,7 +439,7 @@ Java_com_quickjs_android_QuickJS__1executeFunction(JNIEnv *env, jclass clazz, jl
     JSValue func_obj = JS_GetPropertyStr(ctx, this_obj, env->GetStringUTFChars(name, nullptr));
     JSValue value = executeFunction(env, context_ptr, object_handle, func_obj, parameters_handle);
     jobject result = To_JObject(env, context_ptr, expected_type, value);
-    JS_FreeValue(ctx, func_obj);
+//    JS_FreeValue(ctx, func_obj);
     return result;
 }
 
