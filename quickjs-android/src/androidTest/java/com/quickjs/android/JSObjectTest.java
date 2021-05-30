@@ -20,7 +20,7 @@ public class JSObjectTest {
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() throws Throwable {
         object.close();
         context.close();
         quickJS.close();
@@ -94,7 +94,7 @@ public class JSObjectTest {
         JSArray array = new JSArray(context);
         array.push(Integer.MAX_VALUE);
         int result = context.executeIntegerFunction("test", array);
-//        array.close();
+        array.close();
         assertEquals(Integer.MAX_VALUE, result);
     }
 
@@ -211,6 +211,7 @@ public class JSObjectTest {
         JSObject value = new JSObject(context);
         value.set("name", "Wiki");
         array.set("www", value);
+        array.set("www", JSValue.NULL());
         value.close();
         array.close();
     }

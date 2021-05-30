@@ -85,6 +85,11 @@ public class JSValue implements Closeable {
         return QuickJS._Undefined(context.getContextPtr());
     }
 
+    public static JSValue NULL() {
+        return null;
+    }
+
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

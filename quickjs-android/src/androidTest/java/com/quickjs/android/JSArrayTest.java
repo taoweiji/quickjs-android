@@ -134,10 +134,17 @@ public class JSArrayTest {
         array.push(value);
         value.set("age", 18);
         assertEquals(18, array.getObject(0).getInteger("age"));
-//        value.close();
-//        array.close();
-
-//        JSArray result = (JSArray) context.executeScript("var a = [];var b = {'c':'Hello'};a.push(b);b['d']='World';a;","file.js");
-//        assertEquals("World",result.getObject(0).getString("d"));
     }
+
+    @Test
+    public void test3() {
+        JSArray array = new JSArray(context);
+        JSObject value = new JSObject(context);
+        value.set("name", "Wiki");
+        array.push(value);
+        value.set("age", 18);
+        assertEquals(18, array.getObject(0).getInteger("age"));
+    }
+
+
 }
