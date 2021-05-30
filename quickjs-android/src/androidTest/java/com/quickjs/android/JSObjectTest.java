@@ -194,6 +194,31 @@ public class JSObjectTest {
     }
 
     @Test
+    public void registerJavaMethod() {
+        final String[] tmp = new String[1];
+        context.registerJavaMethod((receiver, args) -> {
+            tmp[0] = args.getString(0);
+        }, "log");
+        context.executeVoidScript("log('Hello')", "file.js");
+        assertEquals("Hello", tmp[0]);
+
+        context.executeVoidScript("log('Hello')", "file.js");
+        assertEquals("Hello", tmp[0]);
+
+
+    }
+
+    @Test
+    public void registerJavaMethod2() {
+        context.registerJavaMethod((JavaCallback) (receiver, array) -> Integer.MAX_VALUE, "log");
+        assertEquals(Integer.MAX_VALUE, context.executeIntegerScript("log()", "file.js"));
+        assertEquals(Integer.MAX_VALUE, context.executeIntegerScript("log()", "file.js"));
+//        context.executeVoidScript("log()", "file.js");
+//        context.executeVoidScript("log()", "file.js");
+    }
+
+
+    @Test
     public void getType() {
         context.set("key1", "1");
         context.set("key2", 1);
