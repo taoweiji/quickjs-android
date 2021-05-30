@@ -134,21 +134,19 @@ public class JSObjectTest {
         JSArray arg = new JSArray(context);
         arg.push("Hello");
         array.push(arg);
-        Object result = context.executeArrayFunction("test", array);
-//        assertEquals("Hello", result);
-//        array.close();
+        JSArray result = context.executeArrayFunction("test", array);
+        assertEquals("Hello", result.getString(0));
     }
 
     @Test
     public void executeObjectFunction() {
-//        context.executeVoidScript("function test(data){ return data}", "file.js");
+        context.executeVoidScript("function test(data){ return data}", "file.js");
         JSArray array = new JSArray(context);
         JSObject value = new JSObject(context);
         value.set("name", "Wiki");
         array.push(value);
-//        JSObject result = context.executeObjectFunction("test", array);
-//        array.close();
-//        assertEquals("Wiki", result.getString("name"));
+        JSObject result = context.executeObjectFunction("test", array);
+        assertEquals("Wiki", result.getString("name"));
     }
 
 
