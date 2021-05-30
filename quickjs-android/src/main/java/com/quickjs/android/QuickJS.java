@@ -35,22 +35,7 @@ public class QuickJS implements Closeable {
     }
 
     @Keep
-    static void callJavaVoidCallback(long context_ptr, int javaCallerId, JSValue objectHandle, JSArray argsHandle) {
-        JSContext context = sContextMap.get(context_ptr);
-        if (context == null) {
-            return;
-        }
-        MethodDescriptor methodDescriptor = context.functionRegistry.get(javaCallerId);
-        if (methodDescriptor == null) return;
-        JSObject receiver = null;
-        if (objectHandle instanceof JSObject) {
-            receiver = (JSObject) objectHandle;
-        }
-        methodDescriptor.voidCallback.invoke(receiver, argsHandle);
-    }
-
-    @Keep
-    static Object callJavaCallback(long context_ptr, int javaCallerId, JSValue objectHandle, JSArray argsHandle) {
+    static Object callJavaCallback(long context_ptr, int javaCallerId, JSValue objectHandle, JSArray argsHandle, boolean void_method) {
         JSContext context = sContextMap.get(context_ptr);
         if (context == null) {
             return null;
@@ -60,6 +45,10 @@ public class QuickJS implements Closeable {
         JSObject receiver = null;
         if (objectHandle instanceof JSObject) {
             receiver = (JSObject) objectHandle;
+        }
+        if (void_method) {
+            methodDescriptor.voidCallback.invoke(receiver, argsHandle);
+            return null;
         }
         return methodDescriptor.callback.invoke(receiver, argsHandle);
     }
