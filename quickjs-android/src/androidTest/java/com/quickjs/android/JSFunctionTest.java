@@ -26,6 +26,7 @@ public class JSFunctionTest {
 
     @Test
     public void testJavaCallback0() {
+        // ok
         context.set("intFunction", new JSFunction(context, (JavaCallback) (receiver, array) -> Integer.MAX_VALUE));
         context.set("doubleFunction", new JSFunction(context, (JavaCallback) (receiver, args) -> Double.MAX_VALUE));
         context.set("boolFunction", new JSFunction(context, (JavaCallback) (receiver, args) -> true));
@@ -38,15 +39,31 @@ public class JSFunctionTest {
     }
 
     @Test
+    public void testJavaCallback1_1() {
+        // ok
+        JSObject console = new JSObject(context);
+        console.registerJavaMethod(((JavaCallback) (receiver, array) -> Integer.MAX_VALUE), "intFunction");
+        context.set("console", console);
+        context.executeVoidScript("console.intFunction()", "file.js");
+
+//        console.executeIntegerFunction("intFunction", null);
+
+    }
+
+
+    @Test
     public void testJavaCallback1() {
+        // ok
         JSObject console = new JSObject(context);
         console.set("intFunction", new JSFunction(context, (JavaCallback) (receiver, array) -> Integer.MAX_VALUE));
-        console.set("doubleFunction", new JSFunction(context, (JavaCallback) (receiver, args) -> Double.MAX_VALUE));
-        console.set("boolFunction", new JSFunction(context, (JavaCallback) (receiver, args) -> true));
-        console.set("stringFunction", new JSFunction(context, (JavaCallback) (receiver, args) -> "Hello"));
+        context.set("console", console);
+//        console.set("doubleFunction", new JSFunction(context, (JavaCallback) (receiver, args) -> Double.MAX_VALUE));
+//        console.set("boolFunction", new JSFunction(context, (JavaCallback) (receiver, args) -> true));
+//        console.set("stringFunction", new JSFunction(context, (JavaCallback) (receiver, args) -> "Hello"));
+        context.executeVoidScript("console.intFunction()", "file.js");
 
-        console.executeIntegerFunction("intFunction", null);
-        console.executeIntegerFunction("intFunction", null);
+//        console.executeIntegerFunction("intFunction", null);
+//        console.executeIntegerFunction("intFunction", null);
 
 //        assertEquals(Integer.MAX_VALUE, context.executeIntegerFunction("intFunction", null));
 //        assertEquals(Double.MAX_VALUE, context.executeDoubleFunction("doubleFunction", null), 1);
@@ -57,7 +74,7 @@ public class JSFunctionTest {
 
     @Test
     public void testJavaCallback2() {
-        // 以这个为主，解决注入方法
+        // ok
         context.set("intFunction", new JSFunction(context, (JavaCallback) (receiver, array) -> Integer.MAX_VALUE));
         context.set("doubleFunction", new JSFunction(context, (JavaCallback) (receiver, args) -> Double.MAX_VALUE));
         context.set("boolFunction", new JSFunction(context, (JavaCallback) (receiver, args) -> true));
@@ -75,15 +92,20 @@ public class JSFunctionTest {
         context.set("boolFunction", new JSFunction(context, (JavaCallback) (receiver, args) -> true));
         context.set("stringFunction", new JSFunction(context, (JavaCallback) (receiver, args) -> "Hello"));
 
-        assertEquals(Integer.MAX_VALUE, ((JSFunction) context.getObject("intFunction")).call(JSValue.TYPE.INTEGER, context, null));
-        assertEquals(Double.MAX_VALUE, (Double) ((JSFunction) context.getObject("doubleFunction")).call(JSValue.TYPE.DOUBLE, context, null), 0);
-        assertEquals("Hello", ((JSFunction) context.getObject("stringFunction")).call(JSValue.TYPE.STRING, context, null));
-        assertTrue((Boolean) ((JSFunction) context.getObject("boolFunction")).call(JSValue.TYPE.BOOLEAN, context, null));
+        context.executeVoidFunction("intFunction", null);
+        JSFunction function = (JSFunction) context.getObject("intFunction");
+        function.call(JSValue.TYPE.INTEGER, null, null);
+
+//        assertEquals(Integer.MAX_VALUE, ((JSFunction) context.getObject("intFunction")).call(JSValue.TYPE.INTEGER, context, null));
+//        assertEquals(Double.MAX_VALUE, (Double) ((JSFunction) context.getObject("doubleFunction")).call(JSValue.TYPE.DOUBLE, context, null), 0);
+//        assertEquals("Hello", ((JSFunction) context.getObject("stringFunction")).call(JSValue.TYPE.STRING, context, null));
+//        assertTrue((Boolean) ((JSFunction) context.getObject("boolFunction")).call(JSValue.TYPE.BOOLEAN, context, null));
     }
 
 
     @Test
     public void testJavaCallback4() {
+        // ok
         context.set("test", new JSFunction(context, (receiver, args) -> {
             assertEquals(1, args.getInteger(0));
             assertEquals(3.14, args.getDouble(1), 0);
@@ -105,6 +127,7 @@ public class JSFunctionTest {
 
     @Test
     public void call1() {
+        // ok
         context.executeVoidScript("function test(data){return 'Hello'}", "file.js");
         assertEquals("Hello", context.executeStringFunction("test", null));
         assertEquals("Hello", context.executeStringFunction("test", null));
@@ -137,7 +160,7 @@ public class JSFunctionTest {
         }, "test");
         JSFunction function = (JSFunction) context.getObject("test");
         JSArray parameters = new JSArray(context).push("Hello").push(3.14);
-        assertEquals(3.14, function.call(JSValue.TYPE.STRING, context, parameters));
-        assertEquals(3.14, function.call(JSValue.TYPE.STRING, context, parameters));
+        assertEquals(3.14, function.call(JSValue.TYPE.DOUBLE, context, parameters));
+        assertEquals(3.14, function.call(JSValue.TYPE.DOUBLE, context, parameters));
     }
 }

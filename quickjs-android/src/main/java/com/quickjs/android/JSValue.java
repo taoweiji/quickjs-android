@@ -110,7 +110,8 @@ public class JSValue implements Closeable {
     }
 
     JSValue(JSContext context, JSValue value) {
-//        value.released = true;
+        // 赋值给新的对象，原来的对象就要标记成销毁
+        value.released = true;
         this.context = context;
         this.tag = value.tag;
         this.u_int32 = value.u_int32;

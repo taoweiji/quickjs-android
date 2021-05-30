@@ -3,13 +3,14 @@ package com.quickjs.android;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
 public class JSContext extends JSObject {
     private final long contextPtr;
     Map<Integer, QuickJS.MethodDescriptor> functionRegistry = new HashMap<>();
-    final Set<JSValue> refs = new HashSet<>();
+    final LinkedList<JSValue> refs = new LinkedList<>();
 
     JSContext(long contextPtr) {
         super(null, QuickJS._getGlobalObject(contextPtr));
