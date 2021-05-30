@@ -8,8 +8,8 @@ import java.util.Set;
 
 public class JSContext extends JSObject {
     private final long contextPtr;
-    Map<Long, QuickJS.MethodDescriptor> functionRegistry = new HashMap<>();
-     final Set<JSValue> refs = new HashSet<>();
+    Map<Integer, QuickJS.MethodDescriptor> functionRegistry = new HashMap<>();
+    final Set<JSValue> refs = new HashSet<>();
 
     JSContext(long contextPtr) {
         super(null, QuickJS._getGlobalObject(contextPtr));
@@ -85,13 +85,13 @@ public class JSContext extends JSObject {
     void registerCallback(JavaCallback callback, JSFunction functionHandle) {
         QuickJS.MethodDescriptor methodDescriptor = new QuickJS.MethodDescriptor();
         methodDescriptor.callback = callback;
-        functionRegistry.put(functionHandle.tag, methodDescriptor);
+        functionRegistry.put(callback.hashCode(), methodDescriptor);
     }
 
     void registerCallback(JavaVoidCallback callback, JSFunction functionHandle) {
         QuickJS.MethodDescriptor methodDescriptor = new QuickJS.MethodDescriptor();
         methodDescriptor.voidCallback = callback;
-        functionRegistry.put(functionHandle.tag, methodDescriptor);
+        functionRegistry.put(callback.hashCode(), methodDescriptor);
     }
 
 }

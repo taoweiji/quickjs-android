@@ -1,13 +1,14 @@
 package com.quickjs.android;
 
 public class JSFunction extends JSObject {
+
     public JSFunction(JSContext context, JavaCallback callback) {
-        super(context, QuickJS._initNewJSFunction(context.getContextPtr(), false));
+        super(context, QuickJS._initNewJSFunction(context.getContextPtr(), callback.hashCode(), false));
         this.context.registerCallback(callback, this);
     }
 
     public JSFunction(JSContext context, JavaVoidCallback callback) {
-        super(context, QuickJS._initNewJSFunction(context.getContextPtr(), true));
+        super(context, QuickJS._initNewJSFunction(context.getContextPtr(), callback.hashCode(), true));
         this.context.registerCallback(callback, this);
     }
 
@@ -26,6 +27,7 @@ public class JSFunction extends JSObject {
     @Override
     public void close() {
         super.close();
-        context.functionRegistry.remove(this.tag);
+        // TODO
+//        context.functionRegistry.remove(this.tag);
     }
 }

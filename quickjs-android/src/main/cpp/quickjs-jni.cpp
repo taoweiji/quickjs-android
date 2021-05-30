@@ -202,10 +202,10 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *) {
     booleanInitMethodID = env->GetMethodID(booleanCls, "<init>", "(Z)V");
 
     callJavaVoidCallbackMethodID = env->GetStaticMethodID(quickJSCls, "callJavaVoidCallback",
-                                                          "(Lcom/quickjs/android/JSValue;Lcom/quickjs/android/JSValue;Lcom/quickjs/android/JSArray;)V");
+                                                          "(JILcom/quickjs/android/JSValue;Lcom/quickjs/android/JSArray;)V");
 
     callJavaCallbackMethodID = env->GetStaticMethodID(quickJSCls, "callJavaCallback",
-                                                      "(Lcom/quickjs/android/JSValue;Lcom/quickjs/android/JSValue;Lcom/quickjs/android/JSArray;)Ljava/lang/Object;");
+                                                      "(JILcom/quickjs/android/JSValue;Lcom/quickjs/android/JSArray;)Ljava/lang/Object;");
 
     createJSValueMethodID = env->GetStaticMethodID(quickJSCls, "createJSValue",
                                                    "(JIJIDJ)Lcom/quickjs/android/JSValue;");
@@ -400,8 +400,8 @@ JSValue executeFunction(JNIEnv *env, jlong context_ptr, jobject object_handle, J
             argv[i] = JS_DupValue(ctx, JS_GetPropertyUint32(ctx, argArray, i));
         }
     }
-    JSValue func1 =  func;
-    JSValue this_obj1 = JS_DupValue(ctx,this_obj);
+    JSValue func1 = func;
+    JSValue this_obj1 = JS_DupValue(ctx, this_obj);
     JSValue result = JS_Call(ctx, func1, JS_UNDEFINED, argc, argv);
     JS_FreeValue(ctx, func1);
     JS_FreeValue(ctx, this_obj1);
@@ -447,8 +447,10 @@ callJavaCallback(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *
                  JSValue *func_data) {
     JNIEnv *env;
     jvm->GetEnv((void **) &env, JNI_VERSION_1_6);
-    JSValue func = JS_GetPropertyUint32(ctx, *func_data, 0);
+    int callbackId = JS_VALUE_GET_INT(func_data[0]);
+    auto context_ptr = (jlong) ctx;
     JSValue args = JS_NewArray(ctx);
+
     if (argv != nullptr) {
         for (int i = 0; i < argc; ++i) {
             JSValue it = argv[i];
@@ -456,11 +458,11 @@ callJavaCallback(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *
         }
     }
     jobject objectHandle = TO_JAVA_OBJECT(env, ctx, this_val);
-    jobject functionHandle = TO_JAVA_OBJECT(env, ctx, func);
     jobject argsHandle = TO_JAVA_OBJECT(env, ctx, args);
     jobject result = env->CallStaticObjectMethod(quickJSCls, callJavaCallbackMethodID,
+                                                 context_ptr,
+                                                 callbackId,
                                                  objectHandle,
-                                                 functionHandle,
                                                  argsHandle);
     if (result == nullptr) {
         return JS_NULL;
@@ -483,7 +485,8 @@ callJavaVoidCallback(JSContext *ctx, JSValueConst this_val, int argc, JSValueCon
                      JSValue *func_data) {
     JNIEnv *env;
     jvm->GetEnv((void **) &env, JNI_VERSION_1_6);
-    JSValue func = JS_GetPropertyUint32(ctx, *func_data, 0);
+    int callbackId = JS_VALUE_GET_INT(func_data[0]);
+    auto context_ptr = (jlong) ctx;
     JSValue args = JS_NewArray(ctx);
     if (argv != nullptr) {
         for (int i = 0; i < argc; ++i) {
@@ -492,13 +495,22 @@ callJavaVoidCallback(JSContext *ctx, JSValueConst this_val, int argc, JSValueCon
         }
     }
     jobject objectHandle = TO_JAVA_OBJECT(env, ctx, this_val);
-    jobject functionHandle = TO_JAVA_OBJECT(env, ctx, func);
     jobject argsHandle = TO_JAVA_OBJECT(env, ctx, args);
     env->CallStaticVoidMethod(quickJSCls, callJavaVoidCallbackMethodID,
+                              context_ptr,
+                              callbackId,
                               objectHandle,
-                              functionHandle,
                               argsHandle);
     return JS_NULL;
+}
+
+JSValue newFunction(jlong context_ptr, jboolean void_method, int callbackId) {
+    auto *ctx = reinterpret_cast<JSContext *>(context_ptr);
+    JSCFunctionData *functionData = void_method ? callJavaVoidCallback : callJavaCallback;
+    JSValueConst func_data[1];
+    func_data[0] = JS_NewInt32(ctx, callbackId);
+    JSValue func = JS_NewCFunctionData(ctx, functionData, 1, 0, 1, func_data);
+    return func;
 }
 
 extern "C"
@@ -506,29 +518,23 @@ JNIEXPORT jobject JNICALL
 Java_com_quickjs_android_QuickJS__1initNewJSFunction(JNIEnv *env,
                                                      jclass clazz,
                                                      jlong context_ptr,
+                                                     jint callbackId,
                                                      jboolean void_method) {
     auto *ctx = reinterpret_cast<JSContext *>(context_ptr);
-    JSCFunctionData *functionData = void_method ? callJavaVoidCallback : callJavaCallback;
-    JSValue func_data = JS_NewArray(ctx);
-    JSValue func = JS_NewCFunctionData(ctx, functionData, 1, 0, 1, &func_data);
-    JS_SetPropertyUint32(ctx, func_data, 0, JS_DupValue(ctx, func));
-    JS_FreeValue(ctx, func_data);
+    JSValue func = newFunction(context_ptr, void_method, callbackId);
     return TO_JAVA_OBJECT(env, ctx, func);
 }
 extern "C"
 JNIEXPORT jobject JNICALL
 Java_com_quickjs_android_QuickJS__1registerJavaMethod(JNIEnv *env, jclass clazz, jlong context_ptr,
                                                       jobject object_handle, jstring function_name,
+                                                      jint callbackId,
                                                       jboolean void_method) {
+    const char *name_ = env->GetStringUTFChars(function_name, nullptr);
     auto *ctx = reinterpret_cast<JSContext *>(context_ptr);
-    JSCFunctionData *functionData = void_method ? callJavaVoidCallback : callJavaCallback;
-    JSValue func_data = JS_NewArray(ctx);
-    JSValue func = JS_NewCFunctionData(ctx, functionData, 1, 0, 1, &func_data);
-    JS_SetPropertyUint32(ctx, func_data, 0, func);
+    JSValue func = newFunction(context_ptr, void_method, callbackId);
     JSValue this_obj = TO_JS_VALUE(env, object_handle);
-    JS_SetPropertyStr(ctx, this_obj, env->GetStringUTFChars(function_name, nullptr),
-                      JS_DupValue(ctx, func));
-    JS_FreeValue(ctx, func_data);
+    JS_SetPropertyStr(ctx, this_obj, name_, JS_DupValue(ctx, func));
     return TO_JAVA_OBJECT(env, ctx, func);
 }
 

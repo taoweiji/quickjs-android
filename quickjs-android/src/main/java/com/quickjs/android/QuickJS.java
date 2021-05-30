@@ -35,12 +35,12 @@ public class QuickJS implements Closeable {
     }
 
     @Keep
-    static void callJavaVoidCallback(JSValue objectHandle, JSValue functionHandle, JSArray argsHandle) {
-        JSContext context = sContextMap.get(functionHandle.context.getContextPtr());
+    static void callJavaVoidCallback(long context_ptr, int javaCallerId, JSValue objectHandle, JSArray argsHandle) {
+        JSContext context = sContextMap.get(context_ptr);
         if (context == null) {
             return;
         }
-        MethodDescriptor methodDescriptor = context.functionRegistry.get(functionHandle.tag);
+        MethodDescriptor methodDescriptor = context.functionRegistry.get(javaCallerId);
         if (methodDescriptor == null) return;
         JSObject receiver = null;
         if (objectHandle instanceof JSObject) {
@@ -50,12 +50,12 @@ public class QuickJS implements Closeable {
     }
 
     @Keep
-    static Object callJavaCallback(JSValue objectHandle, JSValue functionHandle, JSArray argsHandle) {
-        JSContext context = sContextMap.get(functionHandle.context.getContextPtr());
+    static Object callJavaCallback(long context_ptr, int javaCallerId, JSValue objectHandle, JSArray argsHandle) {
+        JSContext context = sContextMap.get(context_ptr);
         if (context == null) {
             return null;
         }
-        MethodDescriptor methodDescriptor = context.functionRegistry.get(functionHandle.tag);
+        MethodDescriptor methodDescriptor = context.functionRegistry.get(javaCallerId);
         if (methodDescriptor == null) return null;
         JSObject receiver = null;
         if (objectHandle instanceof JSObject) {
@@ -131,11 +131,11 @@ public class QuickJS implements Closeable {
 
     static native JSArray _initNewJSArray(long contextPtr);
 
-    native static JSFunction _initNewJSFunction(long contextPtr, boolean voidMethod);
+    native static JSFunction _initNewJSFunction(long contextPtr, int javaCallerId, boolean voidMethod);
 
     static native void _release(long contextPtr, JSValue objectHandle);
 
-    static native JSFunction _registerJavaMethod(long contextPtr, JSValue objectHandle, String jsFunctionName, boolean voidMethod);
+    static native JSFunction _registerJavaMethod(long contextPtr, JSValue objectHandle, String jsFunctionName, int javaCallerId, boolean voidMethod);
 
     native static int _getObjectType(long contextPtr, JSValue objectHandle);
 
