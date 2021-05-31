@@ -1,5 +1,7 @@
 package com.quickjs;
 
+import android.util.Log;
+
 import com.quickjs.JSArray;
 import com.quickjs.JSContext;
 import com.quickjs.JSFunction;
@@ -9,6 +11,8 @@ import com.quickjs.QuickJS;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.Arrays;
 
 import static org.junit.Assert.*;
 
@@ -94,12 +98,15 @@ public class JSContextTest {
 
     @Test
     public void executeObjectScriptException() {
-        context.executeVoidScript("a.ss()", "file.js");
-//        assertEquals(JSObject.class, result5.getClass());
-//        Object result7 = context.executeScript("function test(data){return data};test", "file.js");
-//        assertEquals(JSFunction.class, result7.getClass());
+        context.executeVoidScript("function test1(params) {\n" +
+                "    params.say();\n" +
+                "}\n" +
+                "function test2(params) {\n" +
+                "    test1(params);\n" +
+                "}\n" +
+                "function test3(params) {\n" +
+                "    test2(params);\n" +
+                "}\n" +
+                "test3(\"\");", "file.js");
     }
-
-
-
 }
