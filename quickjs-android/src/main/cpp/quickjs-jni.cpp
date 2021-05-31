@@ -403,7 +403,6 @@ JSValue executeFunction(JNIEnv *env, jlong context_ptr, jobject object_handle, J
             argv[i] = JS_DupValue(ctx, JS_GetPropertyUint32(ctx, argArray, i));
         }
     }
-//    JS_DupValue(ctx, this_obj);
     JSValue global = JS_GetGlobalObject(ctx);
 
     if (JS_Equals(this_obj, global)) {
@@ -473,7 +472,6 @@ callJavaCallback(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *
         JS_DupValue(ctx, this_val);
     }
     JS_FreeValue(ctx, global);
-//    JS_DupValue(ctx,args);
     jobject result = env->CallStaticObjectMethod(quickJSCls, callJavaCallbackMethodID,
                                                  context_ptr,
                                                  callbackId,
@@ -565,7 +563,6 @@ Java_com_quickjs_QuickJS__1set(JNIEnv *env, jclass clazz, jlong context_ptr,
         const char *value_ = env->GetStringUTFChars((jstring) value, nullptr);
         JS_SetPropertyStr(ctx, this_obj, key_, JS_NewString(ctx, value_));
     } else if (env->IsInstanceOf(value, jsValueCls)) {
-        // TODO 导致内存泄漏
         JSValue tmp = JS_DupValue(ctx, TO_JS_VALUE(env, value));
         JS_SetPropertyStr(ctx, this_obj, key_, tmp);
     }
@@ -596,7 +593,6 @@ Java_com_quickjs_QuickJS__1arrayAdd(JNIEnv *env, jclass clazz, jlong context_ptr
         const char *value_ = env->GetStringUTFChars((jstring) value, nullptr);
         JS_SetPropertyUint32(ctx, this_obj, len, JS_NewString(ctx, value_));
     } else if (env->IsInstanceOf(value, jsValueCls)) {
-        // TODO 导致内存泄漏
         JSValue tmp = JS_DupValue(ctx, TO_JS_VALUE(env, value));
         JS_SetPropertyUint32(ctx, this_obj, len, tmp);
     }

@@ -90,4 +90,16 @@ public class JSContextTest {
         Object result7 = context.executeScript("function test(data){return data};test", "file.js");
         assertEquals(JSFunction.class, result7.getClass());
     }
+
+
+    @Test
+    public void executeObjectScriptException() {
+        context.executeVoidScript("a.ss()", "file.js");
+//        assertEquals(JSObject.class, result5.getClass());
+//        Object result7 = context.executeScript("function test(data){return data};test", "file.js");
+//        assertEquals(JSFunction.class, result7.getClass());
+    }
+
+
+
 }
