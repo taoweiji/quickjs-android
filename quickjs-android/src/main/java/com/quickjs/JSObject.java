@@ -6,7 +6,7 @@ public class JSObject extends JSValue {
         super(context, QuickJS._initNewJSObject(context.getContextPtr()));
     }
 
-    public JSObject(JSContext context, JSValue value) {
+    JSObject(JSContext context, JSValue value) {
         super(context, value);
     }
 
@@ -124,7 +124,7 @@ public class JSObject extends JSValue {
     }
 
     public Object executeFunction2(String name, Object... parameters) {
-        return QuickJS.executeJSFunction(context, this, name, parameters);
+        return QuickJS.executeFunction(context, this, name, parameters);
     }
 
     public boolean contains(String key) {
