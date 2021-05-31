@@ -98,15 +98,20 @@ public class JSContextTest {
 
     @Test
     public void executeObjectScriptException() {
-        context.executeVoidScript("function test1(params) {\n" +
-                "    params.say();\n" +
-                "}\n" +
-                "function test2(params) {\n" +
-                "    test1(params);\n" +
-                "}\n" +
-                "function test3(params) {\n" +
-                "    test2(params);\n" +
-                "}\n" +
-                "test3(\"\");", "file.js");
+        try {
+            context.executeVoidScript("function test1(params) {\n" +
+                    "    params.say();\n" +
+                    "}\n" +
+                    "function test2(params) {\n" +
+                    "    test1(params);\n" +
+                    "}\n" +
+                    "function test3(params) {\n" +
+                    "    test2(params);\n" +
+                    "}\n" +
+                    "test3(\"\");", "file.js");
+            throw new Exception();
+        } catch (Exception e) {
+            assertEquals(QuickJSException.class, e.getClass());
+        }
     }
 }
