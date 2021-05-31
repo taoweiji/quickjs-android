@@ -1,4 +1,4 @@
-package com.quickjs.android;
+package com.quickjs;
 
 public class JSArray extends JSObject {
 
@@ -74,7 +74,7 @@ public class JSArray extends JSObject {
         if (value == null) {
             return JSValue.TYPE.NULL;
         }
-        return value.getJSType();
+        return value.getType();
     }
 
     public JSArray push(int value) {

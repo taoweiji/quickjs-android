@@ -200,7 +200,7 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *) {
     doubleCls = (jclass) env->NewGlobalRef((env)->FindClass("java/lang/Double"));
     booleanCls = (jclass) env->NewGlobalRef((env)->FindClass("java/lang/Boolean"));
     stringCls = (jclass) env->NewGlobalRef((env)->FindClass("java/lang/String"));
-    quickJSCls = (jclass) env->NewGlobalRef((env)->FindClass("com/quickjs/android/QuickJS"));
+    quickJSCls = (jclass) env->NewGlobalRef((env)->FindClass("com/quickjs/QuickJS"));
 
     integerInitMethodID = env->GetMethodID(integerCls, "<init>", "(I)V");
     longInitMethodID = env->GetMethodID(longCls, "<init>", "(J)V");
@@ -208,10 +208,10 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *) {
     booleanInitMethodID = env->GetMethodID(booleanCls, "<init>", "(Z)V");
 
     callJavaCallbackMethodID = env->GetStaticMethodID(quickJSCls, "callJavaCallback",
-                                                      "(JILcom/quickjs/android/JSValue;Lcom/quickjs/android/JSArray;Z)Ljava/lang/Object;");
+                                                      "(JILcom/quickjs/JSValue;Lcom/quickjs/JSArray;Z)Ljava/lang/Object;");
 
     createJSValueMethodID = env->GetStaticMethodID(quickJSCls, "createJSValue",
-                                                   "(JIJIDJ)Lcom/quickjs/android/JSValue;");
+                                                   "(JIJIDJ)Lcom/quickjs/JSValue;");
 
     intValueMethodID = env->GetMethodID(integerCls, "intValue", "()I");
     longValueMethodID = env->GetMethodID(longCls, "longValue", "()J");
@@ -219,7 +219,7 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *) {
     booleanValueMethodID = env->GetMethodID(booleanCls, "booleanValue", "()Z");
 
 
-    jsValueCls = (jclass) env->NewGlobalRef((env)->FindClass("com/quickjs/android/JSValue"));
+    jsValueCls = (jclass) env->NewGlobalRef((env)->FindClass("com/quickjs/JSValue"));
     js_value_tag_id = env->GetFieldID(jsValueCls, "tag", "J");
     js_value_u_int32_id = env->GetFieldID(jsValueCls, "u_int32", "I");
     js_value_u_float64_id = env->GetFieldID(jsValueCls, "u_float64", "D");
@@ -235,30 +235,30 @@ int GetArrayLength(JSContext *ctx, JSValue this_obj) {
 
 extern "C"
 JNIEXPORT jlong JNICALL
-Java_com_quickjs_android_QuickJS__1createRuntime(JNIEnv *env, jclass clazz) {
+Java_com_quickjs_QuickJS__1createRuntime(JNIEnv *env, jclass clazz) {
     JSRuntime *runtime = JS_NewRuntime();
     return reinterpret_cast<jlong>(runtime);
 }
 extern "C"
 JNIEXPORT jlong JNICALL
-Java_com_quickjs_android_QuickJS__1createContext(JNIEnv *env, jclass clazz, jlong runtime_ptr) {
+Java_com_quickjs_QuickJS__1createContext(JNIEnv *env, jclass clazz, jlong runtime_ptr) {
     auto *runtime = reinterpret_cast<JSRuntime *>(runtime_ptr);
     auto *ctx = JS_NewContext(runtime);
     return reinterpret_cast<jlong>(ctx);
 }extern "C"
 JNIEXPORT void JNICALL
-Java_com_quickjs_android_QuickJS__1releaseRuntime(JNIEnv *env, jclass clazz, jlong runtime_ptr) {
+Java_com_quickjs_QuickJS__1releaseRuntime(JNIEnv *env, jclass clazz, jlong runtime_ptr) {
     auto *runtime = reinterpret_cast<JSRuntime *>(runtime_ptr);
     JS_FreeRuntime(runtime);
 }extern "C"
 JNIEXPORT void JNICALL
-Java_com_quickjs_android_QuickJS__1releaseContext(JNIEnv *env, jclass clazz, jlong context_ptr) {
+Java_com_quickjs_QuickJS__1releaseContext(JNIEnv *env, jclass clazz, jlong context_ptr) {
     auto *ctx = reinterpret_cast<JSContext *>(context_ptr);
     JS_FreeContext(ctx);
 }
 extern "C"
 JNIEXPORT jobject JNICALL
-Java_com_quickjs_android_QuickJS__1executeScript(JNIEnv *env, jclass clazz, jlong context_ptr,
+Java_com_quickjs_QuickJS__1executeScript(JNIEnv *env, jclass clazz, jlong context_ptr,
                                                  jint expected_type,
                                                  jstring source, jstring file_name) {
     if (source == nullptr) {
@@ -279,7 +279,7 @@ Java_com_quickjs_android_QuickJS__1executeScript(JNIEnv *env, jclass clazz, jlon
 }
 extern "C"
 JNIEXPORT jobject JNICALL
-Java_com_quickjs_android_QuickJS__1getGlobalObject(JNIEnv *env, jclass clazz, jlong context_ptr) {
+Java_com_quickjs_QuickJS__1getGlobalObject(JNIEnv *env, jclass clazz, jlong context_ptr) {
     auto *ctx = reinterpret_cast<JSContext *>(context_ptr);
     JSValue global_obj = JS_GetGlobalObject(ctx);
     return TO_JAVA_OBJECT(env, ctx, global_obj);
@@ -288,14 +288,14 @@ Java_com_quickjs_android_QuickJS__1getGlobalObject(JNIEnv *env, jclass clazz, jl
 
 extern "C"
 JNIEXPORT jobject JNICALL
-Java_com_quickjs_android_QuickJS__1initNewJSObject(JNIEnv *env, jclass clazz, jlong context_ptr) {
+Java_com_quickjs_QuickJS__1initNewJSObject(JNIEnv *env, jclass clazz, jlong context_ptr) {
     auto *ctx = reinterpret_cast<JSContext *>(context_ptr);
     JSValue jsValue = JS_NewObject(ctx);
     return TO_JAVA_OBJECT(env, ctx, jsValue);
 }
 extern "C"
 JNIEXPORT jobject JNICALL
-Java_com_quickjs_android_QuickJS__1initNewJSArray(JNIEnv *env, jclass clazz, jlong context_ptr) {
+Java_com_quickjs_QuickJS__1initNewJSArray(JNIEnv *env, jclass clazz, jlong context_ptr) {
     auto *ctx = reinterpret_cast<JSContext *>(context_ptr);
     JSValue jsValue = JS_NewArray(ctx);
     return TO_JAVA_OBJECT(env, ctx, jsValue);
@@ -303,7 +303,7 @@ Java_com_quickjs_android_QuickJS__1initNewJSArray(JNIEnv *env, jclass clazz, jlo
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_quickjs_android_QuickJS__1release(JNIEnv *env, jclass clazz, jlong context_ptr,
+Java_com_quickjs_QuickJS__1release(JNIEnv *env, jclass clazz, jlong context_ptr,
                                            jobject object_handle) {
     auto *ctx = reinterpret_cast<JSContext *>(context_ptr);
     JSValue this_obj = TO_JS_VALUE(env, object_handle);
@@ -312,7 +312,7 @@ Java_com_quickjs_android_QuickJS__1release(JNIEnv *env, jclass clazz, jlong cont
 
 extern "C"
 JNIEXPORT jobject JNICALL
-Java_com_quickjs_android_QuickJS__1get(JNIEnv *env, jclass clazz, jlong context_ptr,
+Java_com_quickjs_QuickJS__1get(JNIEnv *env, jclass clazz, jlong context_ptr,
                                        int expected_type,
                                        jobject object_handle, jstring key) {
     const char *key_ = env->GetStringUTFChars(key, nullptr);
@@ -325,7 +325,7 @@ Java_com_quickjs_android_QuickJS__1get(JNIEnv *env, jclass clazz, jlong context_
 }
 extern "C"
 JNIEXPORT jobject JNICALL
-Java_com_quickjs_android_QuickJS__1getValue(JNIEnv *env, jclass clazz, jlong context_ptr,
+Java_com_quickjs_QuickJS__1getValue(JNIEnv *env, jclass clazz, jlong context_ptr,
                                             jobject object_handle, jstring key) {
     const char *key_ = env->GetStringUTFChars(key, nullptr);
     auto *ctx = reinterpret_cast<JSContext *>(context_ptr);
@@ -338,7 +338,7 @@ Java_com_quickjs_android_QuickJS__1getValue(JNIEnv *env, jclass clazz, jlong con
 
 extern "C"
 JNIEXPORT jobject JNICALL
-Java_com_quickjs_android_QuickJS__1arrayGet(JNIEnv *env, jclass clazz, jlong context_ptr,
+Java_com_quickjs_QuickJS__1arrayGet(JNIEnv *env, jclass clazz, jlong context_ptr,
                                             int expected_type,
                                             jobject object_handle, jint index) {
     auto *ctx = reinterpret_cast<JSContext *>(context_ptr);
@@ -351,7 +351,7 @@ Java_com_quickjs_android_QuickJS__1arrayGet(JNIEnv *env, jclass clazz, jlong con
 
 extern "C"
 JNIEXPORT jobject JNICALL
-Java_com_quickjs_android_QuickJS__1arrayGetValue(JNIEnv *env, jclass clazz, jlong context_ptr,
+Java_com_quickjs_QuickJS__1arrayGetValue(JNIEnv *env, jclass clazz, jlong context_ptr,
                                                  jobject object_handle, jint index) {
     auto *ctx = reinterpret_cast<JSContext *>(context_ptr);
     JSValue this_obj = TO_JS_VALUE(env, object_handle);
@@ -361,7 +361,7 @@ Java_com_quickjs_android_QuickJS__1arrayGetValue(JNIEnv *env, jclass clazz, jlon
 
 extern "C"
 JNIEXPORT jboolean JNICALL
-Java_com_quickjs_android_QuickJS__1contains(JNIEnv *env, jclass clazz, jlong context_ptr,
+Java_com_quickjs_QuickJS__1contains(JNIEnv *env, jclass clazz, jlong context_ptr,
                                             jobject object_handle, jstring key) {
     auto *ctx = reinterpret_cast<JSContext *>(context_ptr);
     JSValue this_obj = TO_JS_VALUE(env, object_handle);
@@ -372,7 +372,7 @@ Java_com_quickjs_android_QuickJS__1contains(JNIEnv *env, jclass clazz, jlong con
     return result;
 }extern "C"
 JNIEXPORT jobjectArray JNICALL
-Java_com_quickjs_android_QuickJS__1getKeys(JNIEnv *env, jclass clazz, jlong context_ptr,
+Java_com_quickjs_QuickJS__1getKeys(JNIEnv *env, jclass clazz, jlong context_ptr,
                                            jobject object_handle) {
     auto *ctx = reinterpret_cast<JSContext *>(context_ptr);
     JSValue this_obj = TO_JS_VALUE(env, object_handle);
@@ -424,7 +424,7 @@ JSValue executeFunction(JNIEnv *env, jlong context_ptr, jobject object_handle, J
 
 extern "C"
 JNIEXPORT jobject JNICALL
-Java_com_quickjs_android_QuickJS__1executeFunction2(JNIEnv *env, jclass clazz, jlong context_ptr,
+Java_com_quickjs_QuickJS__1executeFunction2(JNIEnv *env, jclass clazz, jlong context_ptr,
                                                     jint expected_type, jobject object_handle,
                                                     jobject functionHandle,
                                                     jobject parameters_handle) {
@@ -439,7 +439,7 @@ Java_com_quickjs_android_QuickJS__1executeFunction2(JNIEnv *env, jclass clazz, j
 
 extern "C"
 JNIEXPORT jobject JNICALL
-Java_com_quickjs_android_QuickJS__1executeFunction(JNIEnv *env, jclass clazz, jlong context_ptr,
+Java_com_quickjs_QuickJS__1executeFunction(JNIEnv *env, jclass clazz, jlong context_ptr,
                                                    jint expected_type, jobject object_handle,
                                                    jstring name, jobject parameters_handle) {
     auto *ctx = reinterpret_cast<JSContext *>(context_ptr);
@@ -508,7 +508,7 @@ JSValue newFunction(jlong context_ptr, jboolean void_method, int callbackId) {
 
 extern "C"
 JNIEXPORT jobject JNICALL
-Java_com_quickjs_android_QuickJS__1initNewJSFunction(JNIEnv *env,
+Java_com_quickjs_QuickJS__1initNewJSFunction(JNIEnv *env,
                                                      jclass clazz,
                                                      jlong context_ptr,
                                                      jint callbackId,
@@ -519,7 +519,7 @@ Java_com_quickjs_android_QuickJS__1initNewJSFunction(JNIEnv *env,
 }
 extern "C"
 JNIEXPORT jobject JNICALL
-Java_com_quickjs_android_QuickJS__1registerJavaMethod(JNIEnv *env, jclass clazz, jlong context_ptr,
+Java_com_quickjs_QuickJS__1registerJavaMethod(JNIEnv *env, jclass clazz, jlong context_ptr,
                                                       jobject object_handle, jstring function_name,
                                                       jint callbackId,
                                                       jboolean void_method) {
@@ -534,7 +534,7 @@ Java_com_quickjs_android_QuickJS__1registerJavaMethod(JNIEnv *env, jclass clazz,
 
 extern "C"
 JNIEXPORT jint JNICALL
-Java_com_quickjs_android_QuickJS__1getObjectType(JNIEnv *env, jclass clazz, jlong context_ptr,
+Java_com_quickjs_QuickJS__1getObjectType(JNIEnv *env, jclass clazz, jlong context_ptr,
                                                  jobject object_handle) {
     auto *ctx = reinterpret_cast<JSContext *>(context_ptr);
     JSValue value = TO_JS_VALUE(env, object_handle);
@@ -542,7 +542,7 @@ Java_com_quickjs_android_QuickJS__1getObjectType(JNIEnv *env, jclass clazz, jlon
 }
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_quickjs_android_QuickJS__1set(JNIEnv *env, jclass clazz, jlong context_ptr,
+Java_com_quickjs_QuickJS__1set(JNIEnv *env, jclass clazz, jlong context_ptr,
                                        jobject object_handle, jstring key, jobject value) {
     const char *key_ = env->GetStringUTFChars(key, nullptr);
     auto *ctx = reinterpret_cast<JSContext *>(context_ptr);
@@ -573,7 +573,7 @@ Java_com_quickjs_android_QuickJS__1set(JNIEnv *env, jclass clazz, jlong context_
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_quickjs_android_QuickJS__1arrayAdd(JNIEnv *env, jclass clazz, jlong context_ptr,
+Java_com_quickjs_QuickJS__1arrayAdd(JNIEnv *env, jclass clazz, jlong context_ptr,
                                             jobject object_handle, jobject value) {
     auto *ctx = reinterpret_cast<JSContext *>(context_ptr);
     JSValue this_obj = TO_JS_VALUE(env, object_handle);
@@ -603,13 +603,13 @@ Java_com_quickjs_android_QuickJS__1arrayAdd(JNIEnv *env, jclass clazz, jlong con
 }
 extern "C"
 JNIEXPORT jboolean JNICALL
-Java_com_quickjs_android_QuickJS__1isUndefined(JNIEnv *env, jclass clazz, jlong context_ptr,
+Java_com_quickjs_QuickJS__1isUndefined(JNIEnv *env, jclass clazz, jlong context_ptr,
                                                jobject js_value) {
     JSValue value = TO_JS_VALUE(env, js_value);
     return JS_IsUndefined(value);
 }extern "C"
 JNIEXPORT jobject JNICALL
-Java_com_quickjs_android_QuickJS__1Undefined(JNIEnv *env, jclass clazz, jlong context_ptr) {
+Java_com_quickjs_QuickJS__1Undefined(JNIEnv *env, jclass clazz, jlong context_ptr) {
     auto *ctx = reinterpret_cast<JSContext *>(context_ptr);
     return TO_JAVA_OBJECT(env, ctx, JS_UNDEFINED);
 }

@@ -1,8 +1,9 @@
-package com.quickjs.android;
+package com.quickjs;
+
+import com.quickjs.JSContext;
+import com.quickjs.QuickJS;
 
 import org.junit.Test;
-
-import static org.junit.Assert.*;
 
 public class QuickJSTest {
 
