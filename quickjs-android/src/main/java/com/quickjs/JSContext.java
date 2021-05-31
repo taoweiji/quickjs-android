@@ -1,19 +1,20 @@
-package com.quickjs.android;
+package com.quickjs;
 
+import java.io.Closeable;
+import java.lang.ref.WeakReference;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.Set;
 
-public class JSContext extends JSObject {
+public class JSContext extends JSObject implements Closeable {
+    final long runtimePtr;
     private final long contextPtr;
     Map<Integer, QuickJS.MethodDescriptor> functionRegistry = new HashMap<>();
-    final LinkedList<JSValue> refs = new LinkedList<>();
+    final LinkedList<WeakReference<JSValue>> refs = new LinkedList<>();
 
-    JSContext(long contextPtr) {
+    JSContext(long runtimePtr, long contextPtr) {
         super(null, QuickJS._getGlobalObject(contextPtr));
+        this.runtimePtr = runtimePtr;
         this.contextPtr = contextPtr;
         this.context = this;
     }
@@ -24,20 +25,33 @@ public class JSContext extends JSObject {
 
     void addObjRef(JSValue reference) {
         if (reference.getClass() != JSValue.class) {
-            refs.add(reference);
+            refs.add(new WeakReference<>(reference));
         }
     }
 
     void releaseObjRef(JSValue reference) {
-        refs.remove(reference);
+        for (WeakReference<JSValue> it : refs) {
+            JSValue tmp = it.get();
+            if (tmp == reference) {
+                refs.remove(it);
+                return;
+            }
+        }
     }
 
     @Override
     public void close() {
-        JSValue[] arr = new JSValue[refs.size()];
+        if (released) {
+            return;
+        }
+        functionRegistry.clear();
+        WeakReference[] arr = new WeakReference[refs.size()];
         refs.toArray(arr);
-        for (JSValue it : arr) {
-            it.close();
+        for (WeakReference it : arr) {
+            JSValue tmp = (JSValue) it.get();
+            if (tmp != null) {
+                tmp.close();
+            }
         }
         super.close();
         QuickJS._releaseContext(contextPtr);

@@ -1,4 +1,9 @@
-package com.quickjs.android;
+package com.quickjs;
+
+import com.quickjs.JSArray;
+import com.quickjs.JSContext;
+import com.quickjs.JSValue;
+import com.quickjs.QuickJS;
 
 import org.junit.After;
 import org.junit.Before;
@@ -26,12 +31,11 @@ public class JSValueTest {
     public void isUndefined() {
         JSArray array = new JSArray(context);
         assertTrue(array.getObject(0).isUndefined());
-        array.close();
     }
 
     @Test
-    public void getJSType() {
-        assertEquals(JSValue.TYPE.UNDEFINED, JSValue.Undefined(context).getJSType());
+    public void getType() {
+        assertEquals(JSValue.TYPE.UNDEFINED, JSValue.Undefined(context).getType());
     }
 
     @Test
@@ -43,13 +47,11 @@ public class JSValueTest {
     public void testEquals() {
         JSArray array = new JSArray(context);
         assertEquals(JSValue.Undefined(context), array.getObject(0));
-        array.close();
     }
 
     @Test
     public void testHashCode() {
         JSArray array = new JSArray(context);
         assertEquals(JSValue.Undefined(context).hashCode(), array.getObject(0).hashCode());
-        array.close();
     }
 }

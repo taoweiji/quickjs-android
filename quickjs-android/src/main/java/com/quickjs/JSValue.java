@@ -1,9 +1,11 @@
-package com.quickjs.android;
+package com.quickjs;
 
-import java.io.Closeable;
+import androidx.annotation.Keep;
+
 import java.util.Arrays;
 
-public class JSValue implements Closeable {
+@Keep
+public class JSValue {
     static final int TYPE_NULL = 0;
     static final int TYPE_UNKNOWN = 0;
     static final int TYPE_INTEGER = 1;
@@ -127,8 +129,8 @@ public class JSValue implements Closeable {
         return context.getContextPtr();
     }
 
-    @Override
-    public void close() {
+
+    protected void close() {
         if (!released) {
             QuickJS._release(getContextPtr(), this);
             context.releaseObjRef(this);
@@ -140,7 +142,7 @@ public class JSValue implements Closeable {
         return QuickJS._isUndefined(getContextPtr(), this);
     }
 
-    public TYPE getJSType() {
+    public TYPE getType() {
         int value = QuickJS._getObjectType(getContextPtr(), this);
         switch (value) {
             case TYPE_UNDEFINED:
@@ -185,5 +187,11 @@ public class JSValue implements Closeable {
     @Override
     public int hashCode() {
         return Arrays.hashCode(new Object[]{tag, u_int32, u_float64, u_ptr});
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        close();
+        super.finalize();
     }
 }

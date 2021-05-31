@@ -1,4 +1,13 @@
-package com.quickjs.android;
+package com.quickjs;
+
+import com.quickjs.JSArray;
+import com.quickjs.JSContext;
+import com.quickjs.JSFunction;
+import com.quickjs.JSObject;
+import com.quickjs.JSValue;
+import com.quickjs.JavaCallback;
+import com.quickjs.JavaVoidCallback;
+import com.quickjs.QuickJS;
 
 import org.junit.After;
 import org.junit.Before;
