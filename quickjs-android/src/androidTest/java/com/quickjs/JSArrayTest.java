@@ -1,4 +1,10 @@
-package com.quickjs.android;
+package com.quickjs;
+
+import com.quickjs.JSArray;
+import com.quickjs.JSContext;
+import com.quickjs.JSObject;
+import com.quickjs.JSValue;
+import com.quickjs.QuickJS;
 
 import org.junit.After;
 import org.junit.Before;
@@ -22,7 +28,6 @@ public class JSArrayTest {
 
     @After
     public void tearDown() throws Exception {
-        array.close();
         context.close();
         quickJS.close();
     }
@@ -83,8 +88,6 @@ public class JSArrayTest {
         Object result = array.getObject(0);
 //        String result = array.getObject(0).getString("name");
 //        assertEquals("Wiki", result);
-//        user.close();
-//        user.close();
     }
 
     @Test
@@ -93,7 +96,6 @@ public class JSArrayTest {
         user.push("Wiki");
         array.push(user);
         assertEquals("Wiki", array.getArray(0).getString(0));
-        user.close();
     }
 
     @Test
@@ -116,8 +118,6 @@ public class JSArrayTest {
 //        JSObject value = new JSObject(context);
 //        value.set("name", "Wiki");
 //        array.push(value);
-//        value.close();
-//        array.close();
 
         JSArray array = new JSArray(context);
         JSObject value = new JSObject(context);

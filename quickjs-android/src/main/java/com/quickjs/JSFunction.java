@@ -1,4 +1,4 @@
-package com.quickjs.android;
+package com.quickjs;
 
 public class JSFunction extends JSObject {
 
@@ -22,12 +22,5 @@ public class JSFunction extends JSObject {
         }
         Object result = QuickJS._executeFunction2(context.getContextPtr(), type.value, receiver, this, parameters);
         return JSValue.checkType(result, type);
-    }
-
-    @Override
-    public void close() {
-        super.close();
-        // TODO
-//        context.functionRegistry.remove(this.tag);
     }
 }

@@ -9,16 +9,16 @@ quickjs-android 是 QuickJS JavaScript 引擎的 Andoroid 接口框架，实现�
 ##### 引入依赖
 
 ```groovy
-implementation 'io.github.taoweiji.quickjs:quickjs-android:1.0.0'
+implementation 'io.github.taoweiji.quickjs:quickjs-android:1.1.2'
 ```
 
 ##### 简单示例
 
 ```java
-QuickJS quickJS = QuickJS.createV8Runtime();
-JSContext jsContext = quickJS.createContext();
-int result = jsContext.executeIntegerScript("var a = 2+10;\n a;", "file.js");
-jsContext.close();
+QuickJS quickJS = QuickJS.createRuntime();
+JSContext context = quickJS.createContext();
+int result = context.executeIntegerScript("var a = 2+10;\n a;", "file.js");
+context.close();
 quickJS.close();
 ```
 
@@ -31,7 +31,7 @@ quickJS.close();
 运行环境，可以创建多个运行时环境，不同的环境之间不能共享对象
 
 ```java
-QuickJS quickJS = QuickJS.createV8Runtime();
+QuickJS quickJS = QuickJS.createRuntime();
 ```
 
 ##### JSContext
@@ -94,9 +94,9 @@ Log.e("QuickJS", String.valueOf(arr.length()));
 
 | 方法                             | 说明       |
 | -------------------------------- | ---------- |
-| static QuickJS createV8Runtime() | 创建运行时 |
+| static QuickJS createRuntime() | 创建运行时 |
 | JSContext createContext()        | 创建上下文 |
-| void close()                     | 销毁运行时 |
+| void close()                     | 销毁引擎 |
 
 #### JSValue
 
@@ -104,7 +104,7 @@ Log.e("QuickJS", String.valueOf(arr.length()));
 
 | 方法                             | 说明       |
 | -------------------------------- | ---------- |
-| void close()                     | 销毁运行时 |
+
 
 #### JSObject
 

@@ -1,4 +1,4 @@
-package com.quickjs.android;
+package com.quickjs;
 
 public interface JavaCallback {
     Object invoke(JSObject receiver,JSArray array);

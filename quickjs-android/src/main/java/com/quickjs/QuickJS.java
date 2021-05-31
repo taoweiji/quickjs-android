@@ -1,12 +1,12 @@
-package com.quickjs.android;
+package com.quickjs;
 
 import androidx.annotation.Keep;
 
 import java.io.Closeable;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-@Keep
 public class QuickJS implements Closeable {
     private final long runtimePtr;
     static final Map<Long, JSContext> sContextMap = new HashMap<>();
@@ -20,12 +20,19 @@ public class QuickJS implements Closeable {
     }
 
     public JSContext createContext() {
-        JSContext context = new JSContext(_createContext(runtimePtr));
+        JSContext context = new JSContext(runtimePtr, _createContext(runtimePtr));
         sContextMap.put(context.getContextPtr(), context);
         return context;
     }
 
     public void close() {
+        JSContext[] values = new JSContext[sContextMap.size()];
+        sContextMap.values().toArray(values);
+        for (JSContext context : values) {
+            if (context.runtimePtr == this.runtimePtr) {
+                context.close();
+            }
+        }
         _releaseRuntime(runtimePtr);
     }
 
