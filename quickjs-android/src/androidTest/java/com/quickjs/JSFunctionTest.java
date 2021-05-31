@@ -101,7 +101,7 @@ public class JSFunctionTest {
         context.set("boolFunction", new JSFunction(context, (JavaCallback) (receiver, args) -> true));
         context.set("stringFunction", new JSFunction(context, (JavaCallback) (receiver, args) -> "Hello"));
 
-        context.executeVoidFunction("intFunction", null);
+        context.executeVoidFunction("intFunction", new JSArray(context).push(new JSArray(context)));
         JSFunction function = (JSFunction) context.getObject("intFunction");
         function.call(JSValue.TYPE.INTEGER, null, null);
 

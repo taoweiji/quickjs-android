@@ -3,7 +3,6 @@ package com.quickjs;
 import androidx.annotation.Keep;
 
 import java.io.Closeable;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,7 +19,7 @@ public class QuickJS implements Closeable {
     }
 
     public JSContext createContext() {
-        JSContext context = new JSContext(runtimePtr, _createContext(runtimePtr));
+        JSContext context = new JSContext(this, _createContext(runtimePtr));
         sContextMap.put(context.getContextPtr(), context);
         return context;
     }
@@ -29,7 +28,7 @@ public class QuickJS implements Closeable {
         JSContext[] values = new JSContext[sContextMap.size()];
         sContextMap.values().toArray(values);
         for (JSContext context : values) {
-            if (context.runtimePtr == this.runtimePtr) {
+            if (context.quickJS == this) {
                 context.close();
             }
         }
@@ -77,7 +76,7 @@ public class QuickJS implements Closeable {
         }
     }
 
-    static Object executeJSFunction(JSContext context, JSValue objectHandle, String name, Object[] parameters) {
+    static Object executeFunction(JSContext context, JSValue objectHandle, String name, Object[] parameters) {
         JSArray args = new JSArray(context);
         if (parameters != null) {
             for (Object item : parameters) {
@@ -97,6 +96,19 @@ public class QuickJS implements Closeable {
             }
         }
         return _executeFunction(context.getContextPtr(), JSValue.TYPE_UNKNOWN, objectHandle, name, args);
+    }
+
+    static void checkException(JSContext context) {
+        String[] result = QuickJS._getException(context.getContextPtr());
+        if (result == null) {
+            return;
+        }
+        StringBuilder message = new StringBuilder();
+        message.append(result[1]).append('\n');
+        for (int i = 2; i < result.length; i++) {
+            message.append(result[i]);
+        }
+        throw new QuickJSException(result[0], message.toString());
     }
 
     static native long _createRuntime();
@@ -139,13 +151,15 @@ public class QuickJS implements Closeable {
 
     native static String[] _getKeys(long contextPtr, JSValue objectHandle);
 
-    native static boolean _isUndefined(long contextPtr, JSValue jsValue);
+    native static boolean _isUndefined(long contextPtr, JSValue value);
 
     native static JSValue _Undefined(long contextPtr);
 
-    native static JSValue _getValue(long contextPtr, JSObject jsObject, String key);
+    native static JSValue _getValue(long contextPtr, JSObject object, String key);
 
-    native static JSValue _arrayGetValue(long contextPtr, JSArray jsArray, int index);
+    native static JSValue _arrayGetValue(long contextPtr, JSArray array, int index);
+
+    native static String[] _getException(long contextPtr);
 
 
     static {
