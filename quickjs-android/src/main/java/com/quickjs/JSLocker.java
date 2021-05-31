@@ -1,4 +1,4 @@
-package com.quickjs.android;
+package com.quickjs;
 
 /**
  * 实现单线程

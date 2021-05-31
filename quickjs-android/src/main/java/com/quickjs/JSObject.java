@@ -1,4 +1,4 @@
-package com.quickjs.android;
+package com.quickjs;
 
 public class JSObject extends JSValue {
 
@@ -75,7 +75,7 @@ public class JSObject extends JSValue {
         if (value == null) {
             return TYPE.NULL;
         }
-        return value.getJSType();
+        return value.getType();
     }
 
 

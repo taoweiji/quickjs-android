@@ -1,4 +1,11 @@
-package com.quickjs.android;
+package com.quickjs;
+
+import com.quickjs.JSArray;
+import com.quickjs.JSContext;
+import com.quickjs.JSObject;
+import com.quickjs.JSValue;
+import com.quickjs.JavaCallback;
+import com.quickjs.QuickJS;
 
 import org.junit.After;
 import org.junit.Before;
@@ -21,7 +28,6 @@ public class JSObjectTest {
 
     @After
     public void tearDown() throws Throwable {
-        object.close();
         context.close();
         quickJS.close();
     }
@@ -68,7 +74,6 @@ public class JSObjectTest {
         array.push(1);
         object.set("key1", array);
         assertEquals(1, object.getArray("key1").getInteger(0));
-        array.close();
     }
 
     @Test
@@ -94,7 +99,6 @@ public class JSObjectTest {
         JSArray array = new JSArray(context);
         array.push(Integer.MAX_VALUE);
         int result = context.executeIntegerFunction("test", array);
-        array.close();
         assertEquals(Integer.MAX_VALUE, result);
     }
 
@@ -104,7 +108,6 @@ public class JSObjectTest {
         JSArray array = new JSArray(context);
         array.push(3.14);
         assertEquals(3.14, context.executeDoubleFunction("test", array), 0);
-        array.close();
     }
 
     @Test
@@ -113,7 +116,6 @@ public class JSObjectTest {
         JSArray array = new JSArray(context);
         array.push(true);
         boolean result = context.executeBooleanFunction("test", array);
-        array.close();
         assertTrue(result);
     }
 
@@ -123,7 +125,6 @@ public class JSObjectTest {
         JSArray array = new JSArray(context);
         array.push("Hello");
         String result = context.executeStringFunction("test", array);
-        array.close();
         assertEquals("Hello", result);
     }
 
@@ -235,7 +236,5 @@ public class JSObjectTest {
         value.set("name", "Wiki");
         array.set("www", value);
         array.set("www", JSValue.NULL());
-        value.close();
-        array.close();
     }
 }
