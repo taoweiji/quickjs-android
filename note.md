@@ -1,0 +1,3 @@
+- JS_SetProperty 必须增加JS_DupValue
+- new_XX，由于绑定了Java对象，所以不需要JS_DupValue
+- JS_GetProperty 绑定了java对象，所以也不需要JS_DupValue

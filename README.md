@@ -9,7 +9,7 @@ quickjs-android 是 QuickJS JavaScript 引擎的 Andoroid 接口框架，实现�
 ##### 引入依赖
 
 ```groovy
-implementation 'io.github.taoweiji.quickjs:quickjs-android:1.1.2'
+implementation 'io.github.taoweiji.quickjs:quickjs-android:1.1.3'
 ```
 
 ##### 简单示例
