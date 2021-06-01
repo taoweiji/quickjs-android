@@ -1,5 +1,7 @@
 package com.quickjs;
 
+import android.util.Log;
+
 import com.quickjs.JSArray;
 import com.quickjs.JSContext;
 import com.quickjs.JSObject;
@@ -205,6 +207,14 @@ public class JSObjectTest {
         assertEquals("Hello", tmp[0]);
 
 
+        JSObject user = new JSObject(context).set("name", "Wiki").set("age", 18);
+        user.registerJavaMethod(new JavaVoidCallback() {
+            @Override
+            public void invoke(JSObject receiver, JSArray args) {
+                Log.e("QuickJS", args.getString(0));
+            }
+        }, "log");
+        user.executeVoidFunction("log", new JSArray(context).push("Hello World"));
     }
 
     @Test
