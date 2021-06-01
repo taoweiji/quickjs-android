@@ -1,5 +1,5 @@
 package com.quickjs;
 
 public interface JavaCallback {
-    Object invoke(JSObject receiver,JSArray array);
+    Object invoke(JSObject receiver,JSArray args);
 }

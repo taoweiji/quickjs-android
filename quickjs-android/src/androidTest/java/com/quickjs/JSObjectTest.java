@@ -1,6 +1,7 @@
 package com.quickjs;
 
 import android.util.Log;
+import android.webkit.JavascriptInterface;
 
 import com.quickjs.JSArray;
 import com.quickjs.JSContext;
@@ -246,5 +247,43 @@ public class JSObjectTest {
         value.set("name", "Wiki");
         array.set("www", value);
         array.set("www", JSValue.NULL());
+    }
+
+    @Test
+    public void executeVoidFunction() {
+
+    }
+
+    @Test
+    public void addJavascriptInterface() {
+        context.addJavascriptInterface(new Console(), "console");
+        context.executeVoidScript("console.log('Hello World')", null);
+    }
+
+    public static class Console {
+        int count = 0;
+
+        @JavascriptInterface
+        public void log(String msg) {
+            count++;
+            Log.d("console", msg);
+        }
+
+        @JavascriptInterface
+        public void info(String msg) {
+            count++;
+            Log.i("console", msg);
+        }
+
+        @JavascriptInterface
+        public void error(String msg) {
+            count++;
+            Log.e("console", msg);
+        }
+
+        @JavascriptInterface
+        public int count() {
+            return count;
+        }
     }
 }

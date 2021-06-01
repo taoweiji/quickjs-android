@@ -10,7 +10,7 @@ quickjs-android 是 QuickJS JavaScript 引擎的 Android 接口框架，整体�
 ##### 引入依赖
 
 ```groovy
-implementation 'io.github.taoweiji.quickjs:quickjs-android:1.1.3'
+implementation 'io.github.taoweiji.quickjs:quickjs-android:1.1.4'
 ```
 
 ##### 简单示例
@@ -87,7 +87,39 @@ context.set("console", new JSObject(context).set("log", log).set("message", mess
 context.executeVoidScript("console.log(console.message())", null);
 ```
 
+##### addJavascriptInterface
 
+```java
+public class Console {
+    int count = 0;
+
+    @JavascriptInterface
+    public void log(String msg) {
+        count++;
+        Log.d("console", msg);
+    }
+
+    @JavascriptInterface
+    public void info(String msg) {
+        count++;
+        Log.i("console", msg);
+    }
+
+    @JavascriptInterface
+    public void error(String msg) {
+        count++;
+        Log.e("console", msg);
+    }
+
+    @JavascriptInterface
+    public int count() {
+        return count;
+    }
+}
+
+context.addJavascriptInterface(new Console(), "console");
+context.executeVoidScript("console.log('Hello World')", null);
+```
 
 #### QuickJS
 
