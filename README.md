@@ -2,7 +2,8 @@
 [![Download](https://maven-badges.herokuapp.com/maven-central/io.github.taoweiji.quickjs/quickjs-android/badge.svg)](https://search.maven.org/search?q=io.github.taoweiji.quickjs)
 
 
-quickjs-android 是 QuickJS JavaScript 引擎的 Andoroid 接口框架，实现了 Java 调用内核功能。armeabi-v7a 的大小仅 350KB，是 Google V8 的不错替代品，启动速度比 V8更快，几乎完美支持[ES2020](https://tc39.github.io/ecma262/)。
+quickjs-android 是 QuickJS JavaScript 引擎的 Android 接口框架，整体基于面向对象设计，提供了自动GC功能，使用简单。armeabi-v7a 的大小仅 350KB，是 Google V8 不错的替代品，启动速度比 V8 快，内存占用更低，支持 [ES2020](https://tc39.es/ecma262/)。
+
 
 ### 使用教程
 
@@ -123,11 +124,17 @@ context.executeVoidScript("console.log(console.message())", null);
 | JSObject getObject(String key) | 可能会返回JSObject、JSArray、JSFunction，如果没有就会返回null |
 | registerJavaMethod(JavaCallback callback, String jsFunctionName) | 注册JS函数，调用函数会执行java的Callback，带有返回值 |
 | registerJavaMethod(JavaVoidCallback callback, String jsFunctionName) | 注册JS函数，调用函数会执行java的Callback，不带返回值 |
-| Object executeFunction(String name, JSArray parameters) | 一共提供了10个相关的方法，用于执行JS函数获取返回值   |
-| boolean contains(String key)                                 | 判断是否包含属性                                     |
-| String[] getKeys()                                           | 获取所有的属性名称                                   |
-|                                                              |                                                      |
-|                                                              |                                                      |
+| Object executeFunction(String name, JSArray parameters) | 可能会返回Integer、Double、Boolean、String、JSArray、JSObject、JSFunction、null |
+| double executeDoubleFunction(String name, JSArray parameters) | 返回 double，默认返回 0                     |
+| boolean executeBooleanFunction(String name, JSArray parameters) | 返回boolean，默认人会false                |
+| String executeStringFunction(String name, JSArray parameters) | 返回String，默认返回null |
+| JSArray executeArrayFunction(String name, JSArray parameters) | 返回JSArray，默认返回null |
+| JSObject executeObjectFunction(String name, JSArray parameters) | 可能会返回JSObject、JSArray、JSFunction，默认返回null |
+| void executeVoidFunction(String name, JSArray parameters) | 没有返回值 |
+| Object executeFunction2(String name, Object... parameters) | 可能返回Integer、Double、Boolean、String、JSArray、JSObject、JSFunction、null，入参为java数组，仅支持Integer、Double、Boolean、String、JSArray、JSObject、JSFunction、null |
+| boolean contains(String key) | 是否包含该字段 |
+| String[] getKeys() | 获取属性列表 |
+
 
 #### JSArray
 
@@ -158,19 +165,17 @@ context.executeVoidScript("console.log(console.message())", null);
 
 继承JSObject，拥有JSObject全部方法，对象本身是全局对象
 
-| 方法                                                         | 说明       |
-| ------------------------------------------------------------ | ---------- |
-| void close()                                                 | 销毁上下文 |
-| int executeIntegerScript(String source, String fileName)     |            |
-| double executeDoubleScript(String source, String fileName)   |            |
-| String executeStringScript(String source, String fileName)   |            |
-| boolean executeBooleanScript(String source, String fileName) |            |
-| Object executeScript(String source, String fileName)         |            |
-| void executeVoidScript(String source, String fileName)       |            |
-| JSArray executeArrayScript(String source, String fileName)   |            |
-|                                                              |            |
-
-
+| 方法                                                         | 说明                                                         |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| void close()                                                 | 销毁上下文                                                   |
+| int executeIntegerScript(String source, String fileName)     | 执行js脚本                                                   |
+| double executeDoubleScript(String source, String fileName)   | 执行js脚本                                                   |
+| String executeStringScript(String source, String fileName)   | 执行js脚本                                                   |
+| boolean executeBooleanScript(String source, String fileName) | 执行js脚本                                                   |
+| Object executeScript(String source, String fileName)         | 执行js脚本，可能返回Integer、Double、Boolean、String、JSArray、JSObject、JSFunction、null |
+| void executeVoidScript(String source, String fileName)       | 执行js脚本，无返回值                                         |
+| JSArray executeArrayScript(String source, String fileName)   | 执行js脚本，返回值为JSArray                                  |
+| JSObject executeObjectScript(String source, String fileName) | 执行js脚本，可能会返回JSObject、JSArray、JSFunction          |
 
 
 

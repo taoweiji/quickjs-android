@@ -23,4 +23,9 @@ public class JSFunction extends JSObject {
         Object result = QuickJS._executeFunction2(context.getContextPtr(), type.value, receiver, this, parameters);
         return JSValue.checkType(result, type);
     }
+
+    public Object call(JSObject receiver, JSArray parameters) {
+        return call(TYPE.UNKNOWN, receiver, parameters);
+    }
+
 }
