@@ -119,6 +119,8 @@ public class Console {
 
 context.addJavascriptInterface(new Console(), "console");
 context.executeVoidScript("console.log('Hello World')", null);
+int count = context.executeIntegerScript("console.count()", null);
+Log.d("console", String.valueOf(count));
 ```
 
 #### QuickJS
