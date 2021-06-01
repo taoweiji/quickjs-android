@@ -3,6 +3,8 @@ package com.quickjs.android.example;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.webkit.JavascriptInterface;
+import android.webkit.WebView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -35,11 +37,12 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 for (int i = 0; i < 10000; i++) {
-                    quickJS.createContext();
+//                    quickJS.createContext();
                 }
             }
         });
         test();
+        addJavascriptInterface();
     }
 
     void test() {
@@ -58,6 +61,46 @@ public class MainActivity extends AppCompatActivity {
     void testV8() {
 //        V8 v8 = V8.createV8Runtime();
 //        v8.executeVoidScript("a.a");
+        WebView webView = new WebView(this);
+//        @JavascriptInterface
+//        webView.addJavascriptInterface();
+    }
+
+    public void addJavascriptInterface() {
+        JSContext context = quickJS.createContext();
+        context.addJavascriptInterface(new Console(), "console");
+        context.executeVoidScript("console.log('Hello World')", null);
+        context.executeVoidScript("console.error('Hello World')", null);
+        context.executeVoidScript("console.info('Hello World')", null);
+        int count = context.executeIntegerScript("console.count()", null);
+        Log.d("console", String.valueOf(count));
+    }
+
+    public static class Console {
+        int count = 0;
+
+        @JavascriptInterface
+        public void log(String msg) {
+            count++;
+            Log.d("console", msg);
+        }
+
+        @JavascriptInterface
+        public void info(String msg) {
+            count++;
+            Log.i("console", msg);
+        }
+
+        @JavascriptInterface
+        public void error(String msg) {
+            count++;
+            Log.e("console", msg);
+        }
+
+        @JavascriptInterface
+        public int count() {
+            return count;
+        }
     }
 
     @Override

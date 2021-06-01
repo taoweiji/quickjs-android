@@ -1,5 +1,11 @@
 package com.quickjs;
 
+import android.webkit.JavascriptInterface;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+
 public class JSObject extends JSValue {
 
     public JSObject(JSContext context) {
@@ -139,6 +145,61 @@ public class JSObject extends JSValue {
     protected Object executeFunction(TYPE expectedType, String name, JSArray parameters) {
         Object object = QuickJS._executeFunction(context.getContextPtr(), expectedType.value, this, name, parameters);
         return JSValue.checkType(object, expectedType);
+    }
+
+    public void addJavascriptInterface(Object obj, String interfaceName) {
+        Method[] methods = obj.getClass().getMethods();
+        JSObject object = new JSObject(context);
+        for (Method method : methods) {
+            if (method.getAnnotation(JavascriptInterface.class) == null) {
+                continue;
+            }
+            String functionName = method.getName();
+            if (method.getReturnType().equals(Void.TYPE)) {
+                object.registerJavaMethod((receiver, args) -> {
+                    try {
+                        method.invoke(obj, getParameters(method, args));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        throw new RuntimeException(e);
+                    }
+                }, functionName);
+            } else {
+                object.registerJavaMethod((receiver, args) -> {
+                    try {
+                        return method.invoke(obj, getParameters(method, args));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        throw new RuntimeException(e);
+                    }
+                }, functionName);
+            }
+        }
+        set(interfaceName, object);
+    }
+
+    private Object[] getParameters(Method method, JSArray args) {
+        Object[] objects = new Object[args.length()];
+        Type[] types = method.getGenericParameterTypes();
+        for (int i = 0; i < objects.length; i++) {
+            Type type = types[i];
+            if (type == int.class || type == Integer.class) {
+                objects[i] = args.getInteger(i);
+            } else if (type == double.class || type == Double.class) {
+                objects[i] = args.getDouble(i);
+            } else if (type == boolean.class || type == Boolean.class) {
+                objects[i] = args.getBoolean(i);
+            } else if (type == String.class) {
+                objects[i] = args.getString(i);
+            } else if (type == JSArray.class) {
+                objects[i] = args.getArray(i);
+            } else if (type == JSObject.class || type == JSFunction.class) {
+                objects[i] = args.getObject(i);
+            } else {
+                throw new RuntimeException("Type error");
+            }
+        }
+        return objects;
     }
 
     static class Undefined extends JSObject {
