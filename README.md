@@ -28,7 +28,7 @@ quickJS.close();
 
 ##### QuickJS
 
-运行环境，可以创建多个运行时环境，不同的环境之间不能共享对象
+运行环境，可以创建多个运行时环境，不同的环境之间不能共享对象，不使用的时候需要销毁。
 
 ```java
 QuickJS quickJS = QuickJS.createRuntime();
@@ -36,56 +36,54 @@ QuickJS quickJS = QuickJS.createRuntime();
 
 ##### JSContext
 
-由 QuickJS 创建，一个 QuickJS 可以创建多个 JSContext。
+由 QuickJS 创建，一个 QuickJS 可以创建多个 JSContext，不使用的时候需要销毁。
 
+```java
+JSContext context = quickJS.createContext();
+int result = context.executeIntegerScript("var a = 2+10;\n a;", "file.js");
+String result = context.executeStringScript("'Hello World';", "file.js");
 ```
-JSContext jsContext = quickJS.createContext();
-```
-
-##### JSValue
-
-所有的 JS 类型的基类，比如 int、double、object、array等。
 
 ##### JSObject
 
-object 对应的类型
-
 ```java
-JSObject object = new JSObject(jsContext);
-object.set("name", "Wiki");
-object.set("age", 18);
+JSObject user = new JSObject(context).set("name", "Wiki").set("age", 18);
+Log.e("QuickJS", String.valueOf(user.getString("name")));
+Log.e("QuickJS", String.valueOf(user.getInteger("age")));
 
-Log.e("QuickJS", String.valueOf(object.getString("name")));
-Log.e("QuickJS", String.valueOf(object.getInteger("age")));
+user.registerJavaMethod(new JavaVoidCallback() {
+    @Override
+    public void invoke(JSObject receiver, JSArray args) {
+        Log.e("QuickJS", args.getString(0));
+    }
+}, "log");
+user.executeVoidFunction("log", new JSArray(context).push("Hello World"));
 ```
 ##### JSArray
 
-object 对应的类型
-
 ```java
-JSArray array = new JSArray(jsContext);
-array.push(1);
-array.push(3.14);
-array.push(true);
-array.push("Hello World");
-
-Log.e("QuickJS", String.valueOf(arr.getInteger(0)));
-Log.e("QuickJS", String.valueOf(arr.getDouble(1)));
-Log.e("QuickJS", String.valueOf(arr.getBoolean(2)));
-Log.e("QuickJS", String.valueOf(arr.getString(3)));
-Log.e("QuickJS", String.valueOf(arr.length()));
+JSArray array = new JSArray(context).push(1).push(3.14).push(true).push("Hello World");
+Log.e("QuickJS", String.valueOf(array.getInteger(0)));
+Log.e("QuickJS", String.valueOf(array.getDouble(1)));
 ```
 
 ##### JSFunction
 
-```
-```
-
-
-
-### 注入方法
-
-```
+```java
+JSFunction log = new JSFunction(context, new JavaVoidCallback() {
+    @Override
+    public void invoke(JSObject receiver, JSArray args) {
+        Log.e("QuickJS", args.getString(0));
+    }
+});
+JSFunction message = new JSFunction(context, new JavaCallback() {
+    @Override
+    public Object invoke(JSObject receiver, JSArray array) {
+        return "Hello World";
+    }
+});
+context.set("console", new JSObject(context).set("log", log).set("message", message));
+context.executeVoidScript("console.log(console.message())", null);
 ```
 
 
@@ -100,23 +98,32 @@ Log.e("QuickJS", String.valueOf(arr.length()));
 
 #### JSValue
 
-一切JS元素的基类
+对象会自动回收，开发者无需手动close()
 
-| 方法                             | 说明       |
-| -------------------------------- | ---------- |
+| 方法                                         | 说明              |
+| -------------------------------------------- | ----------------- |
+| static JSObject Undefined(JSContext context) | 获取Undefined对象 |
+| static JSValue NULL()                        | 获取NULL对象      |
+| TYPE getType()                               | 获取数据类型      |
+| boolean isUndefined()                        |                   |
 
 
 #### JSObject
 
 继承JSValue
 
-| 方法                                                         | 说明                                                 |
-| ------------------------------------------------------------ | ---------------------------------------------------- |
-| set(key, value)                                              | 设置属性                                             |
-| getInteger/getBoolean/getDouble/getString/getArray/getObject | 提供了6个获取方法                                    |
+| 方法                           | 说明              |
+| ------------------------------ | ----------------- |
+| set(key, value)                | 设置属性，支持int、boolean、double、String、JSValue |
+| int getInteger(String key)     | 返回值int对象值，如果没有就会返回0 |
+| boolean getBoolean(String key) | 返回值boolean对象值，如果没有就会返回false |
+| double getDouble(String key)   | 返回值double对象值，如果没有就会返回0 |
+| String getString(String key)   | 返回值String对象值，如果没有就会返回null |
+| JSArray getArray(String key)   | 返回值JSArray对象值，如果没有就会返回null |
+| JSObject getObject(String key) | 可能会返回JSObject、JSArray、JSFunction，如果没有就会返回null |
 | registerJavaMethod(JavaCallback callback, String jsFunctionName) | 注册JS函数，调用函数会执行java的Callback，带有返回值 |
 | registerJavaMethod(JavaVoidCallback callback, String jsFunctionName) | 注册JS函数，调用函数会执行java的Callback，不带返回值 |
-| executeFunction                                              | 一共提供了10个相关的方法，用于执行JS函数获取返回值   |
+| Object executeFunction(String name, JSArray parameters) | 一共提供了10个相关的方法，用于执行JS函数获取返回值   |
 | boolean contains(String key)                                 | 判断是否包含属性                                     |
 | String[] getKeys()                                           | 获取所有的属性名称                                   |
 |                                                              |                                                      |
@@ -128,19 +135,24 @@ Log.e("QuickJS", String.valueOf(arr.length()));
 
 | 方法                                                         | 说明              |
 | ------------------------------------------------------------ | ----------------- |
-| push(value)                                                  | 设置属性          |
-| getInteger/getBoolean/getDouble/getString/getArray/getObject | 提供了6个获取方法 |
+| push(value)                                                  | 设置属性，支持int、boolean、double、String、JSValue |
+| int getInteger(String key) | 返回值int对象值，如果没有就会返回0 |
+| boolean getBoolean(String key) | 返回值boolean对象值，如果没有就会返回false |
+| double getDouble(String key) | 返回值double对象值，如果没有就会返回0 |
+| String getString(String key) | 返回值String对象值，如果没有就会返回null |
+| JSArray getArray(String key) | 返回值JSArray对象值，如果没有就会返回null |
+| JSObject getObject(String key) | 可能会返回JSObject、JSArray、JSFunction，如果没有就会返回null |
 | length()                                                     | 数组大小  |
 
 #### JSFunction
 
 继承JSObject
 
-| 方法                                                         | 说明              |
-| ------------------------------------------------------------ | ----------------- |
-| push(value)                                                  | 设置属性          |
-| getInteger/getBoolean/getDouble/getString/getArray/getObject | 提供了6个获取方法 |
-| length()                                                     | 数组大小          |
+| 方法                                                         | 说明     |
+| ------------------------------------------------------------ | -------- |
+| JSFunction(JSContext context, JavaCallback callback)         | 构造函数 |
+| JSFunction(JSContext context, JavaVoidCallback callback)     | 构造函数 |
+| Object call(JSValue.TYPE type, JSObject receiver, JSArray parameters) | 调用方法 |
 
 #### JSContext
 
@@ -157,22 +169,6 @@ Log.e("QuickJS", String.valueOf(arr.length()));
 | void executeVoidScript(String source, String fileName)       |            |
 | JSArray executeArrayScript(String source, String fileName)   |            |
 |                                                              |            |
-
-
-
-## TODO 
-
-- 增加NULL和未定义
-
-
-
-
-
-
-
-
-
-
 
 
 

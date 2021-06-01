@@ -12,7 +12,7 @@ public class JSFunction extends JSObject {
         this.context.registerCallback(callback, this);
     }
 
-    public JSFunction(JSContext context, long tag, int u_int32, double u_float64, long u_ptr) {
+    JSFunction(JSContext context, long tag, int u_int32, double u_float64, long u_ptr) {
         super(context, tag, u_int32, u_float64, u_ptr);
     }
 

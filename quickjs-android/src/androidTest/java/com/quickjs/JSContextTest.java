@@ -32,6 +32,12 @@ public class JSContextTest {
         quickJS.close();
     }
 
+    @Test
+    public void doubleContext() {
+        context = quickJS.createContext();
+        context = quickJS.createContext();
+    }
+
 
     @Test
     public void executeScript() {
