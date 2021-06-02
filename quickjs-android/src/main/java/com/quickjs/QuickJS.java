@@ -9,6 +9,7 @@ import java.util.Map;
 public class QuickJS implements Closeable {
     private final long runtimePtr;
     static final Map<Long, JSContext> sContextMap = new HashMap<>();
+    private boolean released;
 
     private QuickJS(long runtimePtr) {
         this.runtimePtr = runtimePtr;
@@ -25,6 +26,10 @@ public class QuickJS implements Closeable {
     }
 
     public void close() {
+        if (this.released) {
+            return;
+        }
+        this.released = true;
         JSContext[] values = new JSContext[sContextMap.size()];
         sContextMap.values().toArray(values);
         for (JSContext context : values) {
@@ -109,6 +114,10 @@ public class QuickJS implements Closeable {
             message.append(result[i]);
         }
         throw new QuickJSException(result[0], message.toString());
+    }
+
+    public boolean isReleased() {
+        return this.released;
     }
 
     static native long _createRuntime();
