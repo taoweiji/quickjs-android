@@ -118,6 +118,24 @@ jobject TO_JAVA_OBJECT(JNIEnv *env, JSContext *ctx, JSValue value) {
 #endif
 }
 
+JSValue JobjectToJSValue(JNIEnv *env, JSContext *ctx, jobject value) {
+    if (value == nullptr) {
+        return JS_NULL;
+    } else if (env->IsInstanceOf(value, integerCls)) {
+        return JS_NewInt32(ctx, env->CallIntMethod(value, intValueMethodID));
+    } else if (env->IsInstanceOf(value, longCls)) {
+        return JS_NewInt64(ctx, env->CallLongMethod(value, longValueMethodID));
+    } else if (env->IsInstanceOf(value, doubleCls)) {
+        return JS_NewFloat64(ctx, env->CallDoubleMethod(value, doubleValueMethodID));
+    } else if (env->IsInstanceOf(value, booleanCls)) {
+        return JS_NewBool(ctx, env->CallBooleanMethod(value, booleanValueMethodID));
+    } else if (env->IsInstanceOf(value, stringCls)) {
+        return JS_NewString(ctx, env->GetStringUTFChars((jstring) value, nullptr));
+    } else if (env->IsInstanceOf(value, jsValueCls)) {
+        return JS_DupValue(ctx, TO_JS_VALUE(env, value));
+    }
+    return JS_UNDEFINED;
+}
 
 int GetObjectType(JSContext *ctx, JSValue result) {
     if (JS_IsArray(ctx, result)) {
@@ -479,20 +497,12 @@ callJavaCallback(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *
                                                  argsHandle,
                                                  void_method
     );
-    if (result == nullptr) {
-        return JS_NULL;
-    } else if (env->IsInstanceOf(result, integerCls)) {
-        return JS_NewInt32(ctx, env->CallIntMethod(result, intValueMethodID));
-    } else if (env->IsInstanceOf(result, doubleCls)) {
-        return JS_NewFloat64(ctx, env->CallDoubleMethod(result, doubleValueMethodID));
-    } else if (env->IsInstanceOf(result, booleanCls)) {
-        return JS_NewFloat64(ctx, env->CallBooleanMethod(result, booleanValueMethodID));
-    } else if (env->IsInstanceOf(result, longCls)) {
-        return JS_NewInt64(ctx, env->CallLongMethod(result, longValueMethodID));
-    } else if (env->IsInstanceOf(result, stringCls)) {
-        return JS_NewString(ctx, env->GetStringUTFChars((jstring) result, nullptr));
+
+    JSValue value = JobjectToJSValue(env, ctx, result);
+    if (env->IsInstanceOf(result, jsValueCls)) {
+        JS_DupValue(ctx, value);
     }
-    return JS_NULL;
+    return value;
 }
 
 JSValue newFunction(jlong context_ptr, jboolean void_method, int callbackId) {
@@ -545,27 +555,7 @@ Java_com_quickjs_QuickJS__1set(JNIEnv *env, jclass clazz, jlong context_ptr,
     const char *key_ = env->GetStringUTFChars(key, nullptr);
     auto *ctx = reinterpret_cast<JSContext *>(context_ptr);
     JSValue this_obj = TO_JS_VALUE(env, object_handle);
-    if (value == nullptr) {
-        JS_SetPropertyStr(ctx, this_obj, key_, JS_NULL);
-    } else if (env->IsInstanceOf(value, integerCls)) {
-        int value_ = env->CallIntMethod(value, intValueMethodID);
-        JS_SetPropertyStr(ctx, this_obj, key_, JS_NewInt32(ctx, value_));
-    } else if (env->IsInstanceOf(value, longCls)) {
-        long value_ = env->CallLongMethod(value, longValueMethodID);
-        JS_SetPropertyStr(ctx, this_obj, key_, JS_NewInt64(ctx, value_));
-    } else if (env->IsInstanceOf(value, doubleCls)) {
-        double value_ = env->CallDoubleMethod(value, doubleValueMethodID);
-        JS_SetPropertyStr(ctx, this_obj, key_, JS_NewFloat64(ctx, value_));
-    } else if (env->IsInstanceOf(value, booleanCls)) {
-        bool value_ = env->CallBooleanMethod(value, booleanValueMethodID);
-        JS_SetPropertyStr(ctx, this_obj, key_, JS_NewBool(ctx, value_));
-    } else if (env->IsInstanceOf(value, stringCls)) {
-        const char *value_ = env->GetStringUTFChars((jstring) value, nullptr);
-        JS_SetPropertyStr(ctx, this_obj, key_, JS_NewString(ctx, value_));
-    } else if (env->IsInstanceOf(value, jsValueCls)) {
-        JSValue tmp = JS_DupValue(ctx, TO_JS_VALUE(env, value));
-        JS_SetPropertyStr(ctx, this_obj, key_, tmp);
-    }
+    JS_SetPropertyStr(ctx, this_obj, key_, JobjectToJSValue(env, ctx, value));
 }
 
 extern "C"
@@ -575,27 +565,7 @@ Java_com_quickjs_QuickJS__1arrayAdd(JNIEnv *env, jclass clazz, jlong context_ptr
     auto *ctx = reinterpret_cast<JSContext *>(context_ptr);
     JSValue this_obj = TO_JS_VALUE(env, object_handle);
     int len = GetArrayLength(ctx, this_obj);
-    if (value == nullptr) {
-        JS_SetPropertyUint32(ctx, this_obj, len, JS_NULL);
-    } else if (env->IsInstanceOf(value, integerCls)) {
-        int value_ = env->CallIntMethod(value, intValueMethodID);
-        JS_SetPropertyUint32(ctx, this_obj, len, JS_NewInt32(ctx, value_));
-    } else if (env->IsInstanceOf(value, longCls)) {
-        long value_ = env->CallLongMethod(value, longValueMethodID);
-        JS_SetPropertyUint32(ctx, this_obj, len, JS_NewInt64(ctx, value_));
-    } else if (env->IsInstanceOf(value, doubleCls)) {
-        double value_ = env->CallDoubleMethod(value, doubleValueMethodID);
-        JS_SetPropertyUint32(ctx, this_obj, len, JS_NewFloat64(ctx, value_));
-    } else if (env->IsInstanceOf(value, booleanCls)) {
-        bool value_ = env->CallBooleanMethod(value, booleanValueMethodID);
-        JS_SetPropertyUint32(ctx, this_obj, len, JS_NewBool(ctx, value_));
-    } else if (env->IsInstanceOf(value, stringCls)) {
-        const char *value_ = env->GetStringUTFChars((jstring) value, nullptr);
-        JS_SetPropertyUint32(ctx, this_obj, len, JS_NewString(ctx, value_));
-    } else if (env->IsInstanceOf(value, jsValueCls)) {
-        JSValue tmp = JS_DupValue(ctx, TO_JS_VALUE(env, value));
-        JS_SetPropertyUint32(ctx, this_obj, len, tmp);
-    }
+    JS_SetPropertyUint32(ctx, this_obj, len, JobjectToJSValue(env, ctx, value));
 }
 extern "C"
 JNIEXPORT jboolean JNICALL

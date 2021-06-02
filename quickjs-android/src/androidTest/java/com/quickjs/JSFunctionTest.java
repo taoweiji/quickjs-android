@@ -172,4 +172,23 @@ public class JSFunctionTest {
         assertEquals(3.14, function.call(JSValue.TYPE.DOUBLE, context, parameters));
         assertEquals(3.14, function.call(JSValue.TYPE.DOUBLE, context, parameters));
     }
+
+    @Test
+    public void call4() {
+        JSFunction function = new JSFunction(context, new JavaCallback() {
+            @Override
+            public Object invoke(JSObject receiver, JSArray args) {
+                return args.getArray(0);
+            }
+        });
+        context.set("test", function);
+        JSArray array = new JSArray(context).push("Hello");
+        JSArray result = (JSArray) function.call(null, new JSArray(context).push(array));
+        assertEquals("Hello", result.getString(0));
+        JSArray result1 = context.executeArrayScript("test(['Hello'])", null);
+        assertEquals("Hello", result1.getString(0));
+        JSFunction function2 = (JSFunction) context.getObject("test");
+        JSArray result2 = (JSArray) function2.call(null, new JSArray(context).push(array));
+        assertEquals("Hello", result2.getString(0));
+    }
 }

@@ -99,6 +99,10 @@ public class JSContext extends JSObject implements Closeable {
         return (JSObject) executeScript(JSValue.TYPE.JS_OBJECT, source, fileName);
     }
 
+    public boolean isReleased() {
+        return this.released;
+    }
+
     void registerCallback(JavaCallback callback, JSFunction functionHandle) {
         QuickJS.MethodDescriptor methodDescriptor = new QuickJS.MethodDescriptor();
         methodDescriptor.callback = callback;
@@ -110,5 +114,4 @@ public class JSContext extends JSObject implements Closeable {
         methodDescriptor.voidCallback = callback;
         functionRegistry.put(callback.hashCode(), methodDescriptor);
     }
-
 }
