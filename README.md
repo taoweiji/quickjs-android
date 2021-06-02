@@ -2,7 +2,7 @@
 [![Download](https://maven-badges.herokuapp.com/maven-central/io.github.taoweiji.quickjs/quickjs-android/badge.svg)](https://search.maven.org/search?q=io.github.taoweiji.quickjs)
 
 
-quickjs-android 是 QuickJS JavaScript 引擎的 Android 接口框架，整体基于面向对象设计，提供了自动GC功能，使用简单。armeabi-v7a 的大小仅 350KB，是 Google V8 不错的替代品，启动速度比 V8 快，内存占用更低，支持 [ES2020](https://tc39.es/ecma262/)。
+[quickjs-android](https://github.com/taoweiji/quickjs-android) 是 QuickJS JavaScript 引擎的 Android 接口框架，整体基于面向对象设计，提供了自动GC功能，使用简单。armeabi-v7a 的大小仅 350KB，是 Google V8 不错的替代品，启动速度比 V8 快，内存占用更低，支持 [ES2020](https://tc39.es/ecma262/)。
 
 
 ### 使用教程
@@ -10,7 +10,7 @@ quickjs-android 是 QuickJS JavaScript 引擎的 Android 接口框架，整体�
 ##### 引入依赖
 
 ```groovy
-implementation 'io.github.taoweiji.quickjs:quickjs-android:1.1.4'
+implementation 'io.github.taoweiji.quickjs:quickjs-android:1.+'
 ```
 
 ##### 简单示例
@@ -43,6 +43,7 @@ QuickJS quickJS = QuickJS.createRuntime();
 JSContext context = quickJS.createContext();
 int result = context.executeIntegerScript("var a = 2+10;\n a;", "file.js");
 String result = context.executeStringScript("'Hello World';", "file.js");
+context.close();
 ```
 
 ##### JSObject
