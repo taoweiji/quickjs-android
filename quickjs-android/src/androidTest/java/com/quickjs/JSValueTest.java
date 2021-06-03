@@ -1,15 +1,11 @@
 package com.quickjs;
 
-import com.quickjs.JSArray;
-import com.quickjs.JSContext;
-import com.quickjs.JSValue;
-import com.quickjs.QuickJS;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class JSValueTest {
     private JSContext context;
