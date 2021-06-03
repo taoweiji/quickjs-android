@@ -1,8 +1,5 @@
 package com.quickjs;
 
-import com.quickjs.JSContext;
-import com.quickjs.QuickJS;
-
 import org.junit.Test;
 
 public class QuickJSTest {
@@ -21,4 +18,10 @@ public class QuickJSTest {
         quickJS.close();
     }
 
+    @Test
+    public void createContext2() {
+        QuickJS quickJS = QuickJS.createRuntime();
+        JSContext context = quickJS.createContext();
+        quickJS.close();
+    }
 }
