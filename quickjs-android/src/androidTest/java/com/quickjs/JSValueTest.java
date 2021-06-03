@@ -32,6 +32,9 @@ public class JSValueTest {
     @Test
     public void getType() {
         assertEquals(JSValue.TYPE.UNDEFINED, JSValue.Undefined(context).getType());
+        context.executeVoidScript("var a = 1111111111111;a", null);
+        assertEquals(JSValue.TYPE.DOUBLE, context.getType("a"));
+        assertEquals(1111111111111L, context.getDouble("a"), 0);
     }
 
     @Test

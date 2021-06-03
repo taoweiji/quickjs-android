@@ -49,6 +49,7 @@ public class JSArrayTest {
         assertEquals(Double.MAX_VALUE, array.getDouble(1), 0.01);
         assertEquals(Double.MIN_VALUE, array.getDouble(2), 0.01);
         assertEquals(time, array.getDouble(3), 0);
+        assertEquals(JSValue.TYPE.DOUBLE, array.getType(3));
     }
 
     @Test
