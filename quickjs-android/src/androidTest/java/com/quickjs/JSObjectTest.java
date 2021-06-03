@@ -87,11 +87,6 @@ public class JSObjectTest {
 
 
     @Test
-    public void executeFunction() {
-
-    }
-
-    @Test
     public void executeIntegerFunction() {
         context.executeVoidScript("function test(data){ return data}", "file.js");
         JSArray array = new JSArray(context);
@@ -255,6 +250,18 @@ public class JSObjectTest {
         context.executeVoidScript("console.log('Hello World')", null);
         int count = context.executeIntegerScript("console.count()", null);
         assertEquals(1, count);
+    }
+
+    @Test
+    public void executeFunction() {
+        final long time = System.currentTimeMillis();
+        context.registerJavaMethod(new JavaCallback() {
+            @Override
+            public Object invoke(JSObject receiver, JSArray args) {
+                return time;
+            }
+        }, "time");
+        assertEquals(time, (Double) context.executeFunction("time", null), 0);
     }
 
     public static class Console {

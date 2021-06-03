@@ -17,6 +17,7 @@ public class JSFunction extends JSObject {
     }
 
     public Object call(JSValue.TYPE type, JSObject receiver, JSArray parameters) {
+        this.context.quickJS.checkRuntime(parameters);
         if (receiver == null) {
             receiver = JSValue.Undefined(context);
         }
