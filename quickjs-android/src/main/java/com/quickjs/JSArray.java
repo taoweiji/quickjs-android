@@ -2,7 +2,6 @@ package com.quickjs;
 
 public class JSArray extends JSObject {
 
-
     public JSArray(JSContext context) {
         super(context, QuickJS._initNewJSArray(context.getContextPtr()));
     }
@@ -11,15 +10,14 @@ public class JSArray extends JSObject {
         super(context, tag, u_int32, u_float64, u_ptr);
     }
 
-    public Object get(int expectedType, int index) {
+    Object get(int expectedType, int index) {
         return QuickJS._arrayGet(this.getContextPtr(), expectedType, this, index);
     }
 
-    public JSArray pushObject(Object value) {
+    JSArray pushObject(Object value) {
         QuickJS._arrayAdd(getContextPtr(), this, value);
         return this;
     }
-
 
     public int getInteger(int index) {
         Object result = get(JSValue.TYPE_INTEGER, index);
@@ -94,8 +92,6 @@ public class JSArray extends JSObject {
     }
 
     public JSArray push(JSValue value) {
-        // TODO
-//        value.released = true;
         return pushObject(value);
     }
 

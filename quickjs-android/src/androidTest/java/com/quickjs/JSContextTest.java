@@ -1,33 +1,24 @@
 package com.quickjs;
 
-import android.util.Log;
-
-import com.quickjs.JSArray;
-import com.quickjs.JSContext;
-import com.quickjs.JSFunction;
-import com.quickjs.JSObject;
-import com.quickjs.QuickJS;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Arrays;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class JSContextTest {
     private JSContext context;
     private QuickJS quickJS;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         quickJS = QuickJS.createRuntime();
         context = quickJS.createContext();
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         context.close();
         quickJS.close();
     }
