@@ -161,9 +161,7 @@ int GetObjectType(JSContext *ctx, JSValue result) {
         if (tag == JS_TAG_INT) {
             return TYPE_INTEGER;
         }
-        if (JS_TAG_IS_FLOAT64(tag)) {
-            return TYPE_DOUBLE;
-        }
+        return TYPE_DOUBLE;
     }
     return TYPE_UNKNOWN;
 }
