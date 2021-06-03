@@ -116,6 +116,18 @@ public class QuickJS implements Closeable {
         throw new QuickJSException(result[0], message.toString());
     }
 
+    void checkRuntime(JSValue value) {
+        if (value != null && !value.isUndefined()) {
+            if (value.context == null) {
+                throw new Error("Invalid target runtime");
+            }
+            QuickJS quickJS = value.context.quickJS;
+            if (quickJS == null || quickJS.isReleased() || quickJS != this) {
+                throw new Error("Invalid target runtime");
+            }
+        }
+    }
+
     public boolean isReleased() {
         return this.released;
     }

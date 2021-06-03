@@ -48,6 +48,7 @@ public class JSObject extends JSValue {
     }
 
     public JSObject set(String key, JSValue value) {
+        this.context.quickJS.checkRuntime(value);
         return setObject(key, value);
     }
 
@@ -143,6 +144,7 @@ public class JSObject extends JSValue {
 
 
     protected Object executeFunction(TYPE expectedType, String name, JSArray parameters) {
+        this.context.quickJS.checkRuntime(parameters);
         Object object = QuickJS._executeFunction(context.getContextPtr(), expectedType.value, this, name, parameters);
         return JSValue.checkType(object, expectedType);
     }

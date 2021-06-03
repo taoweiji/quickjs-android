@@ -92,6 +92,7 @@ public class JSArray extends JSObject {
     }
 
     public JSArray push(JSValue value) {
+        this.context.quickJS.checkRuntime(value);
         return pushObject(value);
     }
 
