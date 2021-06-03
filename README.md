@@ -2,7 +2,7 @@
 [![Download](https://maven-badges.herokuapp.com/maven-central/io.github.taoweiji.quickjs/quickjs-android/badge.svg)](https://search.maven.org/search?q=io.github.taoweiji.quickjs)
 
 
-[quickjs-android](https://github.com/taoweiji/quickjs-android) 是 QuickJS JavaScript 引擎的 Android 接口框架，整体基于面向对象设计，提供了自动GC功能，使用简单。armeabi-v7a 的大小仅 350KB，是 Google V8 不错的替代品，启动速度比 V8 快，内存占用更低，支持 [ES2020](https://tc39.es/ecma262/)。
+[quickjs-android](https://github.com/taoweiji/quickjs-android) 是 [QuickJS](https://github.com/bellard/quickjs) JavaScript 引擎的 Android 接口框架，整体基于面向对象设计，提供了自动GC功能，使用简单。armeabi-v7a 的大小仅 350KB，是 [Google V8](https://github.com/v8/v8) 不错的替代品，启动速度比 V8 快，内存占用更低，支持 [ES2020](https://tc39.es/ecma262/)。
 
 
 ### 使用教程
@@ -49,9 +49,10 @@ context.close();
 ##### JSObject
 
 ```java
-JSObject user = new JSObject(context).set("name", "Wiki").set("age", 18);
+JSObject user = new JSObject(context).set("name", "Wiki").set("age", 18).set("time",System.currentTimeMillis());
 Log.e("QuickJS", String.valueOf(user.getString("name")));
 Log.e("QuickJS", String.valueOf(user.getInteger("age")));
+Log.e("QuickJS", String.valueOf(user.getDouble("time")));
 
 user.registerJavaMethod(new JavaVoidCallback() {
     @Override
