@@ -143,6 +143,7 @@ public class JSValue {
     }
 
     public TYPE getType() {
+        this.context.checkReleased();
         int value = QuickJS._getObjectType(getContextPtr(), this);
         switch (value) {
             case TYPE_UNDEFINED:

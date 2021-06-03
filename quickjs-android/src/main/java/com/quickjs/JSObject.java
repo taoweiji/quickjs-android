@@ -2,7 +2,6 @@ package com.quickjs;
 
 import android.webkit.JavascriptInterface;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
@@ -21,11 +20,13 @@ public class JSObject extends JSValue {
     }
 
     protected JSObject setObject(String key, Object value) {
+        this.context.checkReleased();
         QuickJS._set(getContextPtr(), this, key, value);
         return this;
     }
 
     protected Object get(TYPE expectedType, String key) {
+        this.context.checkReleased();
         Object object = QuickJS._get(this.getContextPtr(), expectedType.value, this, key);
         return JSValue.checkType(object, expectedType);
     }
@@ -48,7 +49,7 @@ public class JSObject extends JSValue {
     }
 
     public JSObject set(String key, JSValue value) {
-        this.context.quickJS.checkRuntime(value);
+        this.context.checkRuntime(value);
         return setObject(key, value);
     }
 
@@ -87,12 +88,14 @@ public class JSObject extends JSValue {
 
 
     public JSObject registerJavaMethod(JavaCallback callback, String jsFunctionName) {
+        this.context.checkReleased();
         JSFunction functionHandle = QuickJS._registerJavaMethod(this.getContextPtr(), this, jsFunctionName, callback.hashCode(), false);
         context.registerCallback(callback, functionHandle);
         return this;
     }
 
     public JSObject registerJavaMethod(JavaVoidCallback callback, String jsFunctionName) {
+        this.context.checkReleased();
         JSFunction functionHandle = QuickJS._registerJavaMethod(this.getContextPtr(), this, jsFunctionName, callback.hashCode(), true);
         context.registerCallback(callback, functionHandle);
         return this;
@@ -131,25 +134,30 @@ public class JSObject extends JSValue {
     }
 
     public Object executeFunction2(String name, Object... parameters) {
+        this.context.checkReleased();
         return QuickJS.executeFunction(context, this, name, parameters);
     }
 
     public boolean contains(String key) {
+        this.context.checkReleased();
         return QuickJS._contains(getContextPtr(), this, key);
     }
 
     public String[] getKeys() {
+        this.context.checkReleased();
         return QuickJS._getKeys(getContextPtr(), this);
     }
 
 
     protected Object executeFunction(TYPE expectedType, String name, JSArray parameters) {
-        this.context.quickJS.checkRuntime(parameters);
+        this.context.checkReleased();
+        this.context.checkRuntime(parameters);
         Object object = QuickJS._executeFunction(context.getContextPtr(), expectedType.value, this, name, parameters);
         return JSValue.checkType(object, expectedType);
     }
 
     public void addJavascriptInterface(Object obj, String interfaceName) {
+        this.context.checkReleased();
         Method[] methods = obj.getClass().getMethods();
         JSObject object = new JSObject(context);
         for (Method method : methods) {

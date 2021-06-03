@@ -114,4 +114,23 @@ public class JSContext extends JSObject implements Closeable {
         methodDescriptor.voidCallback = callback;
         functionRegistry.put(callback.hashCode(), methodDescriptor);
     }
+
+    void checkRuntime(JSValue value) {
+        if (value != null && !value.isUndefined()) {
+            if (value.context == null) {
+                throw new Error("Invalid target runtime");
+            }
+            QuickJS quickJS = value.context.quickJS;
+            if (quickJS == null || quickJS.isReleased() || quickJS != this.quickJS) {
+                throw new Error("Invalid target runtime");
+            }
+        }
+    }
+
+    void checkReleased() {
+//        this.locker.checkThread();
+        if (this.isReleased() || this.quickJS.isReleased()) {
+            throw new Error("Runtime disposed error");
+        }
+    }
 }

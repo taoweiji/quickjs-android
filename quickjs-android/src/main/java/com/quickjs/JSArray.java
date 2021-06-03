@@ -11,10 +11,12 @@ public class JSArray extends JSObject {
     }
 
     Object get(int expectedType, int index) {
+        this.context.checkReleased();
         return QuickJS._arrayGet(this.getContextPtr(), expectedType, this, index);
     }
 
     JSArray pushObject(Object value) {
+        this.context.checkReleased();
         QuickJS._arrayAdd(getContextPtr(), this, value);
         return this;
     }
@@ -68,6 +70,7 @@ public class JSArray extends JSObject {
     }
 
     public TYPE getType(int index) {
+        this.context.checkReleased();
         JSValue value = QuickJS._arrayGetValue(this.getContextPtr(), this, index);
         if (value == null) {
             return JSValue.TYPE.NULL;
@@ -92,7 +95,7 @@ public class JSArray extends JSObject {
     }
 
     public JSArray push(JSValue value) {
-        this.context.quickJS.checkRuntime(value);
+        this.context.checkRuntime(value);
         return pushObject(value);
     }
 
