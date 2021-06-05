@@ -10,9 +10,9 @@ public class JSArray extends JSObject {
         super(context, tag, u_int32, u_float64, u_ptr);
     }
 
-    Object get(int expectedType, int index) {
+    public Object get(TYPE expectedType, int index) {
         this.context.checkReleased();
-        return QuickJS._arrayGet(this.getContextPtr(), expectedType, this, index);
+        return QuickJS._arrayGet(this.getContextPtr(), expectedType.value, this, index);
     }
 
     JSArray pushObject(Object value) {
@@ -22,7 +22,7 @@ public class JSArray extends JSObject {
     }
 
     public int getInteger(int index) {
-        Object result = get(JSValue.TYPE_INTEGER, index);
+        Object result = get(JSValue.TYPE.INTEGER, index);
         if (result instanceof Integer) {
             return (int) result;
         }
@@ -30,7 +30,7 @@ public class JSArray extends JSObject {
     }
 
     public boolean getBoolean(int index) {
-        Object result = get(JSValue.TYPE_BOOLEAN, index);
+        Object result = get(JSValue.TYPE.BOOLEAN, index);
         if (result instanceof Boolean) {
             return (boolean) result;
         }
@@ -38,7 +38,7 @@ public class JSArray extends JSObject {
     }
 
     public double getDouble(int index) {
-        Object result = get(JSValue.TYPE_DOUBLE, index);
+        Object result = get(JSValue.TYPE.DOUBLE, index);
         if (result instanceof Double) {
             return (double) result;
         }
@@ -46,7 +46,7 @@ public class JSArray extends JSObject {
     }
 
     public String getString(int index) {
-        Object result = get(JSValue.TYPE_STRING, index);
+        Object result = get(JSValue.TYPE.STRING, index);
         if (result instanceof String) {
             return (String) result;
         }
@@ -54,7 +54,7 @@ public class JSArray extends JSObject {
     }
 
     public JSObject getObject(int index) {
-        Object result = get(JSValue.TYPE_JS_OBJECT, index);
+        Object result = get(JSValue.TYPE.JS_OBJECT, index);
         if (result instanceof JSObject) {
             return (JSObject) result;
         }
@@ -62,7 +62,7 @@ public class JSArray extends JSObject {
     }
 
     public JSArray getArray(int index) {
-        Object result = get(JSValue.TYPE_JS_ARRAY, index);
+        Object result = get(JSValue.TYPE.JS_ARRAY, index);
         if (result instanceof JSArray) {
             return (JSArray) result;
         }

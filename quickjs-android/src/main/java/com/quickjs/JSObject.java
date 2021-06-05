@@ -25,7 +25,7 @@ public class JSObject extends JSValue {
         return this;
     }
 
-    protected Object get(TYPE expectedType, String key) {
+    public Object get(TYPE expectedType, String key) {
         this.context.checkReleased();
         Object object = QuickJS._get(this.getContextPtr(), expectedType.value, this, key);
         return JSValue.checkType(object, expectedType);
@@ -156,7 +156,7 @@ public class JSObject extends JSValue {
         return JSValue.checkType(object, expectedType);
     }
 
-    public void addJavascriptInterface(Object obj, String interfaceName) {
+    public JSObject addJavascriptInterface(Object obj, String interfaceName) {
         this.context.checkReleased();
         Method[] methods = obj.getClass().getMethods();
         JSObject object = new JSObject(context);
@@ -186,6 +186,7 @@ public class JSObject extends JSValue {
             }
         }
         set(interfaceName, object);
+        return object;
     }
 
     private Object[] getParameters(Method method, JSArray args) {
@@ -225,7 +226,7 @@ public class JSObject extends JSValue {
         }
 
         @Override
-        protected Object get(TYPE expectedType, String key) {
+        public Object get(TYPE expectedType, String key) {
             throw new UnsupportedOperationException();
         }
 
