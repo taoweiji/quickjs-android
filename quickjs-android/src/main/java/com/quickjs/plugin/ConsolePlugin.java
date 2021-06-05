@@ -15,7 +15,7 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ConsolePlugin extends BasePlugin {
+public class ConsolePlugin extends Plugin {
     private int count;
     private final Map<String, Long> timer = new HashMap<>();
 
@@ -35,25 +35,25 @@ public class ConsolePlugin extends BasePlugin {
     }
 
     @JavascriptInterface
-    public void log(String msg) {
+    public final void log(String msg) {
         count++;
         println(Log.DEBUG, msg);
     }
 
     @JavascriptInterface
-    public void info(String msg) {
+    public final void info(String msg) {
         count++;
         println(Log.INFO, msg);
     }
 
     @JavascriptInterface
-    public void error(String msg) {
+    public final void error(String msg) {
         count++;
         println(Log.ERROR, msg);
     }
 
     @JavascriptInterface
-    public void warn(String msg) {
+    public final void warn(String msg) {
         count++;
         println(Log.WARN, msg);
     }
@@ -63,13 +63,13 @@ public class ConsolePlugin extends BasePlugin {
     }
 
     @JavascriptInterface
-    public int count() {
+    public final int count() {
         return count;
     }
 
 
     @JavascriptInterface
-    public void table(JSObject obj) {
+    public final void table(JSObject obj) {
         if (obj instanceof JSArray) {
             try {
                 log(toJsonArray((JSArray) obj).toString());
@@ -121,7 +121,7 @@ public class ConsolePlugin extends BasePlugin {
 
 
     @JavascriptInterface
-    public void time(String name) {
+    public final void time(String name) {
         if (timer.containsKey(name)) {
             warn(String.format("Timer '%s' already exists", name));
             return;
@@ -130,7 +130,7 @@ public class ConsolePlugin extends BasePlugin {
     }
 
     @JavascriptInterface
-    public void timeEnd(String name) {
+    public final void timeEnd(String name) {
         Long startTime = timer.get(name);
         if (startTime != null) {
             float ms = (System.currentTimeMillis() - startTime);

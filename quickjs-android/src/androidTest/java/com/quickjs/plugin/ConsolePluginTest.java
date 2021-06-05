@@ -7,32 +7,29 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class ConsolePluginTest {
 
     private JSContext context;
     private QuickJS quickJS;
-    private ConsolePlugin plugin;
     private Object result;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() throws Throwable {
         quickJS = QuickJS.createRuntime();
         context = quickJS.createContext();
-        this.plugin = new ConsolePlugin() {
+        context.addPlugin(new ConsolePlugin() {
             @Override
             public void println(int priority, String msg) {
                 result = msg;
                 super.println(priority, msg);
             }
-        };
-        plugin.setup(context);
+        });
     }
 
     @After
-    public void tearDown() throws Exception {
-        plugin.close(context);
+    public void tearDown() throws Throwable {
         context.close();
         quickJS.close();
     }
@@ -102,6 +99,7 @@ public class ConsolePluginTest {
                 "     c:{ num: \"3\" }\n" +
                 "};\n" +
                 "console.table(obj);", null);
+        assertEquals("{\"a\":{\"num\":\"1\"},\"b\":{\"num\":\"2\"},\"c\":{\"num\":\"3\"}}", result);
     }
 
     @Test
@@ -123,6 +121,7 @@ public class ConsolePluginTest {
 
     @Test
     public void timeEnd() {
+
     }
 
     @Test

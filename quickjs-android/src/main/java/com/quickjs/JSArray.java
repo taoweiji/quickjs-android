@@ -12,7 +12,11 @@ public class JSArray extends JSObject {
 
     public Object get(TYPE expectedType, int index) {
         this.context.checkReleased();
-        return QuickJS._arrayGet(this.getContextPtr(), expectedType.value, this, index);
+        if (expectedType == null) {
+            expectedType = TYPE.UNKNOWN;
+        }
+        Object object = QuickJS._arrayGet(this.getContextPtr(), expectedType.value, this, index);
+        return JSValue.checkType(object, expectedType);
     }
 
     JSArray pushObject(Object value) {
