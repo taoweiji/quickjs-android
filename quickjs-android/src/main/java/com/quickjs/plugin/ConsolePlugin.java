@@ -141,26 +141,26 @@ public class ConsolePlugin extends BasePlugin {
 
     @JavascriptInterface
     public void trace() {
-        log("This 'trace' function is not supported");
+        log("This 'console.trace' function is not supported");
     }
 
     @JavascriptInterface
     public void clear() {
-        log("This 'clear' function is not supported");
+        log("This 'console.clear' function is not supported");
     }
 
     @JavascriptInterface
     public void group(String name) {
-        log("This 'group' function is not supported");
+        log("This 'console.group' function is not supported");
     }
 
     @JavascriptInterface
     public void groupCollapsed(String name) {
-        log("This 'groupCollapsed' function is not supported");
+        log("This 'console.groupCollapsed' function is not supported");
     }
 
     @JavascriptInterface
     public void groupEnd(String name) {
-        log("This 'groupEnd' function is not supported");
+        log("This 'console.groupEnd' function is not supported");
     }
 }
