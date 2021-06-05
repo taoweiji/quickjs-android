@@ -1,16 +1,21 @@
 package com.quickjs;
 
+import com.quickjs.plugin.Plugin;
+
 import java.io.Closeable;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Set;
 
 public class JSContext extends JSObject implements Closeable {
     final QuickJS quickJS;
     private final long contextPtr;
     Map<Integer, QuickJS.MethodDescriptor> functionRegistry = new HashMap<>();
     final LinkedList<WeakReference<JSValue>> refs = new LinkedList<>();
+    Set<Plugin> plugins = new HashSet<>();
 
     JSContext(QuickJS quickJS, long contextPtr) {
         super(null, QuickJS._getGlobalObject(contextPtr));
@@ -44,6 +49,10 @@ public class JSContext extends JSObject implements Closeable {
         if (released) {
             return;
         }
+        for (Plugin plugin : plugins) {
+            plugin.close(this);
+        }
+        plugins.clear();
         functionRegistry.clear();
         WeakReference[] arr = new WeakReference[refs.size()];
         refs.toArray(arr);
@@ -125,6 +134,15 @@ public class JSContext extends JSObject implements Closeable {
                 throw new Error("Invalid target runtime");
             }
         }
+    }
+
+    public void addPlugin(Plugin plugin) {
+        checkReleased();
+        if (plugins.contains(plugin)) {
+            return;
+        }
+        plugin.setup(context);
+        this.plugins.add(plugin);
     }
 
     void checkReleased() {

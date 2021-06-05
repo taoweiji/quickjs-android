@@ -27,6 +27,9 @@ public class JSObject extends JSValue {
 
     public Object get(TYPE expectedType, String key) {
         this.context.checkReleased();
+        if (expectedType == null) {
+            expectedType = TYPE.UNKNOWN;
+        }
         Object object = QuickJS._get(this.getContextPtr(), expectedType.value, this, key);
         return JSValue.checkType(object, expectedType);
     }

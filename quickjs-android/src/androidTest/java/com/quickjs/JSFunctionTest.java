@@ -162,4 +162,19 @@ public class JSFunctionTest {
         Thread.sleep(5000);
         assertEquals("Hello", ans[0]);
     }
+
+
+    @Test
+    public void call6() throws InterruptedException {
+        Object[] ans = new Object[1];
+        context.registerJavaMethod(new JavaVoidCallback() {
+            @Override
+            public void invoke(JSObject receiver, JSArray args) {
+                JSArray obj = args.getArray(0);
+                ans[0] = obj.getString(0);
+            }
+        }, "log");
+        context.executeVoidScript("log(['Hello'])", null);
+        assertEquals("Hello", ans[0]);
+    }
 }
