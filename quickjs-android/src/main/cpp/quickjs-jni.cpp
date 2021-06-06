@@ -57,12 +57,15 @@ jmethodID booleanValueMethodID = nullptr;
 jclass quickJSCls = nullptr;
 jmethodID callJavaCallbackMethodID = nullptr;
 jmethodID createJSValueMethodID = nullptr;
+jmethodID getModuleScriptMethodID = nullptr;
 
 jclass jsValueCls = nullptr;
 jfieldID js_value_tag_id;
 jfieldID js_value_u_int32_id;
 jfieldID js_value_u_float64_id;
 jfieldID js_value_u_ptr_id;
+
+void initES6Module(JSRuntime *rt);
 
 bool JS_Equals(JSValue v1, JSValue v2) {
 #if defined(JS_NAN_BOXING)
@@ -228,6 +231,9 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *) {
 
     createJSValueMethodID = env->GetStaticMethodID(quickJSCls, "createJSValue",
                                                    "(JIJIDJ)Lcom/quickjs/JSValue;");
+    getModuleScriptMethodID = env->GetStaticMethodID(quickJSCls, "getModuleScript",
+                                                     "(JLjava/lang/String;)Ljava/lang/String;");
+
 
     intValueMethodID = env->GetMethodID(integerCls, "intValue", "()I");
     longValueMethodID = env->GetMethodID(longCls, "longValue", "()J");
@@ -253,6 +259,7 @@ extern "C"
 JNIEXPORT jlong JNICALL
 Java_com_quickjs_QuickJS__1createRuntime(JNIEnv *env, jclass clazz) {
     JSRuntime *runtime = JS_NewRuntime();
+    initES6Module(runtime);
     return reinterpret_cast<jlong>(runtime);
 }
 extern "C"
@@ -276,7 +283,7 @@ extern "C"
 JNIEXPORT jobject JNICALL
 Java_com_quickjs_QuickJS__1executeScript(JNIEnv *env, jclass clazz, jlong context_ptr,
                                          jint expected_type,
-                                         jstring source, jstring file_name) {
+                                         jstring source, jstring file_name,jint eval_flags) {
     if (source == nullptr) {
         return nullptr;
     }
@@ -289,7 +296,7 @@ Java_com_quickjs_QuickJS__1executeScript(JNIEnv *env, jclass clazz, jlong contex
     } else {
         file_name_ = env->GetStringUTFChars(file_name, nullptr);
     }
-    JSValue val = JS_Eval(ctx, source_, (size_t) source_length, file_name_, JS_EVAL_TYPE_GLOBAL);
+    JSValue val = JS_Eval(ctx, source_, (size_t) source_length, file_name_, eval_flags);
     jobject result = To_JObject(env, context_ptr, expected_type, val);
     return result;
 }
@@ -609,4 +616,31 @@ Java_com_quickjs_QuickJS__1getException(JNIEnv *env, jclass clazz, jlong context
         env->SetObjectArrayElement(stringArray, i, str);
     }
     return stringArray;
+}
+
+const char *GetModuleScript(JSContext *ctx, const char *module_name, int *scriptLen) {
+    JNIEnv *env;
+    jvm->GetEnv((void **) &env, JNI_VERSION_1_6);
+    jobject result = env->CallStaticObjectMethod(quickJSCls, getModuleScriptMethodID, (jlong) ctx,
+                                                 env->NewStringUTF(module_name));
+    if (result == nullptr) {
+        return nullptr;
+    }
+    *scriptLen = env->GetStringUTFLength((jstring) result);
+    return env->GetStringUTFChars((jstring) result, nullptr);
+}
+
+JSModuleDef *_JSModuleLoaderFunc(JSContext *ctx, const char *module_name, void *opaque) {
+    int scriptLen;
+    void *m;
+    const char *script = GetModuleScript(ctx, module_name, &scriptLen);
+    JSValue func_val = JS_Eval(ctx, script, scriptLen, module_name,
+                               JS_EVAL_TYPE_MODULE | JS_EVAL_FLAG_COMPILE_ONLY);
+    m = JS_VALUE_GET_PTR(func_val);
+    JS_FreeValue(ctx, func_val);
+    return (JSModuleDef *) m;
+}
+
+void initES6Module(JSRuntime *rt) {
+    JS_SetModuleLoaderFunc(rt, nullptr, _JSModuleLoaderFunc, nullptr);
 }

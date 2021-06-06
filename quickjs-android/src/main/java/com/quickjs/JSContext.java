@@ -1,7 +1,5 @@
 package com.quickjs;
 
-import com.quickjs.plugin.Plugin;
-
 import java.io.Closeable;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
@@ -16,6 +14,7 @@ public class JSContext extends JSObject implements Closeable {
     Map<Integer, QuickJS.MethodDescriptor> functionRegistry = new HashMap<>();
     final LinkedList<WeakReference<JSValue>> refs = new LinkedList<>();
     Set<Plugin> plugins = new HashSet<>();
+    ES6Module modulePlugin;
 
     JSContext(QuickJS quickJS, long contextPtr) {
         super(null, QuickJS._getGlobalObject(contextPtr));
@@ -68,7 +67,7 @@ public class JSContext extends JSObject implements Closeable {
     }
 
     private Object executeScript(TYPE expectedType, String source, String fileName) throws QuickJSScriptException {
-        Object object = QuickJS._executeScript(this.getContextPtr(), expectedType.value, source, fileName);
+        Object object = QuickJS._executeScript(this.getContextPtr(), expectedType.value, source, fileName, QuickJS.JS_EVAL_TYPE_GLOBAL);
         QuickJS.checkException(context);
         return object;
     }
@@ -143,6 +142,13 @@ public class JSContext extends JSObject implements Closeable {
         }
         plugin.setup(context);
         this.plugins.add(plugin);
+    }
+
+    String getModuleScript(String moduleName) {
+        if (modulePlugin != null) {
+            return modulePlugin.getModuleScript(moduleName);
+        }
+        throw new RuntimeException("No registration ES6ModulePlugin");
     }
 
     void checkReleased() {

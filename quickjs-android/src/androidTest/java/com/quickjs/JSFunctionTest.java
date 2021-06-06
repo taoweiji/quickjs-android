@@ -165,12 +165,13 @@ public class JSFunctionTest {
 
 
     @Test
-    public void call6() throws InterruptedException {
+    public void call6() {
         Object[] ans = new Object[1];
         context.registerJavaMethod(new JavaVoidCallback() {
             @Override
             public void invoke(JSObject receiver, JSArray args) {
                 JSArray obj = args.getArray(0);
+                obj.released = true;
                 ans[0] = obj.getString(0);
             }
         }, "log");
