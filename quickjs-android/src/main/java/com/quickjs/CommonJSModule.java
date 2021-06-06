@@ -13,11 +13,20 @@ public abstract class CommonJSModule extends Module {
     CommonJSModule(QuickJS quickJS) {
         super(quickJS, QuickJS._createContext(quickJS.runtimePtr));
         registerJavaMethod((receiver, args) -> {
+            String moduleBaseName = null;
+            if (!receiver.isUndefined()) {
+                JSObject parentModule = receiver.getObject("module");
+                if (!parentModule.isUndefined()) {
+                    if (parentModule.contains("filename")) {
+                        moduleBaseName = parentModule.getString("filename");
+                    }
+                }
+            }
             String path = args.getString(0);
+            String moduleName = convertModuleName(moduleBaseName, path);
             JSObject module = modules.get(path);
             if (module == null) {
-                // TODO
-                module = executeModule(path);
+                module = executeModule(moduleName);
             }
             return module.get(TYPE.UNKNOWN, "exports");
         }, "require");
@@ -33,9 +42,14 @@ public abstract class CommonJSModule extends Module {
     protected abstract String getModuleScript(String moduleName);
 
     public JSObject executeModuleScript(String source, String moduleName) {
+        String moduleName_ = convertModuleName(null, moduleName);
         String wrapper = MODULE_SCRIPT_WRAPPER.replace("#CODE", source);
-        JSObject module = (JSObject) super.executeScript(TYPE.UNKNOWN, wrapper, moduleName);
-        modules.put(moduleName, module);
+        JSObject module = (JSObject) super.executeScript(TYPE.UNKNOWN, wrapper, moduleName_);
+        module.set("id", moduleName_);
+        module.set("filename", moduleName_);
+        if (moduleName_ != null) {
+            modules.put(moduleName_, module);
+        }
         return module;
     }
 
