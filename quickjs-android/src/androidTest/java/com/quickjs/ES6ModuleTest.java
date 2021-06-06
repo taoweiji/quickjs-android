@@ -6,28 +6,30 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
 public class ES6ModuleTest {
     private QuickJS quickJS;
-    private Map<String, String> fileMap = new HashMap<>();
     private ES6Module es6Module;
-    private String log;
+    private final List<String> logs = new ArrayList<>();
 
     @Before
-    public void setUp() throws Throwable {
+    public void setUp() {
         quickJS = QuickJS.createRuntime();
         es6Module = new ES6Module(quickJS) {
             @Override
             protected String getModuleScript(String moduleName) {
                 if (moduleName.contains("a.js")) {
-                    return "export var name = 'Hello world'; ";
+                    return "export var name = 'Hello world';\n" +
+                            "export var age = 18;";
                 }
                 if (moduleName.contains("b.js")) {
-                    return "import {name} from './a.js';console.log(name);";
+                    return "import {name, age} from './a.js';\n" +
+                            "console.log(name);\n" +
+                            "console.log(age);";
                 }
                 return null;
             }
@@ -36,25 +38,27 @@ public class ES6ModuleTest {
             @Override
             public void println(int priority, String msg) {
                 super.println(priority, msg);
-                log = msg;
+                logs.add(msg);
             }
         });
     }
 
     @After
-    public void tearDown() throws Throwable {
+    public void tearDown() {
         quickJS.close();
     }
 
     @Test
     public void executeScript() {
         es6Module.executeScript("import {name} from './a.js';\n console.log(name);", null);
-        assertEquals("Hello world", log);
+        assertEquals("Hello world", logs.get(0));
     }
 
     @Test
     public void execute() {
         es6Module.execute("b.js");
-        assertEquals("Hello world", log);
+        es6Module.execute("b.js");
+        assertEquals("Hello world", logs.get(0));
+        assertEquals("18", logs.get(1));
     }
 }
