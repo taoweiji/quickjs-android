@@ -34,7 +34,7 @@ public class ES6ModuleTest {
                 return null;
             }
         };
-        es6Module.getContext().addPlugin(new ConsolePlugin() {
+        es6Module.addPlugin(new ConsolePlugin() {
             @Override
             public void println(int priority, String msg) {
                 super.println(priority, msg);
@@ -49,15 +49,22 @@ public class ES6ModuleTest {
     }
 
     @Test
-    public void executeScript() {
-        es6Module.executeScript("import {name} from './a.js';\n console.log(name);", null);
+    public void executeModuleScript1() {
+        es6Module.executeModuleScript("import {name} from './a.js';\n console.log(name);", null);
         assertEquals("Hello world", logs.get(0));
     }
 
     @Test
-    public void execute() {
-        es6Module.execute("b.js");
-        es6Module.execute("b.js");
+    public void executeModuleScript2() {
+        es6Module.executeModuleScript("import {name} from './a.js';\n console.log(name);", null);
+        assertEquals("Hello world", logs.get(0));
+    }
+
+
+    @Test
+    public void executeModule() {
+        es6Module.executeModule("b.js");
+        es6Module.executeModule("b.js");
         assertEquals("Hello world", logs.get(0));
         assertEquals("18", logs.get(1));
     }

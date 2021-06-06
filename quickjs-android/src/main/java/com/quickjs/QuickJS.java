@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class QuickJS implements Closeable {
-    private final long runtimePtr;
+    final long runtimePtr;
     static final Map<Long, JSContext> sContextMap = new HashMap<>();
     private boolean released;
 
@@ -20,9 +20,7 @@ public class QuickJS implements Closeable {
     }
 
     public JSContext createContext() {
-        JSContext context = new JSContext(this, _createContext(runtimePtr));
-        sContextMap.put(context.getContextPtr(), context);
-        return context;
+        return new JSContext(this, _createContext(runtimePtr));
     }
 
     public void close() {
@@ -84,7 +82,7 @@ public class QuickJS implements Closeable {
     @Keep
     static String getModuleScript(long contextPtr, String moduleName) {
         JSContext context = sContextMap.get(contextPtr);
-        if (context == null){
+        if (context == null) {
             return null;
         }
         return context.getModuleScript(moduleName);

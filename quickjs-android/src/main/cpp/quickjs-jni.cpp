@@ -634,6 +634,9 @@ JSModuleDef *_JSModuleLoaderFunc(JSContext *ctx, const char *module_name, void *
     int scriptLen;
     void *m;
     const char *script = GetModuleScript(ctx, module_name, &scriptLen);
+    if (script == nullptr){
+        return nullptr;
+    }
     JSValue func_val = JS_Eval(ctx, script, scriptLen, module_name,
                                JS_EVAL_TYPE_MODULE | JS_EVAL_FLAG_COMPILE_ONLY);
     m = JS_VALUE_GET_PTR(func_val);
