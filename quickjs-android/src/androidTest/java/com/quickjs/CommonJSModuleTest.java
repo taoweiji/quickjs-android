@@ -27,7 +27,7 @@ public class CommonJSModuleTest {
                             "module.exports.age = 18;";
                 }
                 if (moduleName.contains("b.js")) {
-                    return "var a = require('./a.js');\n" +
+                    return "var a = require('./page/a.js');\n" +
                             "console.log(a.name);\n" +
                             "console.log(a.age);";
                 }

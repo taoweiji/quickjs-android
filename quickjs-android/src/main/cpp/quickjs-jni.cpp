@@ -58,6 +58,7 @@ jclass quickJSCls = nullptr;
 jmethodID callJavaCallbackMethodID = nullptr;
 jmethodID createJSValueMethodID = nullptr;
 jmethodID getModuleScriptMethodID = nullptr;
+jmethodID convertModuleNameMethodID = nullptr;
 
 jclass jsValueCls = nullptr;
 jfieldID js_value_tag_id;
@@ -233,7 +234,8 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *) {
                                                    "(JIJIDJ)Lcom/quickjs/JSValue;");
     getModuleScriptMethodID = env->GetStaticMethodID(quickJSCls, "getModuleScript",
                                                      "(JLjava/lang/String;)Ljava/lang/String;");
-
+    convertModuleNameMethodID = env->GetStaticMethodID(quickJSCls, "convertModuleName",
+                                                       "(JLjava/lang/String;Ljava/lang/String;)Ljava/lang/String;");
 
     intValueMethodID = env->GetMethodID(integerCls, "intValue", "()I");
     longValueMethodID = env->GetMethodID(longCls, "longValue", "()J");
@@ -283,7 +285,7 @@ extern "C"
 JNIEXPORT jobject JNICALL
 Java_com_quickjs_QuickJS__1executeScript(JNIEnv *env, jclass clazz, jlong context_ptr,
                                          jint expected_type,
-                                         jstring source, jstring file_name,jint eval_flags) {
+                                         jstring source, jstring file_name, jint eval_flags) {
     if (source == nullptr) {
         return nullptr;
     }
@@ -485,7 +487,7 @@ callJavaCallback(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *
     if (argv != nullptr) {
         for (int i = 0; i < argc; ++i) {
             JSValue it = argv[i];
-            JS_SetPropertyUint32(ctx, args, i, JS_DupValue(ctx,it));
+            JS_SetPropertyUint32(ctx, args, i, JS_DupValue(ctx, it));
         }
     }
     jobject objectHandle = TO_JAVA_OBJECT(env, ctx, this_val);
@@ -635,7 +637,7 @@ JSModuleDef *_JSModuleLoaderFunc(JSContext *ctx, const char *module_name, void *
     int scriptLen;
     void *m;
     const char *script = GetModuleScript(ctx, module_name, &scriptLen);
-    if (script == nullptr){
+    if (script == nullptr) {
         return nullptr;
     }
     JSValue func_val = JS_Eval(ctx, script, scriptLen, module_name,
@@ -645,6 +647,20 @@ JSModuleDef *_JSModuleLoaderFunc(JSContext *ctx, const char *module_name, void *
     return (JSModuleDef *) m;
 }
 
+char *_JSModuleNormalizeFunc(JSContext *ctx,
+                             const char *module_base_name,
+                             const char *module_name, void *opaque) {
+    JNIEnv *env;
+    jvm->GetEnv((void **) &env, JNI_VERSION_1_6);
+    jobject result = env->CallStaticObjectMethod(quickJSCls, convertModuleNameMethodID, (jlong) ctx,
+                                                 env->NewStringUTF(module_base_name),
+                                                 env->NewStringUTF(module_name));
+    if (result == nullptr) {
+        return nullptr;
+    }
+    return (char *) env->GetStringUTFChars((jstring) result, nullptr);
+}
+
 void initES6Module(JSRuntime *rt) {
-    JS_SetModuleLoaderFunc(rt, nullptr, _JSModuleLoaderFunc, nullptr);
+    JS_SetModuleLoaderFunc(rt, _JSModuleNormalizeFunc, _JSModuleLoaderFunc, nullptr);
 }

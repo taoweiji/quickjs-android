@@ -144,10 +144,6 @@ public class JSContext extends JSObject implements Closeable {
         this.plugins.add(plugin);
     }
 
-    String getModuleScript(String moduleName) {
-        throw new RuntimeException("No registration ES6ModulePlugin");
-    }
-
     void checkReleased() {
 //        this.locker.checkThread();
         if (this.isReleased() || this.quickJS.isReleased()) {
