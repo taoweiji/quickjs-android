@@ -81,6 +81,15 @@ public class QuickJS implements Closeable {
         }
     }
 
+    @Keep
+    static String getModuleScript(long contextPtr, String moduleName) {
+        JSContext context = sContextMap.get(contextPtr);
+        if (context == null){
+            return null;
+        }
+        return context.getModuleScript(moduleName);
+    }
+
     static Object executeFunction(JSContext context, JSValue objectHandle, String name, Object[] parameters) {
         JSArray args = new JSArray(context);
         if (parameters != null) {
@@ -117,7 +126,6 @@ public class QuickJS implements Closeable {
     }
 
 
-
     public boolean isReleased() {
         return this.released;
     }
@@ -130,7 +138,7 @@ public class QuickJS implements Closeable {
 
     static native void _releaseContext(long contextPtr);
 
-    static native Object _executeScript(long contextPtr, int expectedType, String source, String fileName);
+    static native Object _executeScript(long contextPtr, int expectedType, String source, String fileName, int eval_flags);
 
     static native JSObject _getGlobalObject(long contextPtr);
 
@@ -171,6 +179,19 @@ public class QuickJS implements Closeable {
     native static JSValue _arrayGetValue(long contextPtr, JSArray array, int index);
 
     native static String[] _getException(long contextPtr);
+
+    /* JS_Eval() flags */
+    static int JS_EVAL_TYPE_GLOBAL = (0); /* global code (default) */
+    static int JS_EVAL_TYPE_MODULE = (1); /* module code */
+    static int JS_EVAL_TYPE_MASK = (3);
+    static int JS_EVAL_FLAG_STRICT = (1 << 3); /* force 'strict' mode */
+    static int JS_EVAL_FLAG_STRIP = (1 << 4); /* force 'strip' mode */
+    /* compile but do not run. The result is an object with a
+       JS_TAG_FUNCTION_BYTECODE or JS_TAG_MODULE tag. It can be executed
+       with JS_EvalFunction(). */
+    static int JS_EVAL_FLAG_COMPILE_ONLY = (1 << 5);
+    /* don't include the stack frames before this eval in the Error() backtraces */
+    static int JS_EVAL_FLAG_BACKTRACE_BARRIER = (1 << 6);
 
 
     static {

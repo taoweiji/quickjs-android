@@ -7,6 +7,7 @@ import com.quickjs.JSArray;
 import com.quickjs.JSContext;
 import com.quickjs.JSObject;
 import com.quickjs.JSValue;
+import com.quickjs.Plugin;
 
 import org.json.JSONArray;
 import org.json.JSONException;

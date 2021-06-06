@@ -1,10 +1,9 @@
 package com.quickjs.plugin;
 
-import com.quickjs.JSArray;
 import com.quickjs.JSContext;
 import com.quickjs.JSObject;
 import com.quickjs.JSValue;
-import com.quickjs.JavaCallback;
+import com.quickjs.Plugin;
 
 /**
  * 实现 CommonJS 的能力
