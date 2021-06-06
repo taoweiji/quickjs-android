@@ -423,7 +423,7 @@ JSValue executeFunction(JNIEnv *env, jlong context_ptr, jobject object_handle, J
         argc = GetArrayLength(ctx, argArray);
         argv = new JSValue[argc];
         for (int i = 0; i < argc; ++i) {
-            argv[i] = JS_DupValue(ctx, JS_GetPropertyUint32(ctx, argArray, i));
+            argv[i] = JS_GetPropertyUint32(ctx, argArray, i);
         }
     }
     JSValue global = JS_GetGlobalObject(ctx);
@@ -439,7 +439,7 @@ JSValue executeFunction(JNIEnv *env, jlong context_ptr, jobject object_handle, J
             JS_FreeValue(ctx, argv[i]);
         }
     }
-    JS_FreeValue(ctx, result);
+//    JS_FreeValue(ctx, result);
     return result;
 }
 
@@ -485,7 +485,7 @@ callJavaCallback(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *
     if (argv != nullptr) {
         for (int i = 0; i < argc; ++i) {
             JSValue it = argv[i];
-            JS_SetPropertyUint32(ctx, args, i, it);
+            JS_SetPropertyUint32(ctx, args, i, JS_DupValue(ctx,it));
         }
     }
     jobject objectHandle = TO_JAVA_OBJECT(env, ctx, this_val);
@@ -505,7 +505,8 @@ callJavaCallback(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *
 
     JSValue value = JobjectToJSValue(env, ctx, result);
     if (env->IsInstanceOf(result, jsValueCls)) {
-        JS_DupValue(ctx, value);
+//        JS_FreeValue(ctx,value);
+//        JS_DupValue(ctx, value);
     }
     return value;
 }

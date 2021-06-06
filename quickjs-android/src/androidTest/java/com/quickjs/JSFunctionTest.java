@@ -56,7 +56,7 @@ public class JSFunctionTest {
         context.set("boolFunction", new JSFunction(context, (JavaCallback) (receiver, args) -> true));
         context.set("stringFunction", new JSFunction(context, (JavaCallback) (receiver, args) -> "Hello"));
 
-        context.executeVoidFunction("intFunction", new JSArray(context).push(new JSArray(context)));
+        context.executeVoidFunction("intFunction", new JSArray(context));
         JSFunction function = (JSFunction) context.getObject("intFunction");
         function.call(JSValue.TYPE.INTEGER, null, null);
     }
@@ -72,6 +72,33 @@ public class JSFunctionTest {
         }));
         context.executeVoidScript("test(1, 3.14, true, 'Hello')", "file.js");
     }
+
+    @Test
+    public void testJavaCallback5() {
+        context.set("intFunction", new JSFunction(context, (JavaCallback) (receiver, array) -> Integer.MAX_VALUE));
+        context.executeVoidFunction("intFunction", new JSArray(context).push(new JSArray(context)));
+    }
+
+
+    @Test
+    public void testJavaCallback6() {
+        context.set("intFunction", new JSFunction(context, (JavaCallback) (receiver, array) -> Integer.MAX_VALUE));
+        context.executeVoidScript("intFunction([1,2])", null);
+    }
+
+    @Test
+    public void testJavaCallback7() {
+        context.executeVoidScript("function test(params){return 1}", null);
+        context.executeVoidFunction("test", new JSArray(context).push(new JSArray(context)));
+    }
+
+
+    @Test
+    public void testJavaCallback8() {
+        context.executeVoidScript("function test(params){return 1}", null);
+        context.executeVoidScript("test([1,2])", null);
+    }
+
 
     @Test
     public void call0() {
@@ -117,7 +144,7 @@ public class JSFunctionTest {
     }
 
     @Test
-    public void call4() {
+    public void call4_1() {
         JSFunction function = new JSFunction(context, new JavaCallback() {
             @Override
             public Object invoke(JSObject receiver, JSArray args) {
@@ -127,15 +154,35 @@ public class JSFunctionTest {
         context.set("test", function);
         JSArray array = new JSArray(context).push("Hello");
         JSArray result = (JSArray) function.call(null, new JSArray(context).push(array));
-        assertEquals("Hello", result.getString(0));
-        JSArray result1 = context.executeArrayScript("test(['Hello'])", null);
-        assertEquals("Hello", result1.getString(0));
-        JSFunction function2 = (JSFunction) context.getObject("test");
-        JSArray result2 = (JSArray) function2.call(null, new JSArray(context).push(array));
-        assertEquals("Hello", result2.getString(0));
     }
 
     @Test
+    public void call4_2() {
+        JSFunction function = new JSFunction(context, new JavaCallback() {
+            @Override
+            public Object invoke(JSObject receiver, JSArray args) {
+                return args.getArray(0);
+            }
+        });
+        context.set("test", function);
+        JSArray result = context.executeArrayScript("var data = [1,2,3];test(data);", null);
+    }
+
+    @Test
+    public void call4_3() {
+        context.executeVoidScript("function test(params){return params}", null);
+        JSArray array = new JSArray(context).push("Hello");
+        JSArray result = (JSArray) context.executeFunction("test", new JSArray(context).push(array));
+    }
+
+    @Test
+    public void call4_4() {
+        context.executeVoidScript("function test(params){return params}", null);
+        JSArray result = context.executeArrayScript("test([1,2,3]);", null);
+    }
+
+
+//    @Test
     public void call5() throws InterruptedException {
         Object[] ans = new Object[1];
         context.registerJavaMethod(new JavaVoidCallback() {
@@ -171,11 +218,35 @@ public class JSFunctionTest {
             @Override
             public void invoke(JSObject receiver, JSArray args) {
                 JSArray obj = args.getArray(0);
-                obj.released = true;
+//                obj.released = true;
                 ans[0] = obj.getString(0);
             }
         }, "log");
         context.executeVoidScript("log(['Hello'])", null);
         assertEquals("Hello", ans[0]);
+    }
+
+    @Test
+    public void call7() {
+        context.registerJavaMethod(new JavaCallback() {
+            @Override
+            public Object invoke(JSObject receiver, JSArray args) {
+                return new JSObject(context).set("name", "Wiki");
+            }
+        }, "test");
+        JSObject result = context.executeObjectScript("test()", null);
+        assertEquals("Wiki", result.getString("name"));
+    }
+
+    @Test
+    public void call8() {
+//        Object[] ans = new Object[1];
+        context.registerJavaMethod(new JavaVoidCallback() {
+            @Override
+            public void invoke(JSObject receiver, JSArray args) {
+            }
+        }, "log");
+        context.executeVoidScript("log(['Hello'])", null);
+//        assertEquals("Hello", ans[0]);
     }
 }
