@@ -4,6 +4,12 @@
 
 [quickjs-android](https://github.com/taoweiji/quickjs-android) 是 [QuickJS](https://github.com/bellard/quickjs) JavaScript 引擎的 Android 接口框架，整体基于面向对象设计，提供了自动GC功能，使用简单。armeabi-v7a 的大小仅 350KB，是 [Google V8](https://github.com/v8/v8) 不错的替代品，启动速度比 V8 快，内存占用更低，支持 [ES2020](https://tc39.es/ecma262/)。
 
+- armeabi-v7a 平台下，整体占用apk空间仅 350KB；
+- JS对象自动GC，无需手动释放；
+- 支持 ES6 Module，可以使用 import、export 函数；
+- 支持Node.js 的 CommonJS 规范，可以使用 require、exports 函数；
+- 支持注入 Java 注解函数；
+- 支持通过 Java Callback 函数注册JS函数；
 
 ### 使用教程
 
