@@ -8,8 +8,8 @@
 - JS对象自动GC，无需手动释放；
 - 支持 ES6 Module，可以使用 import、export 函数；
 - 支持 Node.js 的 CommonJS 规范，可以使用 require、exports 函数；
-- 支持注入 Java 注解函数；
-- 支持通过 Java Callback 函数注册JS函数；
+- 支持绑定 Java 注解函数；
+- 支持通过 Java Function Callback 函数注册JS函数；
 
 ### 使用教程
 
