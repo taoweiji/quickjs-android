@@ -32,6 +32,7 @@ public class CommonJSPlugin extends Plugin {
             "    })();\n" +
             "}";
 
+
     public String require(Module parent, String path) {
         return "";
     }

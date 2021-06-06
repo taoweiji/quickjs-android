@@ -1,31 +1,53 @@
 package com.quickjs;
 
-/**
- * 支持 import、export
- */
-public abstract class ES6Module extends JSContext {
+import java.util.HashMap;
+import java.util.Map;
 
-    ES6Module(QuickJS quickJS) {
+/**
+ * 支持 require、exports
+ */
+public abstract class CommonJSModule extends JSContext {
+    private final String MODULE_SCRIPT_WRAPPER = "(function () {var module = { exports: {}, children: [] }; #CODE ; return module;})();";
+    private final Map<String, JSObject> modules = new HashMap<>();
+
+    CommonJSModule(QuickJS quickJS) {
         super(quickJS, QuickJS._createContext(quickJS.runtimePtr));
+        registerJavaMethod((receiver, args) -> {
+            String path = args.getString(0);
+            JSObject module = modules.get(path);
+            if (module == null) {
+                module = executeModule(path);
+            }
+            return module.get(TYPE.UNKNOWN, "exports");
+        }, "require");
+    }
+
+    @Override
+    public void close() {
+        modules.clear();
+        super.close();
     }
 
     @Override
     protected abstract String getModuleScript(String moduleName);
 
-    public void executeModuleScript(String source, String moduleName) {
-        QuickJS._executeScript(context.getContextPtr(), JSValue.TYPE.NULL.value, source, moduleName, QuickJS.JS_EVAL_TYPE_MODULE);
+    public JSObject executeModuleScript(String source, String moduleName) {
+        String wrapper = MODULE_SCRIPT_WRAPPER.replace("#CODE", source);
+        JSObject module = (JSObject) super.executeScript(TYPE.UNKNOWN, wrapper, moduleName);
+        modules.put(moduleName, module);
+        return module;
     }
 
     public Object executeGlobalScript(String source, String fileName) {
-        return super.executeScript(JSValue.TYPE.UNKNOWN, source, fileName);
+        return super.executeScript(TYPE.UNKNOWN, source, fileName);
     }
 
-    public void executeModule(String moduleName) {
+    public JSObject executeModule(String moduleName) {
         String script = getModuleScript(moduleName);
         if (script == null) {
             throw new RuntimeException("'moduleName' script is null");
         }
-        executeModuleScript(script, moduleName);
+        return executeModuleScript(script, moduleName);
     }
 
     @Deprecated
