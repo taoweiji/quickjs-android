@@ -85,8 +85,27 @@ public class QuickJS implements Closeable {
         if (context == null) {
             return null;
         }
-        return context.getModuleScript(moduleName);
+        if (context instanceof Module) {
+            Module module = (Module) context;
+            return module.getModuleScript(moduleName);
+        }
+        return null;
     }
+
+    @Keep
+    static String convertModuleName(long contextPtr, String moduleBaseName, String moduleName) {
+        JSContext context = sContextMap.get(contextPtr);
+        if (context == null) {
+            return null;
+        }
+        if (context instanceof Module) {
+            Module module = (Module) context;
+            String result = module.convertModuleName(moduleBaseName, moduleName);
+            return result;
+        }
+        return null;
+    }
+
 
     static Object executeFunction(JSContext context, JSValue objectHandle, String name, Object[] parameters) {
         JSArray args = new JSArray(context);

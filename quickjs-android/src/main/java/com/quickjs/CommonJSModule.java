@@ -6,7 +6,7 @@ import java.util.Map;
 /**
  * 支持 require、exports
  */
-public abstract class CommonJSModule extends JSContext {
+public abstract class CommonJSModule extends Module {
     private final String MODULE_SCRIPT_WRAPPER = "(function () {var module = { exports: {}, children: [] }; #CODE ; return module;})();";
     private final Map<String, JSObject> modules = new HashMap<>();
 
@@ -16,6 +16,7 @@ public abstract class CommonJSModule extends JSContext {
             String path = args.getString(0);
             JSObject module = modules.get(path);
             if (module == null) {
+                // TODO
                 module = executeModule(path);
             }
             return module.get(TYPE.UNKNOWN, "exports");
@@ -48,53 +49,5 @@ public abstract class CommonJSModule extends JSContext {
             throw new RuntimeException("'moduleName' script is null");
         }
         return executeModuleScript(script, moduleName);
-    }
-
-    @Deprecated
-    @Override
-    public Object executeScript(String source, String fileName) throws QuickJSScriptException {
-        throw new UnsupportedOperationException("Please use the executeModuleScript/executeGlobalScript/executeModule");
-    }
-
-    @Deprecated
-    @Override
-    public int executeIntegerScript(String source, String fileName) throws QuickJSScriptException {
-        return super.executeIntegerScript(source, fileName);
-    }
-
-    @Deprecated
-    @Override
-    public double executeDoubleScript(String source, String fileName) throws QuickJSScriptException {
-        return super.executeDoubleScript(source, fileName);
-    }
-
-    @Deprecated
-    @Override
-    public boolean executeBooleanScript(String source, String fileName) throws QuickJSScriptException {
-        return super.executeBooleanScript(source, fileName);
-    }
-
-    @Deprecated
-    @Override
-    public String executeStringScript(String source, String fileName) throws QuickJSScriptException {
-        return super.executeStringScript(source, fileName);
-    }
-
-    @Deprecated
-    @Override
-    public void executeVoidScript(String source, String fileName) throws QuickJSScriptException {
-        super.executeVoidScript(source, fileName);
-    }
-
-    @Deprecated
-    @Override
-    public JSArray executeArrayScript(String source, String fileName) throws QuickJSScriptException {
-        return super.executeArrayScript(source, fileName);
-    }
-
-    @Deprecated
-    @Override
-    public JSObject executeObjectScript(String source, String fileName) throws QuickJSScriptException {
-        return super.executeObjectScript(source, fileName);
     }
 }

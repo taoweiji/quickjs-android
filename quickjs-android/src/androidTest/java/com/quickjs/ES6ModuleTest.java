@@ -27,7 +27,7 @@ public class ES6ModuleTest {
                             "export var age = 18;";
                 }
                 if (moduleName.contains("b.js")) {
-                    return "import {name, age} from './a.js';\n" +
+                    return "import {name, age} from './page/a.js';\n" +
                             "console.log(name);\n" +
                             "console.log(age);";
                 }
