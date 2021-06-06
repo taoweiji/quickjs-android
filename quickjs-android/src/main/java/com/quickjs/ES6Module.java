@@ -14,6 +14,14 @@ public abstract class ES6Module {
         QuickJS._executeScript(context.getContextPtr(), JSValue.TYPE.NULL.value, source, moduleName, QuickJS.JS_EVAL_TYPE_MODULE);
     }
 
+    public void execute(String moduleName) {
+        String script = getModuleScript(moduleName);
+        if (script == null) {
+            throw new RuntimeException("'moduleName' script is null");
+        }
+        executeScript(script, moduleName);
+    }
+
     public JSContext getContext() {
         return context;
     }
