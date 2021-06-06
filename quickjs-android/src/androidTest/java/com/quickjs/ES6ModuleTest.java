@@ -1,10 +1,6 @@
 package com.quickjs;
 
-import com.quickjs.ES6Module;
-import com.quickjs.JSArray;
-import com.quickjs.JSObject;
-import com.quickjs.JavaVoidCallback;
-import com.quickjs.QuickJS;
+import com.quickjs.plugin.ConsolePlugin;
 
 import org.junit.After;
 import org.junit.Before;
@@ -19,6 +15,7 @@ public class ES6ModuleTest {
     private QuickJS quickJS;
     private Map<String, String> fileMap = new HashMap<>();
     private ES6Module es6Module;
+    private String log;
 
     @Before
     public void setUp() throws Throwable {
@@ -27,14 +24,21 @@ public class ES6ModuleTest {
             @Override
             protected String getModuleScript(String moduleName) {
                 if (moduleName.contains("a.js")) {
-                    return "export var name = \"Hello world\"; ";
+                    return "export var name = 'Hello world'; ";
                 }
                 if (moduleName.contains("b.js")) {
-                    return "import {name} from './a.js';name;";
+                    return "import {name} from './a.js';console.log(name);";
                 }
                 return null;
             }
         };
+        es6Module.getContext().addPlugin(new ConsolePlugin() {
+            @Override
+            public void println(int priority, String msg) {
+                super.println(priority, msg);
+                log = msg;
+            }
+        });
     }
 
     @After
@@ -43,22 +47,14 @@ public class ES6ModuleTest {
     }
 
     @Test
-    public void require() {
-//        fileMap.put("a.js", "module.exports = 'Hello world';");
-        Object[] result = new Object[1];
-        es6Module.getContext().registerJavaMethod(new JavaVoidCallback() {
-            @Override
-            public void invoke(JSObject receiver, JSArray args) {
-                result[0] = args.getString(0);
-            }
-        }, "log");
-
-        es6Module.executeScript("import {name} from './ddd/a.js';\n log(name);", null);
-        assertEquals("Hello world", result[0]);
+    public void executeScript() {
+        es6Module.executeScript("import {name} from './a.js';\n console.log(name);", null);
+        assertEquals("Hello world", log);
     }
 
     @Test
-    public void getContext() {
-
+    public void execute() {
+        es6Module.execute("b.js");
+        assertEquals("Hello world", log);
     }
 }
