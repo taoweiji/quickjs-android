@@ -10,6 +10,7 @@
 - 支持 Node.js 的 CommonJS 规范，可以使用 require、exports 函数；
 - 支持绑定 Java 注解函数；
 - 支持通过 Java Function Callback 函数注册JS函数；
+- 提供多线程 Executor；
 
 ### 使用教程
 
