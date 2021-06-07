@@ -8,8 +8,7 @@ public class QuickJSExecutor extends Thread {
     private JSContext runtime;
     private String result;
     private volatile boolean terminated = false;
-    private volatile boolean shuttingDown = false;
-    private volatile boolean forceTerminating = false;
+    private volatile boolean softClose = false;
     private Exception exception = null;
     private final LinkedList<String[]> messageQueue = new LinkedList<>();
     private final boolean longRunning;
@@ -41,15 +40,8 @@ public class QuickJSExecutor extends Thread {
         this(script, false, null);
     }
 
-    /**
-     * Override to provide a custom setup for this V8 runtime.
-     * This method can be overridden to configure the V8 runtime,
-     * for example, to add callbacks or to add some additional
-     * functionality to the global scope.
-     *
-     * @param runtime The runtime to configure.
-     */
-    protected void setup(final JSContext runtime) {
+
+    protected void setup(final JSContext context) {
 
     }
 
@@ -66,7 +58,7 @@ public class QuickJSExecutor extends Thread {
 
     /**
      * Posts a message to the receiver to be processed by the executor
-     * and sent to the V8 runtime via the messageHandler.
+     * and sent to the runtime via the messageHandler.
      *
      * @param message The message to send to the messageHandler
      */
@@ -86,23 +78,22 @@ public class QuickJSExecutor extends Thread {
         synchronized (this) {
             this.quickJS = QuickJS.createRuntime();
             runtime = quickJS.createContext();
-            runtime.registerJavaMethod(new ExecutorTermination(), "__j2v8__checkThreadTerminate");
             setup(runtime);
         }
         try {
-            if (!forceTerminating) {
+            if (!isInterrupted()) {
                 Object scriptResult = runtime.executeScript(script, getName());
                 if (scriptResult != null) {
                     result = scriptResult.toString();
                 }
             }
-            while (!forceTerminating && longRunning) {
+            while (!isInterrupted() && longRunning) {
                 synchronized (this) {
-                    if (messageQueue.isEmpty() && !shuttingDown) {
+                    if (messageQueue.isEmpty() && !softClose) {
                         wait();
                     }
-                    if ((messageQueue.isEmpty() && shuttingDown) || forceTerminating) {
-                        return;
+                    if ((messageQueue.isEmpty() && softClose) || isInterrupted()) {
+                        break;
                     }
                 }
                 if (!messageQueue.isEmpty()) {
@@ -120,25 +111,13 @@ public class QuickJSExecutor extends Thread {
             exception = e;
         } finally {
             synchronized (this) {
-//                if (runtime.getLocker().hasLock()) {
                 runtime.close();
                 quickJS.createContext();
                 runtime = null;
                 quickJS = null;
-//                }
                 terminated = true;
             }
         }
-    }
-
-    /**
-     * Determines if an exception was thrown during the JavaScript execution.
-     *
-     * @return True if an exception was thrown during the JavaScript execution,
-     * false otherwise.
-     */
-    public boolean hasException() {
-        return exception != null;
     }
 
     /**
@@ -156,23 +135,15 @@ public class QuickJSExecutor extends Thread {
      *
      * @return True if the executor has terminated, false otherwise.
      */
-    public boolean hasTerminated() {
+    public boolean isTerminated() {
         return terminated;
     }
 
-    /**
-     * Forces the executor to shutdown immediately. Any currently executing
-     * JavaScript will be interrupted and all outstanding messages will be
-     * ignored.
-     */
-    public void forceTermination() {
+
+    @Override
+    public void interrupt() {
+        super.interrupt();
         synchronized (this) {
-            forceTerminating = true;
-            shuttingDown = true;
-            if (runtime != null) {
-                runtime.close();
-                quickJS.createContext();
-            }
             notify();
         }
     }
@@ -181,41 +152,17 @@ public class QuickJSExecutor extends Thread {
      * Indicates to the executor that it should shutdown. Any currently
      * executing JavaScript will be allowed to finish, and any outstanding
      * messages will be processed. Only once the message queue is empty,
-     * will the executor actually shtutdown.
+     * will the executor actually softClose.
      */
-    public void shutdown() {
+    public void softClose() {
         synchronized (this) {
-            shuttingDown = true;
+            softClose = true;
             notify();
         }
     }
 
-    /**
-     * Returns true if shutdown() or forceTermination() was called to
-     * shutdown this executor.
-     *
-     * @return True if shutdown() or forceTermination() was called, false otherwise.
-     */
-    public boolean isShuttingDown() {
-        return shuttingDown;
+    public boolean isSoftClose() {
+        return softClose;
     }
 
-    /**
-     * Returns true if forceTermination was called to shutdown
-     * this executor.
-     *
-     * @return True if forceTermination() was called, false otherwise.
-     */
-    public boolean isTerminating() {
-        return forceTerminating;
-    }
-
-    class ExecutorTermination implements JavaVoidCallback {
-        @Override
-        public void invoke(final JSObject receiver, final JSArray parameters) {
-            if (forceTerminating) {
-                throw new RuntimeException("V8Thread Termination");
-            }
-        }
-    }
 }
