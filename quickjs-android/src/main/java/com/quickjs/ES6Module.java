@@ -5,7 +5,7 @@ package com.quickjs;
  */
 public abstract class ES6Module extends Module {
 
-    ES6Module(QuickJS quickJS) {
+    public ES6Module(QuickJS quickJS) {
         super(quickJS, QuickJS._createContext(quickJS.runtimePtr));
     }
 

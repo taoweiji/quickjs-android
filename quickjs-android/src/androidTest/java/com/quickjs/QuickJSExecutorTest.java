@@ -1,73 +1,61 @@
 package com.quickjs;
 
+import com.quickjs.plugin.ConsolePlugin;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class QuickJSExecutorTest {
-    private JSContext context;
-    private QuickJS quickJS;
-    private final String workerScript = "var worker = new Object();\n" +
-            "worker.callbacks = [];\n" +
-            "worker.onMessage = function (callback) {\n" +
-            "    worker.callbacks.push(callback)\n" +
-            "}\n" +
-            "worker.postMessage = function (params) {\n" +
-            "    for (var i = 0; i < worker.callbacks.length; i++) {\n" +
-            "        worker.callbacks[i](params);\n" +
-            "    }\n" +
-            "}";
+    QuickJSExecutor executor;
+    List<String> logs = new ArrayList<>();
 
     @Before
-    public void setUp() throws Exception {
-        quickJS = QuickJS.createRuntime();
-        context = quickJS.createContext();
+    public void setUp() {
+        executor = new QuickJSExecutor("function postMessage(msg) {console.log(msg.toString())}", true, "postMessage") {
+            @Override
+            protected void setup(JSContext context) {
+                context.addPlugin(new ConsolePlugin() {
+                    @Override
+                    public void println(int priority, String msg) {
+                        super.println(priority, msg);
+                        logs.add(msg);
+                    }
+                });
+            }
+        };
     }
 
     @After
-    public void tearDown() throws Exception {
-        context.close();
-        quickJS.close();
+    public void tearDown() {
+        executor.interrupt();
     }
 
     @Test
-    public void postMessage1() {
-        context.executeVoidScript(workerScript, null);
-        JSObject worker = context.getObject("worker");
-        JSFunction onMessage = (JSFunction) worker.getObject("onMessage");
-        Object[] data = new Object[1];
-        JSFunction event = new JSFunction(context, new JavaVoidCallback() {
-            @Override
-            public void invoke(JSObject receiver, JSArray args) {
-                data[0] = args.getString(0);
-            }
-        });
-        onMessage.call(worker, new JSArray(context).push(event));
-//        context.executeVoidScript("worker.postMessage('Hello')", null);
-        worker.executeFunction2("postMessage", "Hello");
-        assertEquals("Hello", data[0]);
+    public void softClose() throws InterruptedException {
+        executor.start();
+        executor.postMessage("Hello");
+        executor.postMessage("World");
+        executor.softClose();
+        executor.join();
+        assertEquals("Hello", logs.get(0));
+        assertEquals("World", logs.get(1));
+        assertTrue(executor.isTerminated());
     }
-
 
     @Test
-    public void postMessage2() {
-        context.executeVoidScript(workerScript, null);
-        JSObject worker = context.getObject("worker");
-        Object[] data = new Object[1];
-        context.registerJavaMethod(new JavaVoidCallback() {
-            @Override
-            public void invoke(JSObject receiver, JSArray args) {
-                data[0] = args.getString(0);
-            }
-        }, "log");
-        context.executeVoidScript("worker.onMessage(function(params) {\n" +
-                "    log(params)\n" +
-                "})", null);
-        worker.executeFunction2("postMessage", "Hello");
-        assertEquals("Hello", data[0]);
+    public void interrupt() throws InterruptedException {
+        executor.start();
+        executor.postMessage("Hello");
+        executor.postMessage("World");
+        executor.interrupt();
+        executor.join();
+        assertTrue(logs.isEmpty());
     }
-
-
 }

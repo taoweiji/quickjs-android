@@ -10,7 +10,7 @@ public abstract class CommonJSModule extends Module {
     private final String MODULE_SCRIPT_WRAPPER = "(function () {var module = { exports: {}, children: [] }; #CODE ; return module;})();";
     private final Map<String, JSObject> modules = new HashMap<>();
 
-    CommonJSModule(QuickJS quickJS) {
+    public CommonJSModule(QuickJS quickJS) {
         super(quickJS, QuickJS._createContext(quickJS.runtimePtr));
         registerJavaMethod((receiver, args) -> {
             String moduleBaseName = null;
