@@ -4,16 +4,16 @@ import java.util.LinkedList;
 
 public class QuickJSExecutor extends Thread {
 
-    private final String script;
-    private JSContext runtime;
-    private String result;
-    private volatile boolean terminated = false;
-    private volatile boolean softClose = false;
-    private Exception exception = null;
-    private final LinkedList<String[]> messageQueue = new LinkedList<>();
-    private final boolean longRunning;
-    private final String messageHandler;
-    private QuickJS quickJS;
+    protected final String script;
+    protected JSContext context;
+    protected String result;
+    protected volatile boolean terminated = false;
+    protected volatile boolean softClose = false;
+    protected Exception exception = null;
+    protected final LinkedList<String[]> messageQueue = new LinkedList<>();
+    protected final boolean longRunning;
+    protected String messageHandler;
+    protected QuickJS quickJS;
 
     /**
      * Create a new executor and execute the given script on it. Once
@@ -45,6 +45,10 @@ public class QuickJSExecutor extends Thread {
 
     }
 
+    protected JSContext createContext(QuickJS quickJS) {
+        return quickJS.createContext();
+    }
+
     /**
      * Gets the result of the JavaScript that was executed
      * on this executor.
@@ -56,18 +60,6 @@ public class QuickJSExecutor extends Thread {
         return result;
     }
 
-    /**
-     * Posts a message to the receiver to be processed by the executor
-     * and sent to the runtime via the messageHandler.
-     *
-     * @param message The message to send to the messageHandler
-     */
-    public void postMessage(final String... message) {
-        synchronized (this) {
-            messageQueue.add(message);
-            notify();
-        }
-    }
 
     /*
      * (non-Javadoc)
@@ -77,12 +69,12 @@ public class QuickJSExecutor extends Thread {
     public void run() {
         synchronized (this) {
             this.quickJS = QuickJS.createRuntime();
-            runtime = quickJS.createContext();
-            setup(runtime);
+            context = createContext(quickJS);
+            setup(context);
         }
         try {
             if (!isInterrupted()) {
-                Object scriptResult = runtime.executeScript(script, getName());
+                Object scriptResult = context.executeScript(script, getName());
                 if (scriptResult != null) {
                     result = scriptResult.toString();
                 }
@@ -98,26 +90,41 @@ public class QuickJSExecutor extends Thread {
                 }
                 if (!messageQueue.isEmpty()) {
                     String[] message = messageQueue.remove(0);
-                    JSArray parameters = new JSArray(runtime);
-                    JSArray strings = new JSArray(runtime);
-                    for (String string : message) {
-                        strings.push(string);
-                    }
-                    parameters.push(strings);
-                    runtime.executeVoidFunction(messageHandler, parameters);
+                    postMessageInner(context, message);
                 }
             }
         } catch (Exception e) {
             exception = e;
         } finally {
             synchronized (this) {
-                runtime.close();
+                context.close();
                 quickJS.createContext();
-                runtime = null;
+                context = null;
                 quickJS = null;
                 terminated = true;
             }
         }
+    }
+
+    /**
+     * Posts a message to the receiver to be processed by the executor
+     * and sent to the runtime via the messageHandler.
+     *
+     * @param message The message to send to the messageHandler
+     */
+    public void postMessage(final String... message) {
+        synchronized (this) {
+            messageQueue.add(message);
+            notify();
+        }
+    }
+
+    protected void postMessageInner(JSContext context, String[] message) {
+        JSArray parameters = new JSArray(context);
+        for (String string : message) {
+            parameters.push(string);
+        }
+        context.executeVoidFunction(messageHandler, parameters);
     }
 
     /**
