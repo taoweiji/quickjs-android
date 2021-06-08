@@ -113,7 +113,7 @@ public class ConsolePluginTest {
                 "console.timeEnd('计时器1');\n" +
                 "console.time('计时器2');\n" +
                 "for (var i = 0; i < 1000; i++) {\n" +
-                "  for (var j = 0; j < 1000; j++) {}\n" +
+                "  for (var j = 0; j < 10; j++) {}\n" +
                 "}\n" +
                 "console.timeEnd('计时器2');", null);
 

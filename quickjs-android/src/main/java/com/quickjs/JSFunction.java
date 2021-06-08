@@ -23,6 +23,7 @@ public class JSFunction extends JSObject {
             receiver = JSValue.Undefined(context);
         }
         Object result = QuickJS._executeFunction2(context.getContextPtr(), type.value, receiver, this, parameters);
+        QuickJS.checkException(context);
         return JSValue.checkType(result, type);
     }
 

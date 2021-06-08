@@ -10,9 +10,11 @@ public class QuickJS implements Closeable {
     final long runtimePtr;
     static final Map<Long, JSContext> sContextMap = new HashMap<>();
     private boolean released;
+    private final ThreadLocker locker;
 
     private QuickJS(long runtimePtr) {
         this.runtimePtr = runtimePtr;
+        this.locker = new ThreadLocker(this);
     }
 
     public static QuickJS createRuntime() {
@@ -36,6 +38,18 @@ public class QuickJS implements Closeable {
             }
         }
         _releaseRuntime(runtimePtr);
+    }
+
+
+    void checkThread() {
+        this.locker.checkThread();
+    }
+
+    public void checkReleased() {
+        this.checkThread();
+        if (this.isReleased()) {
+            throw new Error("Runtime disposed error");
+        }
     }
 
     static class MethodDescriptor {

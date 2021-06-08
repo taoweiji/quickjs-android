@@ -4,7 +4,7 @@ public class QuickJSException extends RuntimeException {
     private String name;
 
     public QuickJSException(String name, String message) {
-        super(message);
+        super(name + "," + message);
         this.name = name;
     }
 

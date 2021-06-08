@@ -1,74 +1,48 @@
 package com.quickjs.plugin;
 
+import com.quickjs.ES6Module;
+import com.quickjs.JSArray;
 import com.quickjs.JSContext;
+import com.quickjs.JSObject;
+import com.quickjs.JavaVoidCallback;
 import com.quickjs.QuickJS;
+import com.quickjs.QuickJSExecutor;
 
-import java.util.LinkedList;
-
-public class WorkerPlugin extends Thread {
-    private final LinkedList<String> messageQueue = new LinkedList<>();
-    private QuickJS quickJS;
-    private JSContext context;
-    private final String messageHandler;
-    private final String script;
-    private final boolean longRunning;
+public abstract class WorkerPlugin extends QuickJSExecutor {
 
     public WorkerPlugin(String script, boolean longRunning, String messageHandler) {
-        this.script = script;
-        this.longRunning = longRunning;
-        this.messageHandler = messageHandler;
+        super(script, true, messageHandler);
     }
 
-    public WorkerPlugin(final String script) {
-        this(script, false, null);
-    }
-
-
-    public void postMessage(String message) {
-        synchronized (this) {
-            messageQueue.add(message);
-            notify();
-        }
-    }
-
-    protected void setup(final JSContext context) {
-
-    }
-
-    protected JSContext createContext(QuickJS quickJS) {
-        return quickJS.createContext();
+    public WorkerPlugin(String script) {
+        super(script);
     }
 
     @Override
-    public void run() {
-        synchronized (this) {
-            this.quickJS = QuickJS.createRuntime();
-            this.context = createContext(quickJS);
-            setup(this.context);
-        }
-        try {
-            if (script != null) {
-                this.context.executeScript(script, null);
+    protected JSContext createContext(QuickJS quickJS) {
+        return new ES6Module(quickJS) {
+            @Override
+            protected String getModuleScript(String moduleName) {
+                return null;
             }
-            while (!isInterrupted() && longRunning) {
-                synchronized (this) {
-                    if (messageQueue.isEmpty()) {
-                        wait();
-                    }
-                }
-                if (isInterrupted()) {
-                    return;
-                }
-                if (!messageQueue.isEmpty()) {
-                    String message = messageQueue.remove(0);
-                    context.executeFunction2(messageHandler, message);
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            context.close();
-            quickJS.close();
-        }
+        };
     }
+
+    @Override
+    protected void postMessageInner(JSContext context, String[] message) {
+        super.postMessageInner(context, message);
+    }
+
+    @Override
+    protected void setup(JSContext context) {
+        super.setup(context);
+        context.registerJavaMethod(new JavaVoidCallback() {
+            @Override
+            public void invoke(JSObject receiver, JSArray args) {
+                receiveMessage(args.getString(0));
+            }
+        }, "postMessage");
+    }
+
+    protected abstract void receiveMessage(String msg);
 }

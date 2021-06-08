@@ -156,6 +156,7 @@ public class JSObject extends JSValue {
         this.context.checkReleased();
         this.context.checkRuntime(parameters);
         Object object = QuickJS._executeFunction(context.getContextPtr(), expectedType.value, this, name, parameters);
+        QuickJS.checkException(context);
         return JSValue.checkType(object, expectedType);
     }
 

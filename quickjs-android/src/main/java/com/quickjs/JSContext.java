@@ -79,6 +79,19 @@ public class JSContext extends JSObject implements Closeable {
         return executeScript(JSValue.TYPE.UNKNOWN, source, fileName);
     }
 
+    public Object executeScript(String source, String fileName, int evalType) throws QuickJSScriptException {
+        Object object = QuickJS._executeScript(this.getContextPtr(), JSValue.TYPE.UNKNOWN.value, source, fileName, evalType);
+        QuickJS.checkException(context);
+        return object;
+    }
+
+    public Object executeModuleScript(String source, String fileName, int evalType) throws QuickJSScriptException {
+        Object object = QuickJS._executeScript(this.getContextPtr(), JSValue.TYPE.UNKNOWN.value, source, fileName, QuickJS.JS_EVAL_TYPE_MODULE);
+        QuickJS.checkException(context);
+        return object;
+    }
+
+
     public int executeIntegerScript(String source, String fileName) throws QuickJSScriptException {
         return (int) executeScript(JSValue.TYPE.INTEGER, source, fileName);
     }
@@ -145,9 +158,9 @@ public class JSContext extends JSObject implements Closeable {
     }
 
     void checkReleased() {
-//        this.locker.checkThread();
-        if (this.isReleased() || this.quickJS.isReleased()) {
-            throw new Error("Runtime disposed error");
+        this.quickJS.checkReleased();
+        if (this.isReleased()) {
+            throw new Error("Context disposed error");
         }
     }
 }

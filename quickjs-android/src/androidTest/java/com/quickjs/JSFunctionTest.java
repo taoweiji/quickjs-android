@@ -182,21 +182,14 @@ public class JSFunctionTest {
     }
 
 
-//    @Test
+    @Test
     public void call5() throws InterruptedException {
         Object[] ans = new Object[1];
         context.registerJavaMethod(new JavaVoidCallback() {
             @Override
             public void invoke(JSObject receiver, JSArray args) {
                 JSFunction callback = (JSFunction) args.getObject(0);
-//                callback.released = true;
-//                callback.call(null, new JSArray(context).push("Hello"));
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        callback.call(null, new JSArray(context).push("Hello"));
-                    }
-                }).start();
+                callback.call(null, new JSArray(context).push("Hello"));
             }
         }, "fetch");
         context.registerJavaMethod(new JavaVoidCallback() {
@@ -206,7 +199,7 @@ public class JSFunctionTest {
             }
         }, "log");
         context.executeVoidScript("fetch(function(data){log(data)})", null);
-        Thread.sleep(5000);
+//        Thread.sleep(5000);
         assertEquals("Hello", ans[0]);
     }
 
