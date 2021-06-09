@@ -3,6 +3,8 @@ package com.quickjs;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -262,6 +264,27 @@ public class JSObjectTest {
             }
         }, "time");
         assertEquals(time, (Double) context.executeFunction("time", null), 0);
+    }
+
+    @Test
+    public void appendJavascriptInterface() {
+        context.appendJavascriptInterface(new Console());
+        context.executeVoidScript("log('Hello World')", null);
+        context.executeVoidScript("error('Hello World')", null);
+        int count = context.executeIntegerScript("count()", null);
+        assertEquals(2, count);
+    }
+
+
+    @Test
+    public void constructor() throws JSONException {
+        JSObject object = new JSObject(context, new JSONObject("{\"name\":\"Wiki\",\"age\":18,\"body\":{\"a\":\"Hello\"},\"likes\":[1,\"Hello\",{\"b\":\"b\"}]}"));
+        assertEquals("Wiki", object.getString("name"));
+        assertEquals(18, object.getInteger("age"));
+        assertEquals("Hello", object.getObject("body").getString("a"));
+        assertEquals(1, object.getArray("likes").getInteger(0));
+        assertEquals("Hello", object.getArray("likes").getString(1));
+        assertEquals("b", object.getArray("likes").getObject(2).getString("b"));
     }
 
     public static class Console {
