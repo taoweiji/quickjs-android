@@ -2,13 +2,22 @@ package com.quickjs;
 
 import android.webkit.JavascriptInterface;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.Iterator;
 
 public class JSObject extends JSValue {
 
     public JSObject(JSContext context) {
         super(context, QuickJS._initNewJSObject(context.getContextPtr()));
+    }
+
+    public JSObject(JSContext context, JSONObject jsonObject) {
+        this(context, QuickJS._initNewJSObject(context.getContextPtr()));
+        append(this, jsonObject);
     }
 
     JSObject(JSContext context, JSValue value) {
@@ -17,6 +26,30 @@ public class JSObject extends JSValue {
 
     JSObject(JSContext context, long tag, int u_int32, double u_float64, long u_ptr) {
         super(context, tag, u_int32, u_float64, u_ptr);
+    }
+
+    public static void append(JSObject jsObject, JSONObject jsonObject) {
+        if (jsonObject == null) {
+            return;
+        }
+        Iterator<String> it = jsonObject.keys();
+        while (it.hasNext()) {
+            String key = it.next();
+            Object obj = jsonObject.opt(key);
+            if (obj instanceof String) {
+                jsObject.set(key, (String) obj);
+            } else if (obj instanceof Integer) {
+                jsObject.set(key, (Integer) obj);
+            } else if (obj instanceof Boolean) {
+                jsObject.set(key, (Boolean) obj);
+            } else if (obj instanceof Number) {
+                jsObject.set(key, ((Number) obj).doubleValue());
+            } else if (obj instanceof JSONObject) {
+                jsObject.set(key, new JSObject(jsObject.context, (JSONObject) obj));
+            } else if (obj instanceof JSONArray) {
+                jsObject.set(key, new JSArray(jsObject.context, (JSONArray) obj));
+            }
+        }
     }
 
     protected JSObject setObject(String key, Object value) {
@@ -160,17 +193,27 @@ public class JSObject extends JSValue {
         return JSValue.checkType(object, expectedType);
     }
 
+    public void appendJavascriptInterface(Object obj) {
+        appendJavascriptInterface(this, obj);
+    }
+
     public JSObject addJavascriptInterface(Object obj, String interfaceName) {
         this.context.checkReleased();
+        JSObject jsObject = new JSObject(context);
+        appendJavascriptInterface(jsObject, obj);
+        set(interfaceName, jsObject);
+        return jsObject;
+    }
+
+    protected static void appendJavascriptInterface(JSObject jsObject, Object obj) {
         Method[] methods = obj.getClass().getMethods();
-        JSObject object = new JSObject(context);
         for (Method method : methods) {
             if (method.getAnnotation(JavascriptInterface.class) == null) {
                 continue;
             }
             String functionName = method.getName();
             if (method.getReturnType().equals(Void.TYPE)) {
-                object.registerJavaMethod((receiver, args) -> {
+                jsObject.registerJavaMethod((receiver, args) -> {
                     try {
                         method.invoke(obj, getParameters(method, args));
                     } catch (Exception e) {
@@ -179,7 +222,7 @@ public class JSObject extends JSValue {
                     }
                 }, functionName);
             } else {
-                object.registerJavaMethod((receiver, args) -> {
+                jsObject.registerJavaMethod((receiver, args) -> {
                     try {
                         return method.invoke(obj, getParameters(method, args));
                     } catch (Exception e) {
@@ -189,11 +232,9 @@ public class JSObject extends JSValue {
                 }, functionName);
             }
         }
-        set(interfaceName, object);
-        return object;
     }
 
-    private Object[] getParameters(Method method, JSArray args) {
+    private static Object[] getParameters(Method method, JSArray args) {
         Object[] objects = new Object[args.length()];
         Type[] types = method.getGenericParameterTypes();
         for (int i = 0; i < objects.length; i++) {

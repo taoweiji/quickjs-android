@@ -1,5 +1,8 @@
 package com.quickjs;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 public class JSArray extends JSObject {
 
     public JSArray(JSContext context) {
@@ -8,6 +11,33 @@ public class JSArray extends JSObject {
 
     JSArray(JSContext context, long tag, int u_int32, double u_float64, long u_ptr) {
         super(context, tag, u_int32, u_float64, u_ptr);
+    }
+
+    public JSArray(JSContext context, JSONArray jsonArray) {
+        this(context);
+        append(this, jsonArray);
+    }
+
+    public static void append(JSArray jsArray, JSONArray jsonArray) {
+        if (jsonArray == null) {
+            return;
+        }
+        for (int i = 0; i < jsonArray.length(); i++) {
+            Object obj = jsonArray.opt(i);
+            if (obj instanceof String) {
+                jsArray.push((String) obj);
+            } else if (obj instanceof Integer) {
+                jsArray.push((Integer) obj);
+            } else if (obj instanceof Boolean) {
+                jsArray.push((Boolean) obj);
+            } else if (obj instanceof Number) {
+                jsArray.push(((Number) obj).doubleValue());
+            } else if (obj instanceof JSONObject) {
+                jsArray.push(new JSObject(jsArray.context, (JSONObject) obj));
+            } else if (obj instanceof JSONArray) {
+                jsArray.push(new JSArray(jsArray.context, (JSONArray) obj));
+            }
+        }
     }
 
     public Object get(TYPE expectedType, int index) {
