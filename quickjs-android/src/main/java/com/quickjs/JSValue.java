@@ -209,12 +209,7 @@ public class JSValue {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         JSValue jsValue = (JSValue) o;
-        return jsValue.hashCode() == this.hashCode();
-    }
-
-    @Override
-    public int hashCode() {
-        return Arrays.hashCode(new Object[]{tag, u_int32, u_float64, u_ptr});
+        return jsValue.tag == this.tag;
     }
 
     @Override

@@ -24,7 +24,7 @@ public class SetTimeoutPluginTest extends BaseTest {
 
     @Before
     public void setUp() {
-        quickJS = createQuickJS();
+        quickJS = QuickJS.createRuntime();
         context = quickJS.createContext();
         context.addPlugin(new ConsolePlugin() {
             @Override
@@ -50,7 +50,7 @@ public class SetTimeoutPluginTest extends BaseTest {
                 "    setTimeout(print1, 10);\n" +
                 "}\n" +
                 "print1();", null);
-        Thread.sleep(1000);
+        Thread.sleep(200);
         assertTrue(logs.size() > 10);
     }
 

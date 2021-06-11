@@ -19,7 +19,7 @@ public class QuickJS implements Closeable {
 
     private QuickJS(long runtimePtr) {
         this.runtimePtr = runtimePtr;
-        this.quickJSNative = new ThreadLocker(this, new QuickJSNativeImpl());
+        this.quickJSNative = new EventQueue(this, new QuickJSNativeImpl());
     }
 
     public static QuickJS createRuntimeWithoutEventQueue() {
