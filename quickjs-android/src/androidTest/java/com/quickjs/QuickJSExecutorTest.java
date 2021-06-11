@@ -12,7 +12,7 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class QuickJSExecutorTest {
+public class QuickJSExecutorTest  extends BaseTest{
     QuickJSExecutor executor;
     List<String> logs = new ArrayList<>();
 

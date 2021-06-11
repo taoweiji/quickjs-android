@@ -8,14 +8,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-public class JSArrayTest {
+public class JSArrayTest  extends BaseTest{
     JSArray array;
     private JSContext context;
     private QuickJS quickJS;
 
     @Before
     public void setUp() {
-        quickJS = QuickJS.createRuntime();
+        quickJS = QuickJS.createRuntimeWithoutEventQueue();
         context = quickJS.createContext();
         array = new JSArray(context);
     }

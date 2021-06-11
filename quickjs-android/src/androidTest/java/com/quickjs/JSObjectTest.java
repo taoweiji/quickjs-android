@@ -13,7 +13,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-public class JSObjectTest {
+public class JSObjectTest  extends BaseTest{
 
     JSObject object;
     private JSContext context;
@@ -21,7 +21,7 @@ public class JSObjectTest {
 
     @Before
     public void setUp() throws Exception {
-        quickJS = QuickJS.createRuntime();
+        quickJS = createQuickJS();
         context = quickJS.createContext();
         object = new JSObject(context);
     }

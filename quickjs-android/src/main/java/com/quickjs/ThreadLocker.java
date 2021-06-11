@@ -66,9 +66,31 @@ class ThreadLocker implements QuickJSNative {
             event.run();
             return;
         }
+        Object[] result = new Object[2];
+        RuntimeException[] errors = new RuntimeException[1];
         handler.post(() -> {
-            event.run();
+            try {
+                event.run();
+            } catch (RuntimeException e) {
+                errors[0] = e;
+            }
+            synchronized (result) {
+                result[1] = true;
+                result.notifyAll();
+            }
         });
+        synchronized (result) {
+            try {
+                if (result[1] == null) {
+                    result.wait();
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        if (errors[0] != null) {
+            throw errors[0];
+        }
     }
 
 

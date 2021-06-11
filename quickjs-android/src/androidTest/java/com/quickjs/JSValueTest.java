@@ -7,13 +7,13 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class JSValueTest {
+public class JSValueTest  extends BaseTest{
     private JSContext context;
     private QuickJS quickJS;
 
     @Before
     public void setUp() throws Exception {
-        quickJS = QuickJS.createRuntimeAsync();
+        quickJS = createQuickJS();
         context = quickJS.createContext();
     }
 
