@@ -1,6 +1,7 @@
 package com.quickjs.android.example;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -26,7 +27,13 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         quickJS = QuickJS.createRuntimeAsync();
         jsContext = quickJS.createContext();
-        jsContext.addPlugin(new ConsolePlugin());
+        jsContext.addPlugin(new ConsolePlugin() {
+            @Override
+            public void println(int priority, String msg) {
+                Log.e("MainActivity", Thread.currentThread().getName());
+                super.println(priority, msg);
+            }
+        });
         jsContext.addPlugin(new Plugin() {
             @Override
             protected void setup(JSContext context) {
@@ -41,7 +48,9 @@ public class MainActivity extends AppCompatActivity {
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
                             }
-                            func.call(null, null);
+                            if (!func.getContext().isReleased()) {
+                                func.call(null, null);
+                            }
                         }).start();
                     }
                 }, "setTimeout");
@@ -52,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-        jsContext.executeVoidScript("var count = 0;", null);
+        int count = jsContext.executeIntegerScript("var count = 0;count;", null);
         findViewById(R.id.create).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
