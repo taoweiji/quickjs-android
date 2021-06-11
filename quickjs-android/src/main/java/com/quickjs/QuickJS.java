@@ -193,6 +193,8 @@ public class QuickJS implements Closeable {
 
     static native void _release(long contextPtr, JSValue objectHandle);
 
+    static native void _releasePtr(long contextPtr, long tag, int u_int32, double u_float64, long u_ptr);
+
     static native JSFunction _registerJavaMethod(long contextPtr, JSValue objectHandle, String jsFunctionName, int javaCallerId, boolean voidMethod);
 
     native static int _getObjectType(long contextPtr, JSValue objectHandle);

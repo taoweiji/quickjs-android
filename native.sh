@@ -1,1 +1,1 @@
-adb logcat | /Users/Wiki/Library/Android/sdk/ndk/21.4.7075529/prebuilt/darwin-x86_64/bin/ndk-stack -sym /Users/Wiki/StudioProjects/quickjs-android/quickjs-android/build/intermediates/cmake/debug/obj/arm64-v8a
+adb logcat | /Users/Wiki/Library/Android/sdk/ndk/21.4.7075529/prebuilt/darwin-x86_64/bin/ndk-stack -sym /Users/wiki/Documents/source/quickjs-android/quickjs-android/build/intermediates/cmake/debug/obj/x86

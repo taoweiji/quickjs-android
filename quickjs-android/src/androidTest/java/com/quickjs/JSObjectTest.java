@@ -28,6 +28,9 @@ public class JSObjectTest {
 
     @After
     public void tearDown() throws Throwable {
+//        System.gc();
+//        System.gc();
+//        Thread.sleep(5000);
         context.close();
         quickJS.close();
     }

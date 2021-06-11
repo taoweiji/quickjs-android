@@ -336,6 +336,24 @@ Java_com_quickjs_QuickJS__1release(JNIEnv *env, jclass clazz, jlong context_ptr,
 }
 
 extern "C"
+JNIEXPORT void JNICALL
+Java_com_quickjs_QuickJS__1releasePtr(JNIEnv *env, jclass clazz, jlong context_ptr, jlong tag,
+                                      jint u_int32, jdouble u_float64, jlong u_ptr) {
+
+    JSValue value;
+#if defined(JS_NAN_BOXING)
+    value = tag;
+#else
+    value.tag = tag;
+    value.u.int32 = env->GetIntField(object_handle, js_value_u_int32_id);
+    value.u.float64 = env->GetDoubleField(object_handle, js_value_u_float64_id);
+    value.u.ptr = (void *) env->GetLongField(object_handle, js_value_u_ptr_id);
+#endif
+    auto *ctx = reinterpret_cast<JSContext *>(context_ptr);
+    JS_FreeValue(ctx, value);
+}
+
+extern "C"
 JNIEXPORT jobject JNICALL
 Java_com_quickjs_QuickJS__1get(JNIEnv *env, jclass clazz, jlong context_ptr,
                                int expected_type,
