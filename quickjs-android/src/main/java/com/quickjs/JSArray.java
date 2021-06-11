@@ -6,7 +6,7 @@ import org.json.JSONObject;
 public class JSArray extends JSObject {
 
     public JSArray(JSContext context) {
-        super(context, QuickJS._initNewJSArray(context.getContextPtr()));
+        super(context, context.getNative()._initNewJSArray(context.getContextPtr()));
     }
 
     JSArray(JSContext context, long tag, int u_int32, double u_float64, long u_ptr) {
@@ -45,13 +45,13 @@ public class JSArray extends JSObject {
         if (expectedType == null) {
             expectedType = TYPE.UNKNOWN;
         }
-        Object object = QuickJS._arrayGet(this.getContextPtr(), expectedType.value, this, index);
+        Object object = getNative()._arrayGet(this.getContextPtr(), expectedType.value, this, index);
         return JSValue.checkType(object, expectedType);
     }
 
     JSArray pushObject(Object value) {
         this.context.checkReleased();
-        QuickJS._arrayAdd(getContextPtr(), this, value);
+        getNative()._arrayAdd(getContextPtr(), this, value);
         return this;
     }
 
@@ -105,7 +105,7 @@ public class JSArray extends JSObject {
 
     public TYPE getType(int index) {
         this.context.checkReleased();
-        JSValue value = QuickJS._arrayGetValue(this.getContextPtr(), this, index);
+        JSValue value = getContext().getNative()._arrayGetValue(this.getContextPtr(), this, index);
         if (value == null) {
             return JSValue.TYPE.NULL;
         }

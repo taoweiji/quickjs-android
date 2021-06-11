@@ -1,7 +1,5 @@
 package com.quickjs;
 
-import android.util.Log;
-
 import androidx.annotation.Keep;
 
 import java.util.Arrays;
@@ -168,12 +166,12 @@ public class JSValue {
     }
 
     public boolean isUndefined() {
-        return QuickJS._isUndefined(getContextPtr(), this);
+        return getContext().getNative()._isUndefined(getContextPtr(), this);
     }
 
     public TYPE getType() {
         this.context.checkReleased();
-        int value = QuickJS._getObjectType(getContextPtr(), this);
+        int value = getContext().getNative()._getObjectType(getContextPtr(), this);
         switch (value) {
             case TYPE_UNDEFINED:
                 return TYPE.UNDEFINED;
@@ -198,7 +196,7 @@ public class JSValue {
     }
 
     public static JSObject Undefined(JSContext context) {
-        return (JSObject) QuickJS._Undefined(context.getContextPtr());
+        return (JSObject) context.getNative()._Undefined(context.getContextPtr());
     }
 
     public static JSValue NULL() {
@@ -225,5 +223,17 @@ public class JSValue {
             close(true);
         }
         super.finalize();
+    }
+
+    public JSContext getContext() {
+        return context;
+    }
+
+    protected QuickJSNative getNative() {
+        return getContext().getNative();
+    }
+
+    public QuickJS getQuickJS() {
+        return getContext().getQuickJS();
     }
 }

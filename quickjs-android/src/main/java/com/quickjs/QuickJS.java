@@ -11,18 +11,20 @@ public class QuickJS implements Closeable {
     static final Map<Long, JSContext> sContextMap = new HashMap<>();
     private boolean released;
     private final ThreadLocker locker;
+    private final QuickJSNative quickJSNative;
 
     private QuickJS(long runtimePtr) {
         this.runtimePtr = runtimePtr;
         this.locker = new ThreadLocker(this);
+        this.quickJSNative = new QuickJSNativeImpl();
     }
 
     public static QuickJS createRuntime() {
-        return new QuickJS(_createRuntime());
+        return new QuickJS(QuickJSNativeImpl._createRuntime());
     }
 
     public JSContext createContext() {
-        return new JSContext(this, _createContext(runtimePtr));
+        return new JSContext(this, getNative()._createContext(runtimePtr));
     }
 
     public void close() {
@@ -33,11 +35,11 @@ public class QuickJS implements Closeable {
         JSContext[] values = new JSContext[sContextMap.size()];
         sContextMap.values().toArray(values);
         for (JSContext context : values) {
-            if (context.quickJS == this) {
+            if (context.getQuickJS() == this) {
                 context.close();
             }
         }
-        _releaseRuntime(runtimePtr);
+        getNative()._releaseRuntime(runtimePtr);
     }
 
 
@@ -50,6 +52,10 @@ public class QuickJS implements Closeable {
         if (this.isReleased()) {
             throw new Error("Runtime disposed error");
         }
+    }
+
+    public QuickJSNative getNative() {
+        return quickJSNative;
     }
 
     static class MethodDescriptor {
@@ -140,11 +146,11 @@ public class QuickJS implements Closeable {
                 }
             }
         }
-        return _executeFunction(context.getContextPtr(), JSValue.TYPE_UNKNOWN, objectHandle, name, args);
+        return context.getNative()._executeFunction(context.getContextPtr(), JSValue.TYPE_UNKNOWN, objectHandle, name, args);
     }
 
     static void checkException(JSContext context) {
-        String[] result = QuickJS._getException(context.getContextPtr());
+        String[] result = context.getNative()._getException(context.getContextPtr());
         if (result == null) {
             return;
         }
@@ -161,55 +167,6 @@ public class QuickJS implements Closeable {
         return this.released;
     }
 
-    static native long _createRuntime();
-
-    static native void _releaseRuntime(long runtimePtr);
-
-    static native long _createContext(long runtimePtr);
-
-    static native void _releaseContext(long contextPtr);
-
-    static native Object _executeScript(long contextPtr, int expectedType, String source, String fileName, int eval_flags);
-
-    static native JSObject _getGlobalObject(long contextPtr);
-
-    static native void _set(long contextPtr, JSValue objectHandle, String key, Object value);
-
-    static native Object _get(long contextPtr, int expectedType, JSValue objectHandle, String key);
-
-    static native Object _arrayGet(long contextPtr, int expectedType, JSValue objectHandle, int index);
-
-    static native void _arrayAdd(long contextPtr, JSValue objectHandle, Object value);
-
-    static native Object _executeFunction(long contextPtr, int expectedType, JSValue objectHandle, String name, JSValue parametersHandle);
-
-    static native Object _executeFunction2(long contextPtr, int expectedType, JSValue objectHandle, JSValue functionHandle, JSValue parametersHandle);
-
-    static native JSObject _initNewJSObject(long contextPtr);
-
-    static native JSArray _initNewJSArray(long contextPtr);
-
-    native static JSFunction _initNewJSFunction(long contextPtr, int javaCallerId, boolean voidMethod);
-
-    static native void _releasePtr(long contextPtr, long tag, int u_int32, double u_float64, long u_ptr);
-
-    static native JSFunction _registerJavaMethod(long contextPtr, JSValue objectHandle, String jsFunctionName, int javaCallerId, boolean voidMethod);
-
-    native static int _getObjectType(long contextPtr, JSValue objectHandle);
-
-    native static boolean _contains(long contextPtr, JSValue objectHandle, String key);
-
-    native static String[] _getKeys(long contextPtr, JSValue objectHandle);
-
-    native static boolean _isUndefined(long contextPtr, JSValue value);
-
-    native static JSValue _Undefined(long contextPtr);
-
-    native static JSValue _getValue(long contextPtr, JSObject object, String key);
-
-    native static JSValue _arrayGetValue(long contextPtr, JSArray array, int index);
-
-    native static String[] _getException(long contextPtr);
 
     /* JS_Eval() flags */
     static int JS_EVAL_TYPE_GLOBAL = (0); /* global code (default) */

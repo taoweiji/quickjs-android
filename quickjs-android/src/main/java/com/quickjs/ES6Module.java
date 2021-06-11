@@ -6,7 +6,7 @@ package com.quickjs;
 public abstract class ES6Module extends Module {
 
     public ES6Module(QuickJS quickJS) {
-        super(quickJS, QuickJS._createContext(quickJS.runtimePtr));
+        super(quickJS, quickJS.getNative()._createContext(quickJS.runtimePtr));
     }
 
     @Override
@@ -14,7 +14,7 @@ public abstract class ES6Module extends Module {
 
     public void executeModuleScript(String source, String moduleName) {
         checkReleased();
-        QuickJS._executeScript(context.getContextPtr(), JSValue.TYPE.NULL.value, source, moduleName, QuickJS.JS_EVAL_TYPE_MODULE);
+        getNative()._executeScript(context.getContextPtr(), JSValue.TYPE.NULL.value, source, moduleName, QuickJS.JS_EVAL_TYPE_MODULE);
     }
 
     public Object executeGlobalScript(String source, String fileName) {
