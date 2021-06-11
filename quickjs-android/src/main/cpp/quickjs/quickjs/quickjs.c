@@ -1289,6 +1289,7 @@ void *js_malloc_rt(JSRuntime *rt, size_t size)
 
 void js_free_rt(JSRuntime *rt, void *ptr)
 {
+    if(rt == NULL || ptr == NULL) return;
     rt->mf.js_free(&rt->malloc_state, ptr);
 }
 

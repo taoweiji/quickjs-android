@@ -1,5 +1,7 @@
 package com.quickjs;
 
+import android.util.Log;
+
 import androidx.annotation.Keep;
 
 import java.util.Arrays;
@@ -56,7 +58,7 @@ public class JSValue {
     double u_float64;
     long u_ptr;
 
-    boolean released = false;
+    volatile boolean released = false;
 
     protected static Object checkType(Object result, TYPE type) {
         switch (type.value) {
@@ -140,8 +142,12 @@ public class JSValue {
         this.u_float64 = value.u_float64;
         this.u_ptr = value.u_ptr;
         if (context != null) {
-            context.releaseObjRef(value);
+            value.released = true;
+            context.removeObjRef(value);
             context.addObjRef(this);
+        }
+        if (context != null) {
+            context.checkReleased();
         }
     }
 
@@ -149,13 +155,16 @@ public class JSValue {
         return context.getContextPtr();
     }
 
-
     protected void close() {
-        if (!released) {
-            QuickJS._release(getContextPtr(), this);
-            context.releaseObjRef(this);
+        close(false);
+    }
+
+    private void close(boolean finalize) {
+        if (released) {
+            return;
         }
         released = true;
+        context.releaseObjRef(this, finalize);
     }
 
     public boolean isUndefined() {
@@ -212,7 +221,9 @@ public class JSValue {
 
     @Override
     protected void finalize() throws Throwable {
-        close();
+        if (!(this instanceof JSContext)) {
+            close(true);
+        }
         super.finalize();
     }
 }

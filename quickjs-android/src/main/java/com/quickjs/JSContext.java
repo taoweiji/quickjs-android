@@ -1,10 +1,14 @@
 package com.quickjs;
 
+import android.util.Log;
+
 import java.io.Closeable;
 import java.lang.ref.WeakReference;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -33,7 +37,26 @@ public class JSContext extends JSObject implements Closeable {
         }
     }
 
-    void releaseObjRef(JSValue reference) {
+    private final List<Object[]> releaseObjPtrPool = Collections.synchronizedList(new LinkedList<>());
+
+    void releaseObjRef(JSValue reference, boolean finalize) {
+        if (finalize) {
+            releaseObjPtrPool.add(new Object[]{reference.tag, reference.u_int32, reference.u_float64, reference.u_ptr});
+        } else {
+            QuickJS._release(getContextPtr(), reference);
+        }
+        removeObjRef(reference);
+    }
+
+    private void checkReleaseObjPtrPool() {
+        while (!releaseObjPtrPool.isEmpty()) {
+            Object[] ptr = releaseObjPtrPool.get(0);
+            QuickJS._releasePtr(getContextPtr(), (long) ptr[0], (int) ptr[1], (double) ptr[2], (long) ptr[3]);
+            releaseObjPtrPool.remove(0);
+        }
+    }
+
+    void removeObjRef(JSValue reference) {
         for (WeakReference<JSValue> it : refs) {
             JSValue tmp = it.get();
             if (tmp == reference) {
@@ -42,6 +65,7 @@ public class JSContext extends JSObject implements Closeable {
             }
         }
     }
+
 
     @Override
     public void close() {
@@ -53,15 +77,15 @@ public class JSContext extends JSObject implements Closeable {
         }
         plugins.clear();
         functionRegistry.clear();
-        WeakReference[] arr = new WeakReference[refs.size()];
-        refs.toArray(arr);
-        for (WeakReference it : arr) {
-            JSValue tmp = (JSValue) it.get();
+        while (refs.size() > 0) {
+            WeakReference<JSValue> it = refs.removeFirst();
+            JSValue tmp = it.get();
             if (tmp != null) {
                 tmp.close();
             }
         }
         super.close();
+        checkReleaseObjPtrPool();
         QuickJS._releaseContext(contextPtr);
         QuickJS.sContextMap.remove(getContextPtr());
     }
@@ -158,6 +182,7 @@ public class JSContext extends JSObject implements Closeable {
     }
 
     void checkReleased() {
+        checkReleaseObjPtrPool();
         this.quickJS.checkReleased();
         if (this.isReleased()) {
             throw new Error("Context disposed error");
