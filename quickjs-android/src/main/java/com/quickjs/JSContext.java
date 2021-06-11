@@ -43,7 +43,7 @@ public class JSContext extends JSObject implements Closeable {
         if (finalize) {
             releaseObjPtrPool.add(new Object[]{reference.tag, reference.u_int32, reference.u_float64, reference.u_ptr});
         } else {
-            QuickJS._release(getContextPtr(), reference);
+            QuickJS._releasePtr(getContextPtr(), reference.tag, reference.u_int32, reference.u_float64, reference.u_ptr);
         }
         removeObjRef(reference);
     }
