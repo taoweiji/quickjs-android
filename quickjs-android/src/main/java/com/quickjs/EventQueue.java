@@ -6,14 +6,14 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
-class ThreadLocker implements QuickJSNative {
+class EventQueue implements QuickJSNative {
     QuickJS quickJS;
     QuickJSNative quickJSNative;
     Handler handler;
     Thread thread;
     private final ThreadChecker threadChecker;
 
-    public ThreadLocker(QuickJS quickJS, QuickJSNative quickJSNative) {
+    public EventQueue(QuickJS quickJS, QuickJSNative quickJSNative) {
         this.quickJS = quickJS;
         this.quickJSNative = quickJSNative;
         thread = Thread.currentThread();

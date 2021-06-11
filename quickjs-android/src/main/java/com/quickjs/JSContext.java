@@ -14,7 +14,7 @@ public class JSContext extends JSObject implements Closeable {
     private final QuickJS quickJS;
     private final long contextPtr;
     Map<Integer, QuickJS.MethodDescriptor> functionRegistry = new HashMap<>();
-    final LinkedList<WeakReference<JSValue>> refs = new LinkedList<>();
+    final List<WeakReference<JSValue>> refs = Collections.synchronizedList(new LinkedList<>());
     Set<Plugin> plugins = new HashSet<>();
 
     JSContext(QuickJS quickJS, long contextPtr) {
@@ -77,7 +77,8 @@ public class JSContext extends JSObject implements Closeable {
         plugins.clear();
         functionRegistry.clear();
         while (refs.size() > 0) {
-            WeakReference<JSValue> it = refs.removeFirst();
+            WeakReference<JSValue> it = refs.get(0);
+            refs.remove(it);
             JSValue tmp = it.get();
             if (tmp != null) {
                 tmp.close();
