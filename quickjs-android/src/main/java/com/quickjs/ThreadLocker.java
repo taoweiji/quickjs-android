@@ -2,6 +2,7 @@ package com.quickjs;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -31,7 +32,7 @@ class ThreadLocker implements QuickJSNative {
             this.threadChecker.checkThread();
             return event.run();
         }
-        Object[] result = new Object[1];
+        Object[] result = new Object[2];
         RuntimeException[] errors = new RuntimeException[1];
         handler.post(() -> {
             try {
@@ -39,16 +40,19 @@ class ThreadLocker implements QuickJSNative {
             } catch (RuntimeException e) {
                 errors[0] = e;
             }
-            synchronized (event) {
-                event.notify();
+            synchronized (result) {
+                result[1] = true;
+                result.notifyAll();
             }
         });
-        try {
-            synchronized (event) {
-                event.wait();
+        synchronized (result) {
+            try {
+                if (result[1] == null) {
+                    result.wait();
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
         }
         if (errors[0] != null) {
             throw errors[0];
@@ -62,27 +66,9 @@ class ThreadLocker implements QuickJSNative {
             event.run();
             return;
         }
-        RuntimeException[] errors = new RuntimeException[1];
         handler.post(() -> {
-            try {
-                event.run();
-            } catch (RuntimeException e) {
-                errors[0] = e;
-            }
-            synchronized (event) {
-                event.notify();
-            }
+            event.run();
         });
-        try {
-            synchronized (event) {
-                event.wait();
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        if (errors[0] != null) {
-            throw errors[0];
-        }
     }
 
 

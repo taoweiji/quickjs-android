@@ -2,12 +2,16 @@ package com.quickjs;
 
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.util.Log;
 
 import androidx.annotation.Keep;
 
 import java.io.Closeable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicIntegerArray;
 
 public class QuickJS implements Closeable {
     final long runtimePtr;
@@ -26,25 +30,31 @@ public class QuickJS implements Closeable {
         return new QuickJS(QuickJSNativeImpl._createRuntime());
     }
 
+    private static int sId = 0;
+
     public static QuickJS createRuntimeAsync() {
-        QuickJS[] quickJS = new QuickJS[1];
-        HandlerThread handlerThread = new HandlerThread("QuickJS");
+        Object[] objects = new Object[2];
+        HandlerThread handlerThread = new HandlerThread("QuickJS-" + (sId++));
         handlerThread.start();
         new Handler(handlerThread.getLooper()).post(() -> {
-            quickJS[0] = createRuntime();
-            synchronized (quickJS) {
-                quickJS.notify();
+            objects[0] = createRuntime();
+            synchronized (objects) {
+                objects[1] = true;
+                objects.notify();
             }
         });
-        synchronized (quickJS) {
+        synchronized (objects) {
             try {
-                quickJS.wait();
+                if (objects[1] == null) {
+                    objects.wait();
+                }
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
-        quickJS[0].handlerThread = handlerThread;
-        return quickJS[0];
+        QuickJS quickJS = (QuickJS) objects[0];
+        quickJS.handlerThread = handlerThread;
+        return quickJS;
     }
 
 
