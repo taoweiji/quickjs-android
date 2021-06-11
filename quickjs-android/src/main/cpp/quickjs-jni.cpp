@@ -345,9 +345,9 @@ Java_com_quickjs_QuickJS__1releasePtr(JNIEnv *env, jclass clazz, jlong context_p
     value = tag;
 #else
     value.tag = tag;
-    value.u.int32 = env->GetIntField(object_handle, js_value_u_int32_id);
-    value.u.float64 = env->GetDoubleField(object_handle, js_value_u_float64_id);
-    value.u.ptr = (void *) env->GetLongField(object_handle, js_value_u_ptr_id);
+    value.u.int32 = u_int32;
+    value.u.float64 = u_float64;
+    value.u.ptr = (void *) u_ptr;
 #endif
     auto *ctx = reinterpret_cast<JSContext *>(context_ptr);
     JS_FreeValue(ctx, value);
