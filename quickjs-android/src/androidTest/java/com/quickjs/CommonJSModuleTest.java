@@ -11,14 +11,14 @@ import java.util.List;
 
 import static org.junit.Assert.*;
 
-public class CommonJSModuleTest {
+public class CommonJSModuleTest extends BaseTest{
     private QuickJS quickJS;
     private CommonJSModule module;
     private final List<String> logs = new ArrayList<>();
 
     @Before
     public void setUp() {
-        quickJS = QuickJS.createRuntimeAsync();
+        quickJS = createQuickJS();
         module = new CommonJSModule(quickJS) {
             @Override
             protected String getModuleScript(String moduleName) {

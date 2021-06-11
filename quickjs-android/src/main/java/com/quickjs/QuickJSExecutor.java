@@ -68,7 +68,7 @@ public class QuickJSExecutor extends Thread {
     @Override
     public void run() {
         synchronized (this) {
-            this.quickJS = QuickJS.createRuntime();
+            this.quickJS = QuickJS.createRuntimeWithoutEventQueue();
             context = createContext(quickJS);
             setup(context);
         }

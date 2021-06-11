@@ -11,14 +11,14 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-public class ES6ModuleTest {
+public class ES6ModuleTest  extends BaseTest{
     private QuickJS quickJS;
     private ES6Module es6Module;
     private final List<String> logs = new ArrayList<>();
 
     @Before
     public void setUp() {
-        quickJS = QuickJS.createRuntimeAsync();
+        quickJS = createQuickJS();
         es6Module = new ES6Module(quickJS) {
             @Override
             protected String getModuleScript(String moduleName) {

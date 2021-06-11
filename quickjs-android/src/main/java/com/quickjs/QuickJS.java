@@ -2,16 +2,12 @@ package com.quickjs;
 
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.util.Log;
 
 import androidx.annotation.Keep;
 
 import java.io.Closeable;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicIntegerArray;
 
 public class QuickJS implements Closeable {
     final long runtimePtr;
@@ -26,18 +22,18 @@ public class QuickJS implements Closeable {
         this.quickJSNative = new ThreadLocker(this, new QuickJSNativeImpl());
     }
 
-    public static QuickJS createRuntime() {
+    public static QuickJS createRuntimeWithoutEventQueue() {
         return new QuickJS(QuickJSNativeImpl._createRuntime());
     }
 
     private static int sId = 0;
 
-    public static QuickJS createRuntimeAsync() {
+    public static QuickJS createRuntime() {
         Object[] objects = new Object[2];
         HandlerThread handlerThread = new HandlerThread("QuickJS-" + (sId++));
         handlerThread.start();
         new Handler(handlerThread.getLooper()).post(() -> {
-            objects[0] = createRuntime();
+            objects[0] = createRuntimeWithoutEventQueue();
             synchronized (objects) {
                 objects[1] = true;
                 objects.notify();

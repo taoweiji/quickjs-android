@@ -1,56 +1,65 @@
-//package com.quickjs.plugin;
-//
-//import com.quickjs.JSContext;
-//import com.quickjs.QuickJS;
-//
-//import org.junit.After;
-//import org.junit.Before;
-//import org.junit.Test;
-//
-//public class SetTimeoutPluginTest {
-//    private JSContext context;
-//    private QuickJS quickJS;
-//    SetTimeoutPlugin setTimeoutPlugin = new SetTimeoutPlugin();
-//
-//    @Before
-//    public void setUp() throws Throwable {
-//        setTimeoutPlugin.post(new Runnable() {
-//            @Override
-//            public void run() {
-//                quickJS = QuickJS.createRuntime();
-//                context = quickJS.createContext();
-//                context.addPlugin(setTimeoutPlugin);
-//                context.addPlugin(new ConsolePlugin());
-//            }
-//        });
-//    }
-//
-//    @After
-//    public void tearDown() throws Throwable {
-//        context.close();
-//        quickJS.close();
-//    }
-//
-////    @Test
-//    public void test() throws Exception {
-//        setTimeoutPlugin.post(new Runnable() {
-//            @Override
-//            public void run() {
-//                context.executeVoidScript(
-//                        "var timer = 0;\n" +
-//                                "function print1() {\n" +
-//                                "    console.log(timer++);\n" +
-//                                "    setTimeout(print2, 1000);\n" +
-//                                "}\n" +
-//                                "function print2() {\n" +
-//                                "    console.log(timer++);\n" +
-//                                "    if(timer < 1000){\n" +
-//                                "        setTimeout(print1, 1000);\n" +
-//                                "    }\n" +
-//                                "}\n" +
-//                                "print1();", null);
-//            }
-//        });
-//        setTimeoutPlugin.getHandlerThread().join();
-//    }
-//}
+package com.quickjs.plugin;
+
+import com.quickjs.BaseTest;
+import com.quickjs.JSContext;
+import com.quickjs.QuickJS;
+import com.quickjs.plugin.ConsolePlugin;
+import com.quickjs.plugin.SetTimeoutPlugin;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+public class SetTimeoutPluginTest extends BaseTest {
+    List<String> logs = new ArrayList<>();
+
+    private JSContext context;
+    private QuickJS quickJS;
+
+    @Before
+    public void setUp() {
+        quickJS = createQuickJS();
+        context = quickJS.createContext();
+        context.addPlugin(new ConsolePlugin() {
+            @Override
+            public void println(int priority, String msg) {
+                super.println(priority, msg);
+                logs.add(msg);
+            }
+        });
+        context.addPlugin(new SetTimeoutPlugin());
+    }
+
+    @After
+    public void tearDown() {
+        context.close();
+        quickJS.close();
+    }
+
+    @Test
+    public void post() throws InterruptedException {
+        context.executeVoidScript("var counter = 0;\n" +
+                "function print1() {\n" +
+                "    console.log(counter++);\n" +
+                "    setTimeout(print1, 10);\n" +
+                "}\n" +
+                "print1();", null);
+        Thread.sleep(1000);
+        assertTrue(logs.size() > 10);
+    }
+
+
+    @Test
+    public void postDelayed() throws InterruptedException {
+        context.executeVoidScript("setTimeout(function(){console.log('Hello')}, 100);", null);
+        assertTrue(logs.isEmpty());
+        Thread.sleep(200);
+        assertEquals(1, logs.size());
+    }
+}

@@ -55,7 +55,8 @@ public class JSContext extends JSObject implements Closeable {
     }
 
     void removeObjRef(JSValue reference) {
-        for (WeakReference<JSValue> it : refs) {
+        WeakReference<JSValue>[] values = refs.toArray(new WeakReference[0]);
+        for (WeakReference<JSValue> it : values) {
             JSValue tmp = it.get();
             if (tmp == reference) {
                 refs.remove(it);

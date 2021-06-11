@@ -1,5 +1,6 @@
 package com.quickjs.plugin;
 
+import com.quickjs.BaseTest;
 import com.quickjs.JSContext;
 import com.quickjs.QuickJS;
 
@@ -9,7 +10,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class ConsolePluginTest {
+public class ConsolePluginTest  extends BaseTest {
 
     private JSContext context;
     private QuickJS quickJS;
@@ -17,7 +18,7 @@ public class ConsolePluginTest {
 
     @Before
     public void setUp() throws Throwable {
-        quickJS = QuickJS.createRuntimeAsync();
+        quickJS = createQuickJS();
         context = quickJS.createContext();
         context.addPlugin(new ConsolePlugin() {
             @Override
