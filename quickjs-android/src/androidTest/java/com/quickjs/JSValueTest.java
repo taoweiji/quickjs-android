@@ -13,7 +13,7 @@ public class JSValueTest {
 
     @Before
     public void setUp() throws Exception {
-        quickJS = QuickJS.createRuntime();
+        quickJS = QuickJS.createRuntimeAsync();
         context = quickJS.createContext();
     }
 

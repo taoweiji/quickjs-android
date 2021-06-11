@@ -55,7 +55,7 @@ public class QuickJSExecutorTest {
         executor.postMessage("Hello");
         executor.postMessage("World");
         executor.interrupt();
-        executor.join();
+        executor.join(1000);
         assertTrue(logs.isEmpty());
     }
 }

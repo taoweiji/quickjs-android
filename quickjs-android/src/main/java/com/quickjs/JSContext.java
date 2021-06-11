@@ -181,7 +181,6 @@ public class JSContext extends JSObject implements Closeable {
 
     void checkReleased() {
         checkReleaseObjPtrPool();
-        this.quickJS.checkReleased();
         if (this.isReleased()) {
             throw new Error("Context disposed error");
         }

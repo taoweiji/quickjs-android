@@ -18,7 +18,7 @@ public class CommonJSModuleTest {
 
     @Before
     public void setUp() {
-        quickJS = QuickJS.createRuntime();
+        quickJS = QuickJS.createRuntimeAsync();
         module = new CommonJSModule(quickJS) {
             @Override
             protected String getModuleScript(String moduleName) {

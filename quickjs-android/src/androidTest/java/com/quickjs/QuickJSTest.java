@@ -6,13 +6,13 @@ public class QuickJSTest {
 
     @Test
     public void createRuntime() {
-        QuickJS quickJS = QuickJS.createRuntime();
+        QuickJS quickJS = QuickJS.createRuntimeAsync();
         quickJS.close();
     }
 
     @Test
     public void createContext() {
-        QuickJS quickJS = QuickJS.createRuntime();
+        QuickJS quickJS = QuickJS.createRuntimeAsync();
         JSContext context = quickJS.createContext();
         context.close();
         quickJS.close();
@@ -20,7 +20,7 @@ public class QuickJSTest {
 
     @Test
     public void createContext2() {
-        QuickJS quickJS = QuickJS.createRuntime();
+        QuickJS quickJS = QuickJS.createRuntimeAsync();
         JSContext context = quickJS.createContext();
         quickJS.close();
     }

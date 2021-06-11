@@ -18,7 +18,7 @@ public class ES6ModuleTest {
 
     @Before
     public void setUp() {
-        quickJS = QuickJS.createRuntime();
+        quickJS = QuickJS.createRuntimeAsync();
         es6Module = new ES6Module(quickJS) {
             @Override
             protected String getModuleScript(String moduleName) {
