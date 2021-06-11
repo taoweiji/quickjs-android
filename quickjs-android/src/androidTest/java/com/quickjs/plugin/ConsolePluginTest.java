@@ -17,7 +17,7 @@ public class ConsolePluginTest {
 
     @Before
     public void setUp() throws Throwable {
-        quickJS = QuickJS.createRuntime();
+        quickJS = QuickJS.createRuntimeAsync();
         context = quickJS.createContext();
         context.addPlugin(new ConsolePlugin() {
             @Override

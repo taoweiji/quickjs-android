@@ -1,5 +1,8 @@
 package com.quickjs;
 
+import android.os.Handler;
+import android.os.HandlerThread;
+
 import androidx.annotation.Keep;
 
 import java.io.Closeable;
@@ -10,18 +13,40 @@ public class QuickJS implements Closeable {
     final long runtimePtr;
     static final Map<Long, JSContext> sContextMap = new HashMap<>();
     private boolean released;
-    private final ThreadLocker locker;
+    private HandlerThread handlerThread;
+
     private final QuickJSNative quickJSNative;
 
     private QuickJS(long runtimePtr) {
         this.runtimePtr = runtimePtr;
-        this.locker = new ThreadLocker(this);
-        this.quickJSNative = new QuickJSNativeImpl();
+        this.quickJSNative = new ThreadLocker(this, new QuickJSNativeImpl());
     }
 
     public static QuickJS createRuntime() {
         return new QuickJS(QuickJSNativeImpl._createRuntime());
     }
+
+    public static QuickJS createRuntimeAsync() {
+        QuickJS[] quickJS = new QuickJS[1];
+        HandlerThread handlerThread = new HandlerThread("QuickJS");
+        handlerThread.start();
+        new Handler(handlerThread.getLooper()).post(() -> {
+            quickJS[0] = createRuntime();
+            synchronized (quickJS) {
+                quickJS.notify();
+            }
+        });
+        synchronized (quickJS) {
+            try {
+                quickJS.wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        quickJS[0].handlerThread = handlerThread;
+        return quickJS[0];
+    }
+
 
     public JSContext createContext() {
         return new JSContext(this, getNative()._createContext(runtimePtr));
@@ -40,15 +65,12 @@ public class QuickJS implements Closeable {
             }
         }
         getNative()._releaseRuntime(runtimePtr);
-    }
-
-
-    void checkThread() {
-        this.locker.checkThread();
+        if (handlerThread != null) {
+            handlerThread.interrupt();
+        }
     }
 
     public void checkReleased() {
-        this.checkThread();
         if (this.isReleased()) {
             throw new Error("Runtime disposed error");
         }

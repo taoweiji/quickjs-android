@@ -13,7 +13,7 @@ public class JSContextTest {
 
     @Before
     public void setUp() {
-        quickJS = QuickJS.createRuntime();
+        quickJS = QuickJS.createRuntimeAsync();
         context = quickJS.createContext();
     }
 

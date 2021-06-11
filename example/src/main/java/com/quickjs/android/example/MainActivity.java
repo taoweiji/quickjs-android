@@ -1,41 +1,71 @@
 package com.quickjs.android.example;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
-import android.webkit.JavascriptInterface;
-import android.webkit.WebView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.eclipsesource.v8.V8;
 import com.quickjs.JSArray;
 import com.quickjs.JSContext;
 import com.quickjs.JSFunction;
 import com.quickjs.JSObject;
-import com.quickjs.JSValue;
-import com.quickjs.JavaCallback;
 import com.quickjs.JavaVoidCallback;
+import com.quickjs.Plugin;
 import com.quickjs.QuickJS;
+import com.quickjs.plugin.ConsolePlugin;
 
 public class MainActivity extends AppCompatActivity {
 
     private QuickJS quickJS;
     private JSContext jsContext;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        quickJS = QuickJS.createRuntime();
+        quickJS = QuickJS.createRuntimeAsync();
         jsContext = quickJS.createContext();
+        jsContext.addPlugin(new ConsolePlugin());
+        jsContext.addPlugin(new Plugin() {
+            @Override
+            protected void setup(JSContext context) {
+                context.registerJavaMethod(new JavaVoidCallback() {
+                    @Override
+                    public void invoke(JSObject receiver, JSArray args) {
+                        JSFunction func = (JSFunction) args.getObject(0);
+                        long timer = args.getInteger(1);
+                        new Thread(() -> {
+                            try {
+                                Thread.sleep(timer);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                            func.call(null, null);
+                        }).start();
+                    }
+                }, "setTimeout");
+            }
+
+            @Override
+            protected void close(JSContext context) {
+
+            }
+        });
+        jsContext.executeVoidScript("var count = 0;", null);
         findViewById(R.id.create).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                for (int i = 0; i < 10; i++) {
-                    new JSObject(jsContext);
-                    new JSArray(jsContext);
-                }
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        jsContext.executeVoidScript("setTimeout(function(){console.log(count++)},1000)", null);
+//                        for (int i = 0; i < 10; i++) {
+//                            int count = jsContext.executeIntegerScript("console.log(count++);count;", null);
+//                            Log.e("console", count + "");
+//                        }
+                    }
+                }).start();
             }
         });
     }
