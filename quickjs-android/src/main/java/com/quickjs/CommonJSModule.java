@@ -11,7 +11,7 @@ public abstract class CommonJSModule extends Module {
     private final Map<String, JSObject> modules = new HashMap<>();
 
     public CommonJSModule(QuickJS quickJS) {
-        super(quickJS, QuickJS._createContext(quickJS.runtimePtr));
+        super(quickJS, quickJS.getNative()._createContext(quickJS.runtimePtr));
         registerJavaMethod((receiver, args) -> {
             String moduleBaseName = null;
             if (!receiver.isUndefined()) {

@@ -3,12 +3,12 @@ package com.quickjs;
 public class JSFunction extends JSObject {
 
     public JSFunction(JSContext context, JavaCallback callback) {
-        super(context, QuickJS._initNewJSFunction(context.getContextPtr(), callback.hashCode(), false));
+        super(context, context.getNative()._initNewJSFunction(context.getContextPtr(), callback.hashCode(), false));
         this.context.registerCallback(callback, this);
     }
 
     public JSFunction(JSContext context, JavaVoidCallback callback) {
-        super(context, QuickJS._initNewJSFunction(context.getContextPtr(), callback.hashCode(), true));
+        super(context, context.getNative()._initNewJSFunction(context.getContextPtr(), callback.hashCode(), true));
         this.context.registerCallback(callback, this);
     }
 
@@ -22,7 +22,7 @@ public class JSFunction extends JSObject {
         if (receiver == null) {
             receiver = JSValue.Undefined(context);
         }
-        Object result = QuickJS._executeFunction2(context.getContextPtr(), type.value, receiver, this, parameters);
+        Object result = getNative()._executeFunction2(context.getContextPtr(), type.value, receiver, this, parameters);
         QuickJS.checkException(context);
         return JSValue.checkType(result, type);
     }

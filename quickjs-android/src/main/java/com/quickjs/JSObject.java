@@ -12,11 +12,11 @@ import java.util.Iterator;
 public class JSObject extends JSValue {
 
     public JSObject(JSContext context) {
-        super(context, QuickJS._initNewJSObject(context.getContextPtr()));
+        super(context, context.getNative()._initNewJSObject(context.getContextPtr()));
     }
 
     public JSObject(JSContext context, JSONObject jsonObject) {
-        this(context, QuickJS._initNewJSObject(context.getContextPtr()));
+        this(context, context.getNative()._initNewJSObject(context.getContextPtr()));
         append(this, jsonObject);
     }
 
@@ -54,7 +54,7 @@ public class JSObject extends JSValue {
 
     protected JSObject setObject(String key, Object value) {
         this.context.checkReleased();
-        QuickJS._set(getContextPtr(), this, key, value);
+        context.getNative()._set(getContextPtr(), this, key, value);
         return this;
     }
 
@@ -63,7 +63,7 @@ public class JSObject extends JSValue {
         if (expectedType == null) {
             expectedType = TYPE.UNKNOWN;
         }
-        Object object = QuickJS._get(this.getContextPtr(), expectedType.value, this, key);
+        Object object = context.getNative()._get(this.getContextPtr(), expectedType.value, this, key);
         return JSValue.checkType(object, expectedType);
     }
 
@@ -115,7 +115,7 @@ public class JSObject extends JSValue {
 
 
     public TYPE getType(String key) {
-        JSValue value = QuickJS._getValue(this.getContextPtr(), this, key);
+        JSValue value = getContext().getNative()._getValue(this.getContextPtr(), this, key);
         if (value == null) {
             return TYPE.NULL;
         }
@@ -125,14 +125,14 @@ public class JSObject extends JSValue {
 
     public JSObject registerJavaMethod(JavaCallback callback, String jsFunctionName) {
         this.context.checkReleased();
-        JSFunction functionHandle = QuickJS._registerJavaMethod(this.getContextPtr(), this, jsFunctionName, callback.hashCode(), false);
+        JSFunction functionHandle = getNative()._registerJavaMethod(this.getContextPtr(), this, jsFunctionName, callback.hashCode(), false);
         context.registerCallback(callback, functionHandle);
         return this;
     }
 
     public JSObject registerJavaMethod(JavaVoidCallback callback, String jsFunctionName) {
         this.context.checkReleased();
-        JSFunction functionHandle = QuickJS._registerJavaMethod(this.getContextPtr(), this, jsFunctionName, callback.hashCode(), true);
+        JSFunction functionHandle = getNative()._registerJavaMethod(this.getContextPtr(), this, jsFunctionName, callback.hashCode(), true);
         context.registerCallback(callback, functionHandle);
         return this;
     }
@@ -176,19 +176,19 @@ public class JSObject extends JSValue {
 
     public boolean contains(String key) {
         this.context.checkReleased();
-        return QuickJS._contains(getContextPtr(), this, key);
+        return getContext().getNative()._contains(getContextPtr(), this, key);
     }
 
     public String[] getKeys() {
         this.context.checkReleased();
-        return QuickJS._getKeys(getContextPtr(), this);
+        return getContext().getNative()._getKeys(getContextPtr(), this);
     }
 
 
     protected Object executeFunction(TYPE expectedType, String name, JSArray parameters) {
         this.context.checkReleased();
         this.context.checkRuntime(parameters);
-        Object object = QuickJS._executeFunction(context.getContextPtr(), expectedType.value, this, name, parameters);
+        Object object = getNative()._executeFunction(context.getContextPtr(), expectedType.value, this, name, parameters);
         QuickJS.checkException(context);
         return JSValue.checkType(object, expectedType);
     }

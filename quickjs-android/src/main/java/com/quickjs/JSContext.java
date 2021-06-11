@@ -1,7 +1,5 @@
 package com.quickjs;
 
-import android.util.Log;
-
 import java.io.Closeable;
 import java.lang.ref.WeakReference;
 import java.util.Collections;
@@ -13,14 +11,14 @@ import java.util.Map;
 import java.util.Set;
 
 public class JSContext extends JSObject implements Closeable {
-    final QuickJS quickJS;
+    private final QuickJS quickJS;
     private final long contextPtr;
     Map<Integer, QuickJS.MethodDescriptor> functionRegistry = new HashMap<>();
     final LinkedList<WeakReference<JSValue>> refs = new LinkedList<>();
     Set<Plugin> plugins = new HashSet<>();
 
     JSContext(QuickJS quickJS, long contextPtr) {
-        super(null, QuickJS._getGlobalObject(contextPtr));
+        super(null, quickJS.getNative()._getGlobalObject(contextPtr));
         this.quickJS = quickJS;
         this.contextPtr = contextPtr;
         this.context = this;
@@ -43,7 +41,7 @@ public class JSContext extends JSObject implements Closeable {
         if (finalize) {
             releaseObjPtrPool.add(new Object[]{reference.tag, reference.u_int32, reference.u_float64, reference.u_ptr});
         } else {
-            QuickJS._releasePtr(getContextPtr(), reference.tag, reference.u_int32, reference.u_float64, reference.u_ptr);
+            getNative()._releasePtr(getContextPtr(), reference.tag, reference.u_int32, reference.u_float64, reference.u_ptr);
         }
         removeObjRef(reference);
     }
@@ -51,7 +49,7 @@ public class JSContext extends JSObject implements Closeable {
     private void checkReleaseObjPtrPool() {
         while (!releaseObjPtrPool.isEmpty()) {
             Object[] ptr = releaseObjPtrPool.get(0);
-            QuickJS._releasePtr(getContextPtr(), (long) ptr[0], (int) ptr[1], (double) ptr[2], (long) ptr[3]);
+            getNative()._releasePtr(getContextPtr(), (long) ptr[0], (int) ptr[1], (double) ptr[2], (long) ptr[3]);
             releaseObjPtrPool.remove(0);
         }
     }
@@ -86,12 +84,12 @@ public class JSContext extends JSObject implements Closeable {
         }
         super.close();
         checkReleaseObjPtrPool();
-        QuickJS._releaseContext(contextPtr);
+        getNative()._releaseContext(contextPtr);
         QuickJS.sContextMap.remove(getContextPtr());
     }
 
     protected Object executeScript(TYPE expectedType, String source, String fileName) throws QuickJSScriptException {
-        Object object = QuickJS._executeScript(this.getContextPtr(), expectedType.value, source, fileName, QuickJS.JS_EVAL_TYPE_GLOBAL);
+        Object object = getNative()._executeScript(this.getContextPtr(), expectedType.value, source, fileName, QuickJS.JS_EVAL_TYPE_GLOBAL);
         QuickJS.checkException(context);
         return object;
     }
@@ -104,13 +102,13 @@ public class JSContext extends JSObject implements Closeable {
     }
 
     public Object executeScript(String source, String fileName, int evalType) throws QuickJSScriptException {
-        Object object = QuickJS._executeScript(this.getContextPtr(), JSValue.TYPE.UNKNOWN.value, source, fileName, evalType);
+        Object object = getNative()._executeScript(this.getContextPtr(), JSValue.TYPE.UNKNOWN.value, source, fileName, evalType);
         QuickJS.checkException(context);
         return object;
     }
 
     public Object executeModuleScript(String source, String fileName, int evalType) throws QuickJSScriptException {
-        Object object = QuickJS._executeScript(this.getContextPtr(), JSValue.TYPE.UNKNOWN.value, source, fileName, QuickJS.JS_EVAL_TYPE_MODULE);
+        Object object = getNative()._executeScript(this.getContextPtr(), JSValue.TYPE.UNKNOWN.value, source, fileName, QuickJS.JS_EVAL_TYPE_MODULE);
         QuickJS.checkException(context);
         return object;
     }
@@ -187,5 +185,13 @@ public class JSContext extends JSObject implements Closeable {
         if (this.isReleased()) {
             throw new Error("Context disposed error");
         }
+    }
+
+    public QuickJSNative getNative() {
+        return quickJS.getNative();
+    }
+
+    public QuickJS getQuickJS() {
+        return quickJS;
     }
 }
