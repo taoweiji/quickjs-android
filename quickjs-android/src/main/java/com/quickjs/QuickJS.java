@@ -29,7 +29,7 @@ public class QuickJS implements Closeable {
         if (quickJSNative.handler == null) {
             throw new RuntimeException("Without Event Queue, please use QuickJS.createRuntimeWithEventQueue()");
         }
-        quickJSNative.postVoid(event);
+        quickJSNative.postVoid(event, false);
     }
 
     private static int sId = 0;

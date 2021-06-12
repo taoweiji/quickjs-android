@@ -58,7 +58,7 @@ public abstract class WorkerPlugin extends Plugin {
                 @Override
                 public void invoke(JSObject receiver, JSArray args) {
                     String event = args.getString(0);
-                    new Thread(() -> sendMessageReceiver(event)).start();
+                    sendMessageReceiver(event);
                 }
             }, "postMessage");
             this.workerObj = workerObj;
@@ -72,16 +72,18 @@ public abstract class WorkerPlugin extends Plugin {
         }
 
         private void sendMessageReceiver(String event) {
-            JSObject onmessage = workerObj.getObject("onmessage");
-            if (onmessage instanceof JSFunction) {
-                JSFunction func = (JSFunction) onmessage;
-                func.call(workerObj, new JSArray(workerObj.getContext()).push(event));
-            }
+            workerObj.postEventQueue(() -> {
+                JSObject onmessage = workerObj.getObject("onmessage");
+                if (onmessage instanceof JSFunction) {
+                    JSFunction func = (JSFunction) onmessage;
+                    func.call(workerObj, new JSArray(workerObj.getContext()).push(event));
+                }
+            });
         }
 
         private void initWorkerReceiver() {
             workerObj.registerJavaMethod((receiver, args) -> {
-                new Thread(this::close).start();
+                close();
             }, "terminate");
             workerObj.registerJavaMethod(new JavaVoidCallback() {
                 @Override
@@ -99,7 +101,7 @@ public abstract class WorkerPlugin extends Plugin {
                 return;
             }
             terminate = true;
-            quickJS.close();
+            quickJS.postEventQueue(quickJS::close);
         }
     }
 }

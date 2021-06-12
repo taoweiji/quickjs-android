@@ -231,4 +231,8 @@ public class JSValue {
     public QuickJS getQuickJS() {
         return getContext().getQuickJS();
     }
+
+    public void postEventQueue(Runnable event) {
+        getQuickJS().postEventQueue(event);
+    }
 }

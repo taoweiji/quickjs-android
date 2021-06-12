@@ -37,6 +37,10 @@ class EventQueue implements QuickJSNative {
     }
 
     private <T> T post(Event<T> event) {
+        if (handlerThread != null && handlerThread.isInterrupted()) {
+            Log.e("QuickJS", "handlerThread.isInterrupted()");
+            return null;
+        }
         if (Thread.currentThread() == thread || handler == null) {
             this.threadChecker.checkThread();
             return event.run();
@@ -70,11 +74,12 @@ class EventQueue implements QuickJSNative {
     }
 
     void postVoid(Runnable event) {
-        if (Thread.currentThread().isInterrupted()) {
-            return;
-        }
+        postVoid(event, true);
+    }
+
+    void postVoid(Runnable event, boolean block) {
         if (handlerThread != null && handlerThread.isInterrupted()) {
-            Log.e("QuickJS","handlerThread.isInterrupted()");
+            Log.e("QuickJS", "handlerThread.isInterrupted()");
             return;
         }
         if (Thread.currentThread() == thread || handler == null) {
@@ -90,22 +95,26 @@ class EventQueue implements QuickJSNative {
             } catch (RuntimeException e) {
                 errors[0] = e;
             }
-            synchronized (result) {
-                result[1] = true;
-                result.notifyAll();
+            if (block) {
+                synchronized (result) {
+                    result[1] = true;
+                    result.notifyAll();
+                }
             }
         });
-        synchronized (result) {
-            try {
-                if (result[1] == null) {
-                    result.wait();
+        if (block) {
+            synchronized (result) {
+                try {
+                    if (result[1] == null) {
+                        result.wait();
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
             }
-        }
-        if (errors[0] != null) {
-            throw errors[0];
+            if (errors[0] != null) {
+                throw errors[0];
+            }
         }
     }
 
