@@ -25,7 +25,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        quickJS = QuickJS.createRuntime();
+        quickJS = QuickJS.createRuntimeWithEventQueue();
         jsContext = quickJS.createContext();
         jsContext.addPlugin(new ConsolePlugin() {
             @Override

@@ -14,7 +14,6 @@ public class QuickJS implements Closeable {
     static final Map<Long, JSContext> sContextMap = new HashMap<>();
     private boolean released;
     private HandlerThread handlerThread;
-
     private final QuickJSNative quickJSNative;
 
     private QuickJS(long runtimePtr) {
@@ -22,18 +21,18 @@ public class QuickJS implements Closeable {
         this.quickJSNative = new EventQueue(this, new QuickJSNativeImpl());
     }
 
-    public static QuickJS createRuntimeWithoutEventQueue() {
+    public static QuickJS createRuntime() {
         return new QuickJS(QuickJSNativeImpl._createRuntime());
     }
 
     private static int sId = 0;
 
-    public static QuickJS createRuntime() {
+    public static QuickJS createRuntimeWithEventQueue() {
         Object[] objects = new Object[2];
         HandlerThread handlerThread = new HandlerThread("QuickJS-" + (sId++));
         handlerThread.start();
         new Handler(handlerThread.getLooper()).post(() -> {
-            objects[0] = createRuntimeWithoutEventQueue();
+            objects[0] = createRuntime();
             synchronized (objects) {
                 objects[1] = true;
                 objects.notify();

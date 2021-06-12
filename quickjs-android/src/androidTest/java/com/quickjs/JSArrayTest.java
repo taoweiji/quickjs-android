@@ -15,7 +15,7 @@ public class JSArrayTest  extends BaseTest{
 
     @Before
     public void setUp() {
-        quickJS = QuickJS.createRuntimeWithoutEventQueue();
+        quickJS = QuickJS.createRuntime();
         context = quickJS.createContext();
         array = new JSArray(context);
     }

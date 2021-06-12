@@ -3,8 +3,6 @@ package com.quickjs.plugin;
 import com.quickjs.BaseTest;
 import com.quickjs.JSContext;
 import com.quickjs.QuickJS;
-import com.quickjs.plugin.ConsolePlugin;
-import com.quickjs.plugin.SetTimeoutPlugin;
 
 import org.junit.After;
 import org.junit.Before;
@@ -24,7 +22,7 @@ public class SetTimeoutPluginTest extends BaseTest {
 
     @Before
     public void setUp() {
-        quickJS = QuickJS.createRuntime();
+        quickJS = QuickJS.createRuntimeWithEventQueue();
         context = quickJS.createContext();
         context.addPlugin(new ConsolePlugin() {
             @Override
