@@ -9,13 +9,15 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.WeakHashMap;
 
 public class JSContext extends JSObject implements Closeable {
-    private final QuickJS quickJS;
-    private final long contextPtr;
-    Map<Integer, QuickJS.MethodDescriptor> functionRegistry = new HashMap<>();
-    final List<WeakReference<JSValue>> refs = Collections.synchronizedList(new LinkedList<>());
-    Set<Plugin> plugins = new HashSet<>();
+    final QuickJS quickJS;
+    final long contextPtr;
+    final Set<Plugin> plugins = Collections.synchronizedSet(new HashSet<>());
+    final Map<Integer, JSValue> refs = Collections.synchronizedMap(new WeakHashMap<>());
+    final List<Object[]> releaseObjPtrPool = Collections.synchronizedList(new LinkedList<>());
+    final Map<Integer, QuickJS.MethodDescriptor> functionRegistry = Collections.synchronizedMap(new HashMap<>());
 
     JSContext(QuickJS quickJS, long contextPtr) {
         super(null, quickJS.getNative()._getGlobalObject(contextPtr));
@@ -30,12 +32,10 @@ public class JSContext extends JSObject implements Closeable {
     }
 
     void addObjRef(JSValue reference) {
-        if (reference.getClass() != JSValue.class) {
-            refs.add(new WeakReference<>(reference));
+        if (reference.getClass() != JSContext.class) {
+            refs.put(reference.hashCode(), reference);
         }
     }
-
-    private final List<Object[]> releaseObjPtrPool = Collections.synchronizedList(new LinkedList<>());
 
     void releaseObjRef(JSValue reference, boolean finalize) {
         if (finalize) {
@@ -55,39 +55,32 @@ public class JSContext extends JSObject implements Closeable {
     }
 
     void removeObjRef(JSValue reference) {
-        WeakReference<JSValue>[] values = refs.toArray(new WeakReference[0]);
-        for (WeakReference<JSValue> it : values) {
-            JSValue tmp = it.get();
-            if (tmp == reference) {
-                refs.remove(it);
-                return;
-            }
-        }
+        refs.remove(reference.hashCode());
     }
 
 
     @Override
     public void close() {
-        if (released) {
-            return;
-        }
-        for (Plugin plugin : plugins) {
-            plugin.close(this);
-        }
-        plugins.clear();
-        functionRegistry.clear();
-        while (refs.size() > 0) {
-            WeakReference<JSValue> it = refs.get(0);
-            refs.remove(it);
-            JSValue tmp = it.get();
-            if (tmp != null) {
-                tmp.close();
+        postEventQueue(() -> {
+            if (released) {
+                return;
             }
-        }
-        super.close();
-        checkReleaseObjPtrPool();
-        getNative()._releaseContext(contextPtr);
-        QuickJS.sContextMap.remove(getContextPtr());
+            for (Plugin plugin : plugins) {
+                plugin.close(JSContext.this);
+            }
+            plugins.clear();
+            functionRegistry.clear();
+            JSValue[] jsValues = refs.values().toArray(new JSValue[0]);
+            for (JSValue it : jsValues) {
+                if (it != null) {
+                    it.close();
+                }
+            }
+            checkReleaseObjPtrPool();
+            JSContext.super.close();
+            getNative()._releaseContext(contextPtr);
+            QuickJS.sContextMap.remove(getContextPtr());
+        });
     }
 
     protected Object executeScript(TYPE expectedType, String source, String fileName) throws QuickJSScriptException {
@@ -145,7 +138,7 @@ public class JSContext extends JSObject implements Closeable {
     }
 
     public boolean isReleased() {
-        if (getQuickJS().isReleased()){
+        if (getQuickJS().isReleased()) {
             return true;
         }
         return this.released;

@@ -12,31 +12,27 @@ import com.quickjs.QuickJS;
 
 import java.io.Closeable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * http://www.ruanyifeng.com/blog/2018/07/web-worker.html
  */
 public abstract class WorkerPlugin extends Plugin {
-    private List<Worker> workers = new ArrayList<>();
+    private Map<Long, Worker> workers = new HashMap<>();
 
     @Override
     protected void setup(JSContext context) {
-        context.registerJavaMethod(new JavaVoidCallback() {
-            @Override
-            public void invoke(JSObject receiver, JSArray args) {
-//                receiveMessage(args.getString(0));
-            }
-        }, "postMessage");
         context.registerClass((self, args) -> {
             String url = args.getString(0);
-            workers.add(new Worker(WorkerPlugin.this, self, url));
+            workers.put(self.getTag(), new Worker(WorkerPlugin.this, self, url));
         }, "Worker");
     }
 
     @Override
     protected void close(JSContext context) {
-        for (Worker worker : workers) {
+        for (Worker worker : workers.values()) {
             worker.close();
         }
     }
@@ -88,7 +84,7 @@ public abstract class WorkerPlugin extends Plugin {
             workerObj.registerJavaMethod(new JavaVoidCallback() {
                 @Override
                 public void invoke(JSObject receiver, JSArray args) {
-
+                    postMessage(args.getString(0));
                 }
             }, "postMessage");
         }
@@ -102,6 +98,15 @@ public abstract class WorkerPlugin extends Plugin {
             }
             terminate = true;
             quickJS.postEventQueue(quickJS::close);
+        }
+
+        public void postMessage(String msg) {
+            quickJS.postEventQueue(() -> {
+                JSObject func = context.getObject("onmessage");
+                if (func != null && !func.isUndefined()) {
+                    ((JSFunction) func).call(null, new JSArray(context).push(msg));
+                }
+            });
         }
     }
 }

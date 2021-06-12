@@ -8,21 +8,19 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 class EventQueue implements QuickJSNative {
+    private final QuickJS quickJS;
+    private final QuickJSNative quickJSNative;
     private final HandlerThread handlerThread;
-    QuickJS quickJS;
-    QuickJSNative quickJSNative;
-    Handler handler;
-    Thread thread;
+    private final Handler handler;
+    private final Thread thread;
     private final ThreadChecker threadChecker;
 
     public EventQueue(QuickJS quickJS, HandlerThread handlerThread) {
         this.quickJS = quickJS;
         this.quickJSNative = new QuickJSNativeImpl();
-        thread = Thread.currentThread();
+        this.thread = Thread.currentThread();
         this.handlerThread = handlerThread;
-        if (Looper.myLooper() != null) {
-            handler = new Handler(Looper.myLooper());
-        }
+        this.handler = Looper.myLooper() != null ? new Handler(Looper.myLooper()) : null;
         this.threadChecker = new ThreadChecker(quickJS);
     }
 
@@ -37,11 +35,14 @@ class EventQueue implements QuickJSNative {
     }
 
     private <T> T post(Event<T> event) {
-        if (handlerThread != null && handlerThread.isInterrupted()) {
-            Log.e("QuickJS", "handlerThread.isInterrupted()");
+        if (quickJS.isReleased() || (handlerThread != null && handlerThread.isInterrupted())) {
+            Log.e("QuickJS", "QuickJS is released");
             return null;
         }
-        if (Thread.currentThread() == thread || handler == null) {
+        if (Thread.currentThread() == thread) {
+            return event.run();
+        }
+        if (handler == null) {
             this.threadChecker.checkThread();
             return event.run();
         }
@@ -78,11 +79,15 @@ class EventQueue implements QuickJSNative {
     }
 
     void postVoid(Runnable event, boolean block) {
-        if (handlerThread != null && handlerThread.isInterrupted()) {
-            Log.e("QuickJS", "handlerThread.isInterrupted()");
+        if (quickJS.isReleased() || (handlerThread != null && handlerThread.isInterrupted())) {
+            Log.e("QuickJS", "QuickJS is released");
             return;
         }
-        if (Thread.currentThread() == thread || handler == null) {
+        if (Thread.currentThread() == thread) {
+            event.run();
+            return;
+        }
+        if (handler == null) {
             this.threadChecker.checkThread();
             event.run();
             return;
@@ -91,7 +96,9 @@ class EventQueue implements QuickJSNative {
         RuntimeException[] errors = new RuntimeException[1];
         handler.post(() -> {
             try {
-                event.run();
+                if (!quickJS.isReleased()) {
+                    event.run();
+                }
             } catch (RuntimeException e) {
                 errors[0] = e;
             }

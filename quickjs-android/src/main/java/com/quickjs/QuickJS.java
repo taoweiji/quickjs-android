@@ -7,14 +7,15 @@ import android.util.Log;
 import androidx.annotation.Keep;
 
 import java.io.Closeable;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 public class QuickJS implements Closeable {
+    boolean released;
     final long runtimePtr;
-    static final Map<Long, JSContext> sContextMap = new HashMap<>();
-    private boolean released;
-    private final EventQueue quickJSNative;
+    final EventQueue quickJSNative;
+    static final Map<Long, JSContext> sContextMap = Collections.synchronizedMap(new HashMap<>());
 
     private QuickJS(long runtimePtr, HandlerThread handlerThread) {
         this.runtimePtr = runtimePtr;
@@ -26,9 +27,6 @@ public class QuickJS implements Closeable {
     }
 
     public void postEventQueue(Runnable event) {
-        if (quickJSNative.handler == null) {
-            throw new RuntimeException("Without Event Queue, please use QuickJS.createRuntimeWithEventQueue()");
-        }
         quickJSNative.postVoid(event, false);
     }
 
@@ -63,21 +61,21 @@ public class QuickJS implements Closeable {
     }
 
     public void close() {
-        if (this.released) {
-            return;
-        }
-        this.released = true;
-        Log.e("QuickJS", "QuickJS.close1");
-        JSContext[] values = new JSContext[sContextMap.size()];
-        sContextMap.values().toArray(values);
-        for (JSContext context : values) {
-            if (context.getQuickJS() == this) {
-                context.close();
+        postEventQueue(() -> {
+            if (QuickJS.this.released) {
+                return;
             }
-        }
-        getNative()._releaseRuntime(runtimePtr);
-        quickJSNative.interrupt();
-        Log.e("QuickJS", "QuickJS.close2");
+            JSContext[] values = new JSContext[sContextMap.size()];
+            sContextMap.values().toArray(values);
+            for (JSContext context : values) {
+                if (context.getQuickJS() == QuickJS.this) {
+                    context.close();
+                }
+            }
+            getNative()._releaseRuntime(runtimePtr);
+            QuickJS.this.released = true;
+            quickJSNative.interrupt();
+        });
     }
 
     public void checkReleased() {

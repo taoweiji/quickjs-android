@@ -31,7 +31,10 @@ public class WorkerPluginTest extends BaseTest {
                         "    postMessage(counter++);\n" +
                         "    setTimeout(print1, 10);\n" +
                         "}\n" +
-                        "setTimeout(print1, 10);";
+                        "setTimeout(print1, 10);" +
+                        "onmessage = function(event) {\n" +
+                        "  console.log('Worker ' + event);\n" +
+                        "};";
             }
 
         });
@@ -52,8 +55,9 @@ public class WorkerPluginTest extends BaseTest {
                 "       worker.terminate();" +
                 "   }" +
                 "   console.log('Received message ' + event);\n" +
+                "   worker.postMessage(event);" +
                 "};" +
-                "worker.onmessage(101);", null);
+                "", null);
         Thread.sleep(5000);
     }
 }

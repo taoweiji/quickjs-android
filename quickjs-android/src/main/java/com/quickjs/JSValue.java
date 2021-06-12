@@ -101,6 +101,10 @@ public class JSValue {
         return null;
     }
 
+    public long getTag() {
+        return tag;
+    }
+
     public enum TYPE {
         NULL(TYPE_NULL),
         UNKNOWN(TYPE_UNKNOWN),
