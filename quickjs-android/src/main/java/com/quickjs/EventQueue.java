@@ -74,6 +74,7 @@ class EventQueue implements QuickJSNative {
             return;
         }
         if (handlerThread != null && handlerThread.isInterrupted()) {
+            Log.e("QuickJS","handlerThread.isInterrupted()");
             return;
         }
         if (Thread.currentThread() == thread || handler == null) {
