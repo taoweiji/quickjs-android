@@ -213,4 +213,9 @@ class EventQueue implements QuickJSNative {
     public String[] _getException(long contextPtr) {
         return post(() -> quickJSNative._getException(contextPtr));
     }
+
+    @Override
+    public JSFunction _newClass(long contextPtr, int javaCallerId) {
+        return post(() -> quickJSNative._newClass(contextPtr, javaCallerId));
+    }
 }

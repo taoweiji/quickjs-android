@@ -284,8 +284,9 @@ Java_com_quickjs_QuickJSNativeImpl__1releaseContext(JNIEnv *env, jclass clazz, j
 extern "C"
 JNIEXPORT jobject JNICALL
 Java_com_quickjs_QuickJSNativeImpl__1executeScript(JNIEnv *env, jclass clazz, jlong context_ptr,
-                                         jint expected_type,
-                                         jstring source, jstring file_name, jint eval_flags) {
+                                                   jint expected_type,
+                                                   jstring source, jstring file_name,
+                                                   jint eval_flags) {
     if (source == nullptr) {
         return nullptr;
     }
@@ -328,8 +329,9 @@ Java_com_quickjs_QuickJSNativeImpl__1initNewJSArray(JNIEnv *env, jclass clazz, j
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_quickjs_QuickJSNativeImpl__1releasePtr(JNIEnv *env, jclass clazz, jlong context_ptr, jlong tag,
-                                      jint u_int32, jdouble u_float64, jlong u_ptr) {
+Java_com_quickjs_QuickJSNativeImpl__1releasePtr(JNIEnv *env, jclass clazz, jlong context_ptr,
+                                                jlong tag,
+                                                jint u_int32, jdouble u_float64, jlong u_ptr) {
 
     JSValue value;
 #if defined(JS_NAN_BOXING)
@@ -347,8 +349,8 @@ Java_com_quickjs_QuickJSNativeImpl__1releasePtr(JNIEnv *env, jclass clazz, jlong
 extern "C"
 JNIEXPORT jobject JNICALL
 Java_com_quickjs_QuickJSNativeImpl__1get(JNIEnv *env, jclass clazz, jlong context_ptr,
-                               int expected_type,
-                               jobject object_handle, jstring key) {
+                                         int expected_type,
+                                         jobject object_handle, jstring key) {
     const char *key_ = env->GetStringUTFChars(key, nullptr);
     auto *ctx = reinterpret_cast<JSContext *>(context_ptr);
     JSValue this_obj = TO_JS_VALUE(env, object_handle);
@@ -360,7 +362,7 @@ Java_com_quickjs_QuickJSNativeImpl__1get(JNIEnv *env, jclass clazz, jlong contex
 extern "C"
 JNIEXPORT jobject JNICALL
 Java_com_quickjs_QuickJSNativeImpl__1getValue(JNIEnv *env, jclass clazz, jlong context_ptr,
-                                    jobject object_handle, jstring key) {
+                                              jobject object_handle, jstring key) {
     const char *key_ = env->GetStringUTFChars(key, nullptr);
     auto *ctx = reinterpret_cast<JSContext *>(context_ptr);
     JSValue this_obj = TO_JS_VALUE(env, object_handle);
@@ -373,8 +375,8 @@ Java_com_quickjs_QuickJSNativeImpl__1getValue(JNIEnv *env, jclass clazz, jlong c
 extern "C"
 JNIEXPORT jobject JNICALL
 Java_com_quickjs_QuickJSNativeImpl__1arrayGet(JNIEnv *env, jclass clazz, jlong context_ptr,
-                                    int expected_type,
-                                    jobject object_handle, jint index) {
+                                              int expected_type,
+                                              jobject object_handle, jint index) {
     auto *ctx = reinterpret_cast<JSContext *>(context_ptr);
     JSValue this_obj = TO_JS_VALUE(env, object_handle);
     JSValue result = JS_GetPropertyUint32(ctx, this_obj, index);
@@ -386,7 +388,7 @@ Java_com_quickjs_QuickJSNativeImpl__1arrayGet(JNIEnv *env, jclass clazz, jlong c
 extern "C"
 JNIEXPORT jobject JNICALL
 Java_com_quickjs_QuickJSNativeImpl__1arrayGetValue(JNIEnv *env, jclass clazz, jlong context_ptr,
-                                         jobject object_handle, jint index) {
+                                                   jobject object_handle, jint index) {
     auto *ctx = reinterpret_cast<JSContext *>(context_ptr);
     JSValue this_obj = TO_JS_VALUE(env, object_handle);
     JSValue result = JS_GetPropertyUint32(ctx, this_obj, index);
@@ -396,7 +398,7 @@ Java_com_quickjs_QuickJSNativeImpl__1arrayGetValue(JNIEnv *env, jclass clazz, jl
 extern "C"
 JNIEXPORT jboolean JNICALL
 Java_com_quickjs_QuickJSNativeImpl__1contains(JNIEnv *env, jclass clazz, jlong context_ptr,
-                                    jobject object_handle, jstring key) {
+                                              jobject object_handle, jstring key) {
     auto *ctx = reinterpret_cast<JSContext *>(context_ptr);
     JSValue this_obj = TO_JS_VALUE(env, object_handle);
     const char *key_ = env->GetStringUTFChars(key, nullptr);
@@ -407,7 +409,7 @@ Java_com_quickjs_QuickJSNativeImpl__1contains(JNIEnv *env, jclass clazz, jlong c
 }extern "C"
 JNIEXPORT jobjectArray JNICALL
 Java_com_quickjs_QuickJSNativeImpl__1getKeys(JNIEnv *env, jclass clazz, jlong context_ptr,
-                                   jobject object_handle) {
+                                             jobject object_handle) {
     auto *ctx = reinterpret_cast<JSContext *>(context_ptr);
     JSValue this_obj = TO_JS_VALUE(env, object_handle);
     JSPropertyEnum *tab;
@@ -458,9 +460,9 @@ JSValue executeFunction(JNIEnv *env, jlong context_ptr, jobject object_handle, J
 extern "C"
 JNIEXPORT jobject JNICALL
 Java_com_quickjs_QuickJSNativeImpl__1executeFunction2(JNIEnv *env, jclass clazz, jlong context_ptr,
-                                            jint expected_type, jobject object_handle,
-                                            jobject functionHandle,
-                                            jobject parameters_handle) {
+                                                      jint expected_type, jobject object_handle,
+                                                      jobject functionHandle,
+                                                      jobject parameters_handle) {
     auto *ctx = reinterpret_cast<JSContext *>(context_ptr);
     JSValue func_obj = TO_JS_VALUE(env, functionHandle);
     JS_DupValue(ctx, func_obj);
@@ -473,8 +475,8 @@ Java_com_quickjs_QuickJSNativeImpl__1executeFunction2(JNIEnv *env, jclass clazz,
 extern "C"
 JNIEXPORT jobject JNICALL
 Java_com_quickjs_QuickJSNativeImpl__1executeFunction(JNIEnv *env, jclass clazz, jlong context_ptr,
-                                           jint expected_type, jobject object_handle,
-                                           jstring name, jobject parameters_handle) {
+                                                     jint expected_type, jobject object_handle,
+                                                     jstring name, jobject parameters_handle) {
     auto *ctx = reinterpret_cast<JSContext *>(context_ptr);
     JSValue this_obj = TO_JS_VALUE(env, object_handle);
     JSValue func_obj = JS_GetPropertyStr(ctx, this_obj, env->GetStringUTFChars(name, nullptr));
@@ -534,20 +536,22 @@ JSValue newFunction(jlong context_ptr, jboolean void_method, int callbackId) {
 extern "C"
 JNIEXPORT jobject JNICALL
 Java_com_quickjs_QuickJSNativeImpl__1initNewJSFunction(JNIEnv *env,
-                                             jclass clazz,
-                                             jlong context_ptr,
-                                             jint callbackId,
-                                             jboolean void_method) {
+                                                       jclass clazz,
+                                                       jlong context_ptr,
+                                                       jint callbackId,
+                                                       jboolean void_method) {
     auto *ctx = reinterpret_cast<JSContext *>(context_ptr);
     JSValue func = newFunction(context_ptr, void_method, callbackId);
     return TO_JAVA_OBJECT(env, ctx, func);
 }
 extern "C"
 JNIEXPORT jobject JNICALL
-Java_com_quickjs_QuickJSNativeImpl__1registerJavaMethod(JNIEnv *env, jclass clazz, jlong context_ptr,
-                                              jobject object_handle, jstring function_name,
-                                              jint callbackId,
-                                              jboolean void_method) {
+Java_com_quickjs_QuickJSNativeImpl__1registerJavaMethod(JNIEnv *env, jclass clazz,
+                                                        jlong context_ptr,
+                                                        jobject object_handle,
+                                                        jstring function_name,
+                                                        jint callbackId,
+                                                        jboolean void_method) {
     const char *name_ = env->GetStringUTFChars(function_name, nullptr);
     auto *ctx = reinterpret_cast<JSContext *>(context_ptr);
     JSValue func = newFunction(context_ptr, void_method, callbackId);
@@ -560,7 +564,7 @@ Java_com_quickjs_QuickJSNativeImpl__1registerJavaMethod(JNIEnv *env, jclass claz
 extern "C"
 JNIEXPORT jint JNICALL
 Java_com_quickjs_QuickJSNativeImpl__1getObjectType(JNIEnv *env, jclass clazz, jlong context_ptr,
-                                         jobject object_handle) {
+                                                   jobject object_handle) {
     auto *ctx = reinterpret_cast<JSContext *>(context_ptr);
     JSValue value = TO_JS_VALUE(env, object_handle);
     return GetObjectType(ctx, value);
@@ -568,7 +572,7 @@ Java_com_quickjs_QuickJSNativeImpl__1getObjectType(JNIEnv *env, jclass clazz, jl
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_quickjs_QuickJSNativeImpl__1set(JNIEnv *env, jclass clazz, jlong context_ptr,
-                               jobject object_handle, jstring key, jobject value) {
+                                         jobject object_handle, jstring key, jobject value) {
     const char *key_ = env->GetStringUTFChars(key, nullptr);
     auto *ctx = reinterpret_cast<JSContext *>(context_ptr);
     JSValue this_obj = TO_JS_VALUE(env, object_handle);
@@ -578,7 +582,7 @@ Java_com_quickjs_QuickJSNativeImpl__1set(JNIEnv *env, jclass clazz, jlong contex
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_quickjs_QuickJSNativeImpl__1arrayAdd(JNIEnv *env, jclass clazz, jlong context_ptr,
-                                    jobject object_handle, jobject value) {
+                                              jobject object_handle, jobject value) {
     auto *ctx = reinterpret_cast<JSContext *>(context_ptr);
     JSValue this_obj = TO_JS_VALUE(env, object_handle);
     int len = GetArrayLength(ctx, this_obj);
@@ -587,7 +591,7 @@ Java_com_quickjs_QuickJSNativeImpl__1arrayAdd(JNIEnv *env, jclass clazz, jlong c
 extern "C"
 JNIEXPORT jboolean JNICALL
 Java_com_quickjs_QuickJSNativeImpl__1isUndefined(JNIEnv *env, jclass clazz, jlong context_ptr,
-                                       jobject js_value) {
+                                                 jobject js_value) {
     JSValue value = TO_JS_VALUE(env, js_value);
     return JS_IsUndefined(value);
 }extern "C"
@@ -672,4 +676,61 @@ char *_JSModuleNormalizeFunc(JSContext *ctx,
 
 void initES6Module(JSRuntime *rt) {
     JS_SetModuleLoaderFunc(rt, _JSModuleNormalizeFunc, _JSModuleLoaderFunc, nullptr);
+}
+
+//JSValue js_worker_constructor(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv){
+//
+//}
+JSValue js_worker_constructor(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv,
+                              int me) {
+    JNIEnv *env;
+    jvm->GetEnv((void **) &env, JNI_VERSION_1_6);
+    auto context_ptr = (jlong) ctx;
+    JSValue args = JS_NewArray(ctx);
+    int callbackId = JS_VALUE_GET_INT(JS_GetPropertyStr(ctx, this_val, "java_caller_id"));
+
+    if (argv != nullptr) {
+        for (int i = 0; i < argc; ++i) {
+            JSValue it = argv[i];
+            JS_SetPropertyUint32(ctx, args, i, JS_DupValue(ctx, it));
+        }
+    }
+    jobject objectHandle = TO_JAVA_OBJECT(env, ctx, this_val);
+    jobject argsHandle = TO_JAVA_OBJECT(env, ctx, args);
+    JSValue global = JS_GetGlobalObject(ctx);
+    if (!JS_Equals(global, this_val)) {
+        JS_DupValue(ctx, this_val);
+    }
+    JS_FreeValue(ctx, global);
+    jobject result = env->CallStaticObjectMethod(quickJSCls, callJavaCallbackMethodID,
+                                                 context_ptr,
+                                                 callbackId,
+                                                 objectHandle,
+                                                 argsHandle,
+                                                 false
+    );
+    JSValue value = JobjectToJSValue(env, ctx, result);
+    return value;
+}
+
+void newWorker(JSContext *ctx, int callbackId) {
+//    JSClassDef workerClassDef = new JSClassDef(.);
+//    JSClassID workerJSClassID;
+//    JS_NewClassID(&workerJSClassID);
+//    JS_NewClass(rt,workerJSClassID,);
+//    JS_SetModuleLoaderFunc(rt, _JSModuleNormalizeFunc, _JSModuleLoaderFunc, nullptr);
+//    obj = JS_NewCFunction2(ctx, js_worker_constructor, "Worker", 1,
+//                           JS_CFUNC_constructor, 0);
+
+}
+
+extern "C"
+JNIEXPORT jobject JNICALL
+Java_com_quickjs_QuickJSNativeImpl__1newClass(JNIEnv *env, jobject thiz, jlong context_ptr,
+                                              jint java_caller_id) {
+    auto *ctx = reinterpret_cast<JSContext *>(context_ptr);
+    JSValue func = JS_NewCFunctionMagic(ctx, js_worker_constructor, "Worker", 1,
+                                        JS_CFUNC_constructor, java_caller_id);
+    JS_SetPropertyStr(ctx, func, "java_caller_id", JS_NewInt32(ctx, java_caller_id));
+    return TO_JAVA_OBJECT(env, ctx, func);
 }

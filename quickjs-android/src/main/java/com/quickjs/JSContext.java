@@ -148,13 +148,13 @@ public class JSContext extends JSObject implements Closeable {
         return this.released;
     }
 
-    void registerCallback(JavaCallback callback, JSFunction functionHandle) {
+    void _registerCallback(JavaCallback callback, JSFunction functionHandle) {
         QuickJS.MethodDescriptor methodDescriptor = new QuickJS.MethodDescriptor();
         methodDescriptor.callback = callback;
         functionRegistry.put(callback.hashCode(), methodDescriptor);
     }
 
-    void registerCallback(JavaVoidCallback callback, JSFunction functionHandle) {
+    void _registerCallback(JavaVoidCallback callback, JSFunction functionHandle) {
         QuickJS.MethodDescriptor methodDescriptor = new QuickJS.MethodDescriptor();
         methodDescriptor.voidCallback = callback;
         functionRegistry.put(callback.hashCode(), methodDescriptor);

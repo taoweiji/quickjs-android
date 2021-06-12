@@ -4,6 +4,7 @@ import com.quickjs.JSArray;
 import com.quickjs.JSContext;
 import com.quickjs.JSFunction;
 import com.quickjs.JSObject;
+import com.quickjs.JavaCallback;
 import com.quickjs.JavaVoidCallback;
 import com.quickjs.Plugin;
 import com.quickjs.QuickJS;
@@ -26,10 +27,13 @@ public abstract class WorkerPlugin extends Plugin {
 //                receiveMessage(args.getString(0));
             }
         }, "postMessage");
-        context.registerJavaMethod(new JavaVoidCallback() {
+        context.registerClass(new JavaCallback() {
             @Override
-            public void invoke(JSObject receiver, JSArray args) {
-                workers.add(new Worker((JSFunction) receiver));
+            public Object invoke(JSObject receiver, JSArray args) {
+                JSObject workerObj = new JSObject(context);
+                String url = args.getString(0);
+                workers.add(new Worker(WorkerPlugin.this, workerObj, url));
+                return workerObj;
             }
         }, "Worker");
     }
@@ -45,11 +49,11 @@ public abstract class WorkerPlugin extends Plugin {
 
 
     static class Worker implements Closeable {
-        private final JSFunction workerReceiver;
+        private final JSObject workerObj;
         private final QuickJS quickJS;
         private final JSContext context;
 
-        Worker(JSFunction workerReceiver) {
+        Worker(WorkerPlugin workerPlugin, JSObject workerObj, String url) {
             this.quickJS = QuickJS.createRuntimeWithEventQueue();
             this.context = quickJS.createContext();
             this.context.addPlugin(new ConsolePlugin());
@@ -57,14 +61,25 @@ public abstract class WorkerPlugin extends Plugin {
             this.context.registerJavaMethod(new JavaVoidCallback() {
                 @Override
                 public void invoke(JSObject receiver, JSArray args) {
-                    workerReceiver.executeFunction2("onmessage", args.getString(0));
+                    String event = args.getString(0);
+                    workerObj.executeFunction("onmessage", new JSArray(workerObj.getContext()).push(event));
                 }
             }, "postMessage");
-            this.workerReceiver = workerReceiver;
-            workerReceiver.registerJavaMethod((receiver, args) -> {
+            this.workerObj = workerObj;
+            initWorkerReceiver();
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    context.executeVoidScript(workerPlugin.getScript(url), url);
+                }
+            }).start();
+        }
+
+        private void initWorkerReceiver() {
+            workerObj.registerJavaMethod((receiver, args) -> {
                 close();
             }, "terminate");
-            workerReceiver.registerJavaMethod(new JavaVoidCallback() {
+            workerObj.registerJavaMethod(new JavaVoidCallback() {
                 @Override
                 public void invoke(JSObject receiver, JSArray args) {
 

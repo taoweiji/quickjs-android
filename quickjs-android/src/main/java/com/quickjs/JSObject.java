@@ -123,18 +123,25 @@ public class JSObject extends JSValue {
     }
 
 
-    public JSObject registerJavaMethod(JavaCallback callback, String jsFunctionName) {
+    public JSFunction registerJavaMethod(JavaCallback callback, String jsFunctionName) {
         this.context.checkReleased();
         JSFunction functionHandle = getNative()._registerJavaMethod(this.getContextPtr(), this, jsFunctionName, callback.hashCode(), false);
-        context.registerCallback(callback, functionHandle);
-        return this;
+        context._registerCallback(callback, functionHandle);
+        return functionHandle;
     }
 
-    public JSObject registerJavaMethod(JavaVoidCallback callback, String jsFunctionName) {
+    public JSFunction registerJavaMethod(JavaVoidCallback callback, String jsFunctionName) {
         this.context.checkReleased();
         JSFunction functionHandle = getNative()._registerJavaMethod(this.getContextPtr(), this, jsFunctionName, callback.hashCode(), true);
-        context.registerCallback(callback, functionHandle);
-        return this;
+        context._registerCallback(callback, functionHandle);
+        return functionHandle;
+    }
+
+    public JSFunction registerClass(JavaCallback callback, String className) {
+        JSFunction functionHandle = context.getNative()._newClass(context.getContextPtr(), callback.hashCode());
+        this.context._registerCallback(callback, functionHandle);
+        this.set(className, functionHandle);
+        return functionHandle;
     }
 
     public Object executeFunction(String name, JSArray parameters) {
@@ -276,12 +283,12 @@ public class JSObject extends JSValue {
         }
 
         @Override
-        public JSObject registerJavaMethod(JavaCallback callback, String jsFunctionName) {
+        public JSFunction registerJavaMethod(JavaCallback callback, String jsFunctionName) {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public JSObject registerJavaMethod(JavaVoidCallback callback, String jsFunctionName) {
+        public JSFunction registerJavaMethod(JavaVoidCallback callback, String jsFunctionName) {
             throw new UnsupportedOperationException();
         }
 

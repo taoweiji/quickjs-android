@@ -13,7 +13,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-public class JSObjectTest  extends BaseTest{
+public class JSObjectTest extends BaseTest {
 
     JSObject object;
     private JSContext context;
@@ -288,6 +288,21 @@ public class JSObjectTest  extends BaseTest{
         assertEquals(1, object.getArray("likes").getInteger(0));
         assertEquals("Hello", object.getArray("likes").getString(1));
         assertEquals("b", object.getArray("likes").getObject(2).getString("b"));
+    }
+
+    @Test
+    public void registerClass() {
+        Object[] result = new Object[1];
+//        JSObject object = new JSObject(context);
+        context.registerClass(new JavaCallback() {
+            @Override
+            public JSObject invoke(JSObject receiver, JSArray args) {
+                result[0] = args.getString(0);
+                return new JSObject(context);
+            }
+        }, "Worker");
+        context.executeVoidScript("var worker = new Worker('Hello')", null);
+        assertEquals("Hello", result[0]);
     }
 
     public static class Console {

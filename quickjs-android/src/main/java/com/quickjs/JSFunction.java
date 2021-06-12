@@ -4,12 +4,12 @@ public class JSFunction extends JSObject {
 
     public JSFunction(JSContext context, JavaCallback callback) {
         super(context, context.getNative()._initNewJSFunction(context.getContextPtr(), callback.hashCode(), false));
-        this.context.registerCallback(callback, this);
+        this.context._registerCallback(callback, this);
     }
 
     public JSFunction(JSContext context, JavaVoidCallback callback) {
         super(context, context.getNative()._initNewJSFunction(context.getContextPtr(), callback.hashCode(), true));
-        this.context.registerCallback(callback, this);
+        this.context._registerCallback(callback, this);
     }
 
     JSFunction(JSContext context, long tag, int u_int32, double u_float64, long u_ptr) {

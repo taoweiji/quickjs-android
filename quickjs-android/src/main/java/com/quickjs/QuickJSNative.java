@@ -48,4 +48,6 @@ public interface QuickJSNative {
     JSValue _arrayGetValue(long contextPtr, JSArray array, int index);
 
     String[] _getException(long contextPtr);
+
+    JSFunction _newClass(long contextPtr, int javaCallerId);
 }

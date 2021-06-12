@@ -75,4 +75,8 @@ class QuickJSNativeImpl implements QuickJSNative {
 
     @Override
     public native String[] _getException(long contextPtr);
+
+    @Override
+    public native JSFunction _newClass(long contextPtr, int javaCallerId);
+
 }
