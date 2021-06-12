@@ -5,6 +5,7 @@ import com.quickjs.JSContext;
 import com.quickjs.JSFunction;
 import com.quickjs.JSObject;
 import com.quickjs.JavaCallback;
+import com.quickjs.JavaConstructorCallback;
 import com.quickjs.JavaVoidCallback;
 import com.quickjs.Plugin;
 import com.quickjs.QuickJS;
@@ -27,14 +28,9 @@ public abstract class WorkerPlugin extends Plugin {
 //                receiveMessage(args.getString(0));
             }
         }, "postMessage");
-        context.registerClass(new JavaCallback() {
-            @Override
-            public Object invoke(JSObject receiver, JSArray args) {
-                JSObject workerObj = new JSObject(context);
-                String url = args.getString(0);
-                workers.add(new Worker(WorkerPlugin.this, workerObj, url));
-                return workerObj;
-            }
+        context.registerClass((self, args) -> {
+            String url = args.getString(0);
+            workers.add(new Worker(WorkerPlugin.this, self, url));
         }, "Worker");
     }
 
@@ -62,7 +58,7 @@ public abstract class WorkerPlugin extends Plugin {
                 @Override
                 public void invoke(JSObject receiver, JSArray args) {
                     String event = args.getString(0);
-                    workerObj.executeFunction("onmessage", new JSArray(workerObj.getContext()).push(event));
+                    new Thread(() -> sendMessageReceiver(event)).start();
                 }
             }, "postMessage");
             this.workerObj = workerObj;
@@ -75,9 +71,17 @@ public abstract class WorkerPlugin extends Plugin {
             }).start();
         }
 
+        private void sendMessageReceiver(String event) {
+            JSObject onmessage = workerObj.getObject("onmessage");
+            if (onmessage instanceof JSFunction) {
+                JSFunction func = (JSFunction) onmessage;
+                func.call(workerObj, new JSArray(workerObj.getContext()).push(event));
+            }
+        }
+
         private void initWorkerReceiver() {
             workerObj.registerJavaMethod((receiver, args) -> {
-                close();
+                new Thread(this::close).start();
             }, "terminate");
             workerObj.registerJavaMethod(new JavaVoidCallback() {
                 @Override

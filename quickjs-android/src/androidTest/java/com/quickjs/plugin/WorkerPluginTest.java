@@ -48,9 +48,12 @@ public class WorkerPluginTest extends BaseTest {
         context.executeVoidScript(" console.log('Received message ' + 1);" +
                 "var worker = new Worker('work.js');\n" +
                 "worker.onmessage = function (event) {\n" +
-                "  console.log('Received message ' + event);\n" +
+                "  if(event == '100'){" +
+                "       worker.terminate();" +
+                "   }" +
+                "   console.log('Received message ' + event);\n" +
                 "};" +
                 "worker.onmessage(101);", null);
-        Thread.sleep(10000);
+        Thread.sleep(5000);
     }
 }

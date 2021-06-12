@@ -2,6 +2,7 @@ package com.quickjs;
 
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.util.Log;
 
 import androidx.annotation.Keep;
 
@@ -13,16 +14,22 @@ public class QuickJS implements Closeable {
     final long runtimePtr;
     static final Map<Long, JSContext> sContextMap = new HashMap<>();
     private boolean released;
-    private HandlerThread handlerThread;
-    private final QuickJSNative quickJSNative;
+    private final EventQueue quickJSNative;
 
-    private QuickJS(long runtimePtr) {
+    private QuickJS(long runtimePtr, HandlerThread handlerThread) {
         this.runtimePtr = runtimePtr;
-        this.quickJSNative = new EventQueue(this, new QuickJSNativeImpl());
+        this.quickJSNative = new EventQueue(this, handlerThread);
     }
 
     public static QuickJS createRuntime() {
-        return new QuickJS(QuickJSNativeImpl._createRuntime());
+        return new QuickJS(QuickJSNativeImpl._createRuntime(), null);
+    }
+
+    public void postEventQueue(Runnable event) {
+        if (quickJSNative.handler == null) {
+            throw new RuntimeException("Without Event Queue, please use QuickJS.createRuntimeWithEventQueue()");
+        }
+        quickJSNative.postVoid(event);
     }
 
     private static int sId = 0;
@@ -32,7 +39,7 @@ public class QuickJS implements Closeable {
         HandlerThread handlerThread = new HandlerThread("QuickJS-" + (sId++));
         handlerThread.start();
         new Handler(handlerThread.getLooper()).post(() -> {
-            objects[0] = createRuntime();
+            objects[0] = new QuickJS(QuickJSNativeImpl._createRuntime(), handlerThread);
             synchronized (objects) {
                 objects[1] = true;
                 objects.notify();
@@ -47,9 +54,7 @@ public class QuickJS implements Closeable {
                 e.printStackTrace();
             }
         }
-        QuickJS quickJS = (QuickJS) objects[0];
-        quickJS.handlerThread = handlerThread;
-        return quickJS;
+        return (QuickJS) objects[0];
     }
 
 
@@ -62,6 +67,7 @@ public class QuickJS implements Closeable {
             return;
         }
         this.released = true;
+        Log.e("QuickJS", "QuickJS.close1");
         JSContext[] values = new JSContext[sContextMap.size()];
         sContextMap.values().toArray(values);
         for (JSContext context : values) {
@@ -70,9 +76,8 @@ public class QuickJS implements Closeable {
             }
         }
         getNative()._releaseRuntime(runtimePtr);
-        if (handlerThread != null) {
-            handlerThread.interrupt();
-        }
+        quickJSNative.interrupt();
+        Log.e("QuickJS", "QuickJS.close2");
     }
 
     public void checkReleased() {

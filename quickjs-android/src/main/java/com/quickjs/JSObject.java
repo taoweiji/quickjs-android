@@ -137,7 +137,12 @@ public class JSObject extends JSValue {
         return functionHandle;
     }
 
-    public JSFunction registerClass(JavaCallback callback, String className) {
+    public JSFunction registerClass(JavaConstructorCallback javaConstructorCallback, String className) {
+        JavaCallback callback = (receiver, args) -> {
+            JSObject self = new JSObject(receiver.context);
+            javaConstructorCallback.invoke(self, args);
+            return self;
+        };
         JSFunction functionHandle = context.getNative()._newClass(context.getContextPtr(), callback.hashCode());
         this.context._registerCallback(callback, functionHandle);
         this.set(className, functionHandle);
@@ -145,35 +150,35 @@ public class JSObject extends JSValue {
     }
 
     public Object executeFunction(String name, JSArray parameters) {
-        return executeFunction(JSValue.TYPE.UNKNOWN, name, parameters);
+        return _executeFunction(JSValue.TYPE.UNKNOWN, name, parameters);
     }
 
     public int executeIntegerFunction(String name, JSArray parameters) {
-        return (int) executeFunction(JSValue.TYPE.INTEGER, name, parameters);
+        return (int) _executeFunction(JSValue.TYPE.INTEGER, name, parameters);
     }
 
     public double executeDoubleFunction(String name, JSArray parameters) {
-        return (double) executeFunction(JSValue.TYPE.DOUBLE, name, parameters);
+        return (double) _executeFunction(JSValue.TYPE.DOUBLE, name, parameters);
     }
 
     public boolean executeBooleanFunction(String name, JSArray parameters) {
-        return (boolean) executeFunction(JSValue.TYPE.BOOLEAN, name, parameters);
+        return (boolean) _executeFunction(JSValue.TYPE.BOOLEAN, name, parameters);
     }
 
     public String executeStringFunction(String name, JSArray parameters) {
-        return (String) executeFunction(JSValue.TYPE.STRING, name, parameters);
+        return (String) _executeFunction(JSValue.TYPE.STRING, name, parameters);
     }
 
     public JSArray executeArrayFunction(String name, JSArray parameters) {
-        return (JSArray) executeFunction(JSValue.TYPE.JS_ARRAY, name, parameters);
+        return (JSArray) _executeFunction(JSValue.TYPE.JS_ARRAY, name, parameters);
     }
 
     public JSObject executeObjectFunction(String name, JSArray parameters) {
-        return (JSObject) executeFunction(JSValue.TYPE.JS_OBJECT, name, parameters);
+        return (JSObject) _executeFunction(JSValue.TYPE.JS_OBJECT, name, parameters);
     }
 
     public void executeVoidFunction(String name, JSArray parameters) {
-        executeFunction(JSValue.TYPE.NULL, name, parameters);
+        _executeFunction(JSValue.TYPE.NULL, name, parameters);
     }
 
     public Object executeFunction2(String name, Object... parameters) {
@@ -192,7 +197,7 @@ public class JSObject extends JSValue {
     }
 
 
-    protected Object executeFunction(TYPE expectedType, String name, JSArray parameters) {
+    protected Object _executeFunction(TYPE expectedType, String name, JSArray parameters) {
         this.context.checkReleased();
         this.context.checkRuntime(parameters);
         Object object = getNative()._executeFunction(context.getContextPtr(), expectedType.value, this, name, parameters);
@@ -293,7 +298,7 @@ public class JSObject extends JSValue {
         }
 
         @Override
-        protected Object executeFunction(TYPE expectedType, String name, JSArray parameters) {
+        protected Object _executeFunction(TYPE expectedType, String name, JSArray parameters) {
             throw new UnsupportedOperationException();
         }
 

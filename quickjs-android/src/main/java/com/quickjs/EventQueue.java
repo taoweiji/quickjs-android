@@ -1,26 +1,35 @@
 package com.quickjs;
 
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Looper;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 
 class EventQueue implements QuickJSNative {
+    private final HandlerThread handlerThread;
     QuickJS quickJS;
     QuickJSNative quickJSNative;
     Handler handler;
     Thread thread;
     private final ThreadChecker threadChecker;
 
-    public EventQueue(QuickJS quickJS, QuickJSNative quickJSNative) {
+    public EventQueue(QuickJS quickJS, HandlerThread handlerThread) {
         this.quickJS = quickJS;
-        this.quickJSNative = quickJSNative;
+        this.quickJSNative = new QuickJSNativeImpl();
         thread = Thread.currentThread();
+        this.handlerThread = handlerThread;
         if (Looper.myLooper() != null) {
             handler = new Handler(Looper.myLooper());
         }
         this.threadChecker = new ThreadChecker(quickJS);
+    }
+
+    public void interrupt() {
+        if (handlerThread != null) {
+            handlerThread.interrupt();
+        }
     }
 
     public interface Event<T> {
@@ -60,7 +69,13 @@ class EventQueue implements QuickJSNative {
         return (T) result[0];
     }
 
-    private void postVoid(Runnable event) {
+    void postVoid(Runnable event) {
+        if (Thread.currentThread().isInterrupted()) {
+            return;
+        }
+        if (handlerThread != null && handlerThread.isInterrupted()) {
+            return;
+        }
         if (Thread.currentThread() == thread || handler == null) {
             this.threadChecker.checkThread();
             event.run();

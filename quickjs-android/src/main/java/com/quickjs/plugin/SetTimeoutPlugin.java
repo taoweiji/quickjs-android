@@ -19,9 +19,11 @@ public class SetTimeoutPlugin extends Plugin {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                if (!func.getContext().isReleased()) {
-                    func.call(null, new JSArray(context));
-                }
+                func.getQuickJS().postEventQueue(() -> {
+                    if (!func.getContext().isReleased()) {
+                        func.call(null, new JSArray(context));
+                    }
+                });
             }).start();
         }, "setTimeout");
     }

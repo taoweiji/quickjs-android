@@ -145,6 +145,9 @@ public class JSContext extends JSObject implements Closeable {
     }
 
     public boolean isReleased() {
+        if (getQuickJS().isReleased()){
+            return true;
+        }
         return this.released;
     }
 
