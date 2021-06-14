@@ -72,52 +72,10 @@ public class ConsolePlugin extends Plugin {
     @JavascriptInterface
     public final void table(JSObject obj) {
         if (obj instanceof JSArray) {
-            try {
-                log(toJsonArray((JSArray) obj).toString());
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            log(((JSArray) obj).toJSONArray().toString());
         } else if (obj != null) {
-            try {
-                log(toJsonObject(obj).toString());
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            log(obj.toJSONObject().toString());
         }
-    }
-
-    private JSONObject toJsonObject(JSObject obj) throws JSONException {
-        if (obj == null) return null;
-        JSONObject json = new JSONObject();
-        String[] keys = obj.getKeys();
-        for (String key : keys) {
-            Object tmp = obj.get(JSValue.TYPE.UNKNOWN, key);
-            if (tmp instanceof JSArray) {
-                json.put(key, toJsonArray((JSArray) tmp));
-            } else if (tmp instanceof JSObject) {
-                json.put(key, toJsonObject((JSObject) tmp));
-            } else {
-                json.put(key, tmp);
-            }
-        }
-        return json;
-    }
-
-    private JSONArray toJsonArray(JSArray array) throws JSONException {
-        if (array == null) return null;
-        JSONArray json = new JSONArray();
-        int length = array.length();
-        for (int i = 0; i < length; i++) {
-            Object tmp = array.get(JSValue.TYPE.UNKNOWN, i);
-            if (tmp instanceof JSArray) {
-                json.put(toJsonArray((JSArray) tmp));
-            } else if (tmp instanceof JSObject) {
-                json.put(toJsonObject((JSObject) tmp));
-            } else {
-                json.put(tmp);
-            }
-        }
-        return json;
     }
 
 

@@ -1,6 +1,7 @@
 package com.quickjs;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 public class JSArray extends JSObject {
@@ -40,7 +41,11 @@ public class JSArray extends JSObject {
         }
     }
 
-    public Object get(TYPE expectedType, int index) {
+    public Object get(int index) {
+        return get(TYPE.UNKNOWN, index);
+    }
+
+    Object get(TYPE expectedType, int index) {
         this.context.checkReleased();
         if (expectedType == null) {
             expectedType = TYPE.UNKNOWN;
@@ -135,5 +140,23 @@ public class JSArray extends JSObject {
 
     public int length() {
         return getInteger("length");
+    }
+
+    public JSONArray toJSONArray() {
+        JSONArray jsonArray = new JSONArray();
+        for (int i = 0; i < this.length(); i++) {
+            Object obj = this.get(i);
+            if (obj instanceof Undefined || obj instanceof JSFunction) {
+                continue;
+            }
+            if (obj instanceof Number || obj instanceof String || obj instanceof Boolean) {
+                jsonArray.put(obj);
+            } else if (obj instanceof JSArray) {
+                jsonArray.put(((JSArray) obj).toJSONArray());
+            } else if (obj instanceof JSObject) {
+                jsonArray.put(((JSObject) obj).toJSONObject());
+            }
+        }
+        return jsonArray;
     }
 }

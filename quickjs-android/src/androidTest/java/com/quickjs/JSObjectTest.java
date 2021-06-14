@@ -298,6 +298,20 @@ public class JSObjectTest extends BaseTest {
         assertEquals("Hello", result[0]);
     }
 
+    @Test
+    public void toJSONObject() throws JSONException {
+        JSObject body = new JSObject(context).set("a", "Hello");
+        JSArray likes = new JSArray(context).push(1).push("Hello").push(new JSObject(context).set("b", "b"));
+        JSObject user = new JSObject(context).set("name", "Wiki").set("age", 18).set("body", body).set("likes", likes);
+        JSONObject jsonObject = user.toJSONObject();
+        assertEquals("Wiki", jsonObject.getString("name"));
+        assertEquals(18, jsonObject.getInt("age"));
+        assertEquals("Hello", jsonObject.getJSONObject("body").getString("a"));
+        assertEquals(1, jsonObject.getJSONArray("likes").getInt(0));
+        assertEquals("Hello", jsonObject.getJSONArray("likes").getString(1));
+        assertEquals("b", jsonObject.getJSONArray("likes").getJSONObject(2).getString("b"));
+    }
+
     public static class Console {
         int count = 0;
 

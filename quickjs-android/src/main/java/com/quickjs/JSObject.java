@@ -2,7 +2,10 @@ package com.quickjs;
 
 import android.webkit.JavascriptInterface;
 
+import androidx.annotation.NonNull;
+
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.reflect.Method;
@@ -58,7 +61,11 @@ public class JSObject extends JSValue {
         return this;
     }
 
-    public Object get(TYPE expectedType, String key) {
+    public Object get(String key) {
+        return get(TYPE.UNKNOWN, key);
+    }
+
+    Object get(TYPE expectedType, String key) {
         this.context.checkReleased();
         if (expectedType == null) {
             expectedType = TYPE.UNKNOWN;
@@ -268,6 +275,37 @@ public class JSObject extends JSValue {
             }
         }
         return objects;
+    }
+
+    public JSONObject toJSONObject() {
+        JSONObject jsonObject = new JSONObject();
+        String[] keys = getKeys();
+        for (String key : keys) {
+            Object obj = this.get(key);
+            if (obj instanceof Undefined || obj instanceof JSFunction) {
+                continue;
+            }
+            if (obj instanceof Number || obj instanceof String || obj instanceof Boolean) {
+                try {
+                    jsonObject.put(key, obj);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            } else if (obj instanceof JSArray) {
+                try {
+                    jsonObject.put(key, ((JSArray) obj).toJSONArray());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            } else if (obj instanceof JSObject) {
+                try {
+                    jsonObject.put(key, ((JSObject) obj).toJSONObject());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return jsonObject;
     }
 
     static class Undefined extends JSObject {
