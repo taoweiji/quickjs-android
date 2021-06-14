@@ -1,5 +1,5 @@
 package com.quickjs;
 
 public interface JavaConstructorCallback {
-    void invoke(JSObject self, JSArray args);
+    void invoke(JSObject thisObj, JSArray args);
 }

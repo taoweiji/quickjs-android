@@ -24,9 +24,9 @@ public abstract class WorkerPlugin extends Plugin {
 
     @Override
     protected void setup(JSContext context) {
-        context.registerClass((self, args) -> {
+        context.registerClass((thisObj, args) -> {
             String url = args.getString(0);
-            workers.put(self.getTag(), new Worker(WorkerPlugin.this, self, url));
+            workers.put(thisObj.getTag(), new Worker(WorkerPlugin.this, thisObj, url));
         }, "Worker");
     }
 

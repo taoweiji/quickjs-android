@@ -293,7 +293,7 @@ public class JSObjectTest extends BaseTest {
     @Test
     public void registerClass() {
         Object[] result = new Object[1];
-        context.registerClass((self, args) -> result[0] = args.getString(0), "Worker");
+        context.registerClass((thisObj, args) -> result[0] = args.getString(0), "Worker");
         context.executeVoidScript("var worker = new Worker('Hello')", null);
         assertEquals("Hello", result[0]);
     }

@@ -146,9 +146,9 @@ public class JSObject extends JSValue {
 
     public JSFunction registerClass(JavaConstructorCallback javaConstructorCallback, String className) {
         JavaCallback callback = (receiver, args) -> {
-            JSObject self = new JSObject(receiver.context);
-            javaConstructorCallback.invoke(self, args);
-            return self;
+            JSObject thisObj = new JSObject(receiver.context);
+            javaConstructorCallback.invoke(thisObj, args);
+            return thisObj;
         };
         JSFunction functionHandle = context.getNative()._newClass(context.getContextPtr(), callback.hashCode());
         this.context._registerCallback(callback, functionHandle);
