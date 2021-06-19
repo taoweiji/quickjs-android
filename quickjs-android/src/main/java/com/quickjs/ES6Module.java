@@ -17,10 +17,6 @@ public abstract class ES6Module extends Module {
         getNative()._executeScript(context.getContextPtr(), JSValue.TYPE.NULL.value, source, moduleName, QuickJS.JS_EVAL_TYPE_MODULE);
     }
 
-    public Object executeGlobalScript(String source, String fileName) {
-        return super.executeScript(JSValue.TYPE.UNKNOWN, source, fileName);
-    }
-
     public void executeModule(String moduleName) {
         String script = getModuleScript(moduleName);
         if (script == null) {

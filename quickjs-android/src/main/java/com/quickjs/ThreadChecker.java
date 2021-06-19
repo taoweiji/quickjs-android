@@ -16,9 +16,8 @@ class ThreadChecker {
 
     public synchronized void acquire() {
         if (this.thread != null && this.thread != Thread.currentThread()) {
-            throw new Error("Invalid QuickJS thread access: current thread is " + Thread.currentThread() + " while the locker has thread " + this.thread);
+            throw new Error("All QuickJS methods must be called on the same thread. Invalid QuickJS thread access: current thread is " + Thread.currentThread() + " while the locker has thread " + this.thread);
         } else if (this.thread != Thread.currentThread()) {
-//            this.runtime.acquireLock(this.runtime.getV8RuntimePtr());
             this.thread = Thread.currentThread();
             this.released = false;
         }
@@ -28,7 +27,7 @@ class ThreadChecker {
         if (this.released && this.thread == null) {
             throw new Error("Invalid QuickJS thread access: the locker has been released!");
         } else if (this.thread != Thread.currentThread()) {
-            throw new Error("Invalid QuickJS thread access: current thread is " + Thread.currentThread() + " while the locker has thread " + this.thread);
+            throw new Error("All QuickJS methods must be called on the same thread. Invalid QuickJS thread access: current thread is " + Thread.currentThread() + " while the locker has thread " + this.thread);
         }
     }
 }

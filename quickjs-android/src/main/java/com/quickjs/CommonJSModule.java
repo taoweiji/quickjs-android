@@ -7,7 +7,7 @@ import java.util.Map;
  * 支持 require、exports
  */
 public abstract class CommonJSModule extends Module {
-    private final String MODULE_SCRIPT_WRAPPER = "(function () {var module = { exports: {}, children: [] }; #CODE ; return module;})();";
+    private static final String MODULE_SCRIPT_WRAPPER = "(function () {var module = { exports: {}, children: [] }; #CODE ; return module;})();";
     private final Map<String, JSObject> modules = new HashMap<>();
 
     public CommonJSModule(QuickJS quickJS) {
@@ -51,10 +51,6 @@ public abstract class CommonJSModule extends Module {
             modules.put(moduleName_, module);
         }
         return module;
-    }
-
-    public Object executeGlobalScript(String source, String fileName) {
-        return super.executeScript(TYPE.UNKNOWN, source, fileName);
     }
 
     public JSObject executeModule(String moduleName) {
