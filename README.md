@@ -40,6 +40,7 @@ quickJS.close();
 
 ```java
 QuickJS quickJS = QuickJS.createRuntime();
+// QuickJS quickJS = QuickJS.createRuntimeWithEventQueue();
 ```
 
 ##### JSContext
