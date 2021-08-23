@@ -1,5 +1,9 @@
 package com.quickjs;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import android.util.Log;
 import android.webkit.JavascriptInterface;
 
@@ -8,10 +12,6 @@ import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 public class JSObjectTest extends BaseTest {
 
@@ -257,6 +257,19 @@ public class JSObjectTest extends BaseTest {
         assertEquals(1, count);
     }
 
+
+    @Test
+    public void addJavascriptInterfaceSameName() {
+        context.addJavascriptInterface(new TestSameNameObj(), "testSameName");
+        String s1=context.executeStringScript("testSameName.aa('112233')",null);
+        assertEquals("V1112233",s1);
+        String s2=context.executeStringScript("testSameName.aa('abc','def')",null);
+        assertEquals("V2abcdef",s2);
+    }
+
+
+
+
     @Test
     public void executeFunction() {
         final long time = System.currentTimeMillis();
@@ -310,6 +323,17 @@ public class JSObjectTest extends BaseTest {
         assertEquals(1, jsonObject.getJSONArray("likes").getInt(0));
         assertEquals("Hello", jsonObject.getJSONArray("likes").getString(1));
         assertEquals("b", jsonObject.getJSONArray("likes").getJSONObject(2).getString("b"));
+    }
+
+    public static class TestSameNameObj {
+        @JavascriptInterface
+        public String aa(String v1) {
+            return "V1" + v1;
+        }
+        @JavascriptInterface
+        public String aa(String v1, String v2) {
+            return "V2" + v1 + v2;
+        }
     }
 
     public static class Console {

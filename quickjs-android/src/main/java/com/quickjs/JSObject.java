@@ -2,15 +2,17 @@ package com.quickjs;
 
 import android.webkit.JavascriptInterface;
 
-import androidx.annotation.NonNull;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 
 public class JSObject extends JSValue {
 
@@ -225,32 +227,62 @@ public class JSObject extends JSValue {
     }
 
     protected static void appendJavascriptInterface(JSObject jsObject, Object obj) {
-        Method[] methods = obj.getClass().getMethods();
+        List<Method> methods = Arrays.asList(obj.getClass().getMethods());
+        Method temp = null;
+        List<Method> methodList = new ArrayList<>();
+        //先按名称排序，名称相同的按参数多少排序
+        Collections.sort(methods, (o1, o2) -> {
+            //名称相同，参数多的排在前面
+            if (o1.getName().equals(o2.getName())) {
+                return o2.getGenericParameterTypes().length - o1.getGenericParameterTypes().length;
+            }
+            //名称不同，按照名称默认排序
+            return o1.getName().compareTo(o2.getName());
+        });
+
         for (Method method : methods) {
             if (method.getAnnotation(JavascriptInterface.class) == null) {
                 continue;
             }
             String functionName = method.getName();
-            if (method.getReturnType().equals(Void.TYPE)) {
-                jsObject.registerJavaMethod((receiver, args) -> {
-                    try {
-                        method.invoke(obj, getParameters(method, args));
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        throw new RuntimeException(e);
-                    }
-                }, functionName);
-            } else {
-                jsObject.registerJavaMethod((receiver, args) -> {
-                    try {
-                        return method.invoke(obj, getParameters(method, args));
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        throw new RuntimeException(e);
-                    }
-                }, functionName);
+            if (temp == null || !temp.getName().equals(functionName)) {
+                if (methodList.size() > 0) {
+                    registerFun(jsObject, obj, methodList, methodList.get(0).getName());
+                }
+                methodList = new ArrayList<>();
             }
+            methodList.add(method);
+            temp = method;
         }
+        if (methodList.size() > 0) {
+            registerFun(jsObject, obj, methodList, methodList.get(0).getName());
+        }
+
+    }
+
+    protected static void registerFun(JSObject jsObject, Object obj, List<Method> methods, String name) {
+        jsObject.registerJavaMethod((receiver, args) -> {
+            for (Method m : methods) {
+                if (args.length() == m.getGenericParameterTypes().length) {
+                    if (m.getReturnType().equals(Void.TYPE)) {
+                        try {
+                            m.invoke(obj, getParameters(m, args));
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            throw new RuntimeException(e);
+                        }
+                    } else {
+                        try {
+                            return m.invoke(obj, getParameters(m, args));
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            throw new RuntimeException(e);
+                        }
+                    }
+                }
+            }
+            return "this function [" + obj.getClass().getName() + name + "] no such parameters";
+        }, name);
     }
 
     private static Object[] getParameters(Method method, JSArray args) {
