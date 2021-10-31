@@ -40,6 +40,8 @@ quickJS.close();
 
 ```java
 QuickJS quickJS = QuickJS.createRuntime();
+// 如果需要在多线程执行，必须创建带有线程池的环境
+// QuickJS quickJS = QuickJS.createRuntimeWithEventQueue();
 ```
 
 ##### JSContext

@@ -83,7 +83,7 @@ public class JSContext extends JSObject implements Closeable {
         });
     }
 
-    protected Object executeScript(TYPE expectedType, String source, String fileName) throws QuickJSScriptException {
+    protected Object executeScript(TYPE expectedType, String source, String fileName) throws QuickJSException {
         Object object = getNative()._executeScript(this.getContextPtr(), expectedType.value, source, fileName, QuickJS.JS_EVAL_TYPE_GLOBAL);
         QuickJS.checkException(context);
         return object;
@@ -92,48 +92,48 @@ public class JSContext extends JSObject implements Closeable {
     /**
      * @return Integer/Double/Boolean/String/JSObject/JSArray/JSFunction
      */
-    public Object executeScript(String source, String fileName) throws QuickJSScriptException {
+    public Object executeScript(String source, String fileName) throws QuickJSException {
         return executeScript(JSValue.TYPE.UNKNOWN, source, fileName);
     }
 
-    public Object executeScript(String source, String fileName, int evalType) throws QuickJSScriptException {
+    public Object executeScript(String source, String fileName, int evalType) throws QuickJSException {
         Object object = getNative()._executeScript(this.getContextPtr(), JSValue.TYPE.UNKNOWN.value, source, fileName, evalType);
         QuickJS.checkException(context);
         return object;
     }
 
-    public Object executeModuleScript(String source, String fileName, int evalType) throws QuickJSScriptException {
+    public Object executeModuleScript(String source, String fileName, int evalType) throws QuickJSException {
         Object object = getNative()._executeScript(this.getContextPtr(), JSValue.TYPE.UNKNOWN.value, source, fileName, QuickJS.JS_EVAL_TYPE_MODULE);
         QuickJS.checkException(context);
         return object;
     }
 
 
-    public int executeIntegerScript(String source, String fileName) throws QuickJSScriptException {
+    public int executeIntegerScript(String source, String fileName) throws QuickJSException {
         return (int) executeScript(JSValue.TYPE.INTEGER, source, fileName);
     }
 
-    public double executeDoubleScript(String source, String fileName) throws QuickJSScriptException {
+    public double executeDoubleScript(String source, String fileName) throws QuickJSException {
         return (double) executeScript(JSValue.TYPE.DOUBLE, source, fileName);
     }
 
-    public boolean executeBooleanScript(String source, String fileName) throws QuickJSScriptException {
+    public boolean executeBooleanScript(String source, String fileName) throws QuickJSException {
         return (boolean) executeScript(JSValue.TYPE.BOOLEAN, source, fileName);
     }
 
-    public String executeStringScript(String source, String fileName) throws QuickJSScriptException {
+    public String executeStringScript(String source, String fileName) throws QuickJSException {
         return (String) executeScript(JSValue.TYPE.STRING, source, fileName);
     }
 
-    public void executeVoidScript(String source, String fileName) throws QuickJSScriptException {
+    public void executeVoidScript(String source, String fileName) throws QuickJSException {
         executeScript(JSValue.TYPE.NULL, source, fileName);
     }
 
-    public JSArray executeArrayScript(String source, String fileName) throws QuickJSScriptException {
+    public JSArray executeArrayScript(String source, String fileName) throws QuickJSException {
         return (JSArray) executeScript(JSValue.TYPE.JS_ARRAY, source, fileName);
     }
 
-    public JSObject executeObjectScript(String source, String fileName) throws QuickJSScriptException {
+    public JSObject executeObjectScript(String source, String fileName) throws QuickJSException {
         return (JSObject) executeScript(JSValue.TYPE.JS_OBJECT, source, fileName);
     }
 
